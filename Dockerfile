@@ -12,7 +12,8 @@ COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/db/package.json ./packages/db/
 
-RUN npm ci
+# Força o ambiente de desenvolvimento apenas para baixar as dependencias de Build (como o Tailwind)
+RUN NODE_ENV=development npm ci
 
 # Fase 2: Construindo o projeto
 FROM base AS builder
