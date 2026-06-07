@@ -503,3 +503,60 @@ Após o primeiro login, redirecione usuários novos para um **fluxo de onboardin
 ### H. Seed de Dados Iniciais
 
 Mantenha um script `db/seed.ts` com dados iniciais essenciais (admin padrão, categorias base, etc.) executável via `npm run db:seed`. Isso agiliza o setup de ambientes novos e garante que dados estruturais estejam sempre presentes.
+
+---
+
+## 🚀 11. Tailwind CSS v4 em Monorepos e Docker (Troubleshooting de Binários Nativos)
+
+A versão **v4** do Tailwind CSS trouxe uma mudança estrutural massiva: ela abandonou o JavaScript puro em prol de dois motores nativos escritos em **Rust** para máxima performance (`lightningcss` e `@tailwindcss/oxide`). 
+
+Como motores nativos precisam de binários compilados especificamente para o Sistema Operacional e a Arquitetura do processador, se você desenvolve no Windows e faz deploy em Docker (Alpine Linux), o `package-lock.json` gerado localmente **não incluirá os binários do Linux**, causando a falha fatal de `Cannot find module` durante a etapa de build (`npm run build`). E tentar forçar a instalação no Docker com Múltiplas Etapas (Multi-stage) causa travamentos por falta de Memória RAM na VPS (OOM Killer).
+
+Para garantir que o Docker no Coolify passe direto sem travar:
+
+### 1. Hardcode no `package.json` do Workspace Frontend
+Force a inclusão dos binários da biblioteca gráfica do Linux (musl) diretamente no objeto `optionalDependencies` do seu `apps/web/package.json`. Isso obriga o `npm install` local no Windows a registrar as assinaturas do Linux no `package-lock.json`.
+
+```json
+  "optionalDependencies": {
+    "@next/swc-win32-x64-msvc": "^16.2.7",
+    "@next/swc-linux-x64-musl": "^16.2.7",
+    "lightningcss-linux-x64-musl": "1.32.0",
+    "@tailwindcss/oxide-linux-x64-musl": "4.3.0"
+  }
+```
+
+> **Atenção às versões:** Mantenha a versão do `lightningcss-linux-x64-musl` perfeitamente alinhada com a versão requerida pelo Tailwind instalado. O mesmo vale para o `@tailwindcss/oxide-linux-x64-musl`.
+
+### 2. Atualize o Lockfile Localmente
+Logo após adicionar no `package.json`, rode no seu terminal do Windows:
+```bash
+npm install
+```
+Isso vai popular o `package-lock.json` com os links de download de Linux. Commit o lockfile junto com o código.
+
+### 3. Use o Dockerfile Otimizado (Single-stage Builder)
+Nunca use Multi-stage para a fase de `deps` em Monorepos com Tailwind v4. O processo de copiar gigabytes da pasta `node_modules` causa pico de disco IO e estouro de RAM. Use o construtor único com `npm ci`:
+
+```dockerfile
+# Usa apenas um estágio pesado
+FROM docker.io/library/node:20-alpine AS builder
+
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/db/package.json ./packages/db/
+
+# Como o lockfile já possui as chaves do Linux, npm ci funciona perfeitamente
+RUN npm ci --include=dev
+
+COPY . .
+RUN npm run build --workspace=@teko/web
+
+# Extrai os binários standalone leves
+FROM docker.io/library/node:20-alpine AS runner
+# ...
+```
+Isso soluciona 100% dos travamentos de RAM no Coolify e quebras no Tailwind v4.
