@@ -12,8 +12,8 @@ COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/db/package.json ./packages/db/
 
-# Força o ambiente de desenvolvimento apenas para baixar as dependencias de Build (como o Tailwind)
-RUN NODE_ENV=development npm ci
+# Força a instalação das devDependencies (Tailwind, TypeScript, etc) mesmo que o Coolify injete NODE_ENV=production
+RUN npm ci --include=dev
 
 # Fase 2: Construindo o projeto
 FROM base AS builder
