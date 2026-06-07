@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "product": "Product",
+    "psychologists": "Psychologists",
+    "clinics": "Clinics",
+    "parents": "Parents",
+    "login": "Login"
+  },
+  "hero": {
+    "badge": "Pioneering PsychTech",
+    "title": "Clinical Insights Through Playful Experiences.",
+    "description": "Teko transforms clinical assessments into games children love, delivering ready-to-use data to psychologists before the first session.",
+    "cta_primary": "Start Your Clinical Trial",
+    "cta_secondary": "How it Works"
+  },
+  "modules": {
+    "title": "A Tri-Fold Ecosystem",
+    "subtitle": "Bridging the gap between clinical rigor, child engagement, and parental peace of mind.",
+    "child": {
+      "title": "The Playful Interface (Children)",
+      "description": "Explain how children 5-12 engage in games that are actually clinical assessments. No clinical stress, just play—capturing raw, authentic data.",
+      "badge": "Ages 5-12 Optimized"
+    },
+    "psychologist": {
+      "title": "Behavioral Maps (Psychologists)",
+      "description": "Ready data before the first session. Highlight structured behavioral maps and professional dashboards for immediate diagnostic clarity.",
+      "badge": "Instant Insights"
+    },
+    "parent": {
+      "title": "Family Connection (Parents)",
+      "description": "Showcase clear visibility into progress without the clinical jargon. Reassuring and easy to understand reports that bring families together.",
+      "badge": "Accessible Language"
+    }
+  },
+  "bento": {
+    "psychologist": {
+      "badge": "For Psychologists",
+      "title": "Save hours on intake with pre-session data.",
+      "description": "Enter your first session with a detailed behavioral roadmap. Our automated pre-assessment identifies key markers while the child plays, letting you focus on the human connection."
+    },
+    "clinic": {
+      "badge": "For Clinics",
+      "title": "Gain a competitive edge with cutting-edge PsychTech.",
+      "description": "Streamline workflows and increase patient satisfaction through technology that respects clinical boundaries."
+    },
+    "parent": {
+      "badge": "For Parents",
+      "title": "Finally see the progress your child is making.",
+      "description": "We bridge the gap between complex clinical data and understandable family updates. No jargon, just clarity."
+    }
+  },
+  "cta_bottom": {
+    "title": "Ready to redefine the pediatric clinical experience?",
+    "description": "Join hundreds of clinics transforming their intake process and deepening patient relationships.",
+    "button": "Start Your Clinical Trial",
+    "note": "No credit card required for 14-day trial."
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact Us",
+    "rights": "© 2024 Teko PsychTech. All rights reserved."
+  }
+}

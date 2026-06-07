@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "product": "Produto",
+    "psychologists": "Psicólogos",
+    "clinics": "Clínicas",
+    "parents": "Pais",
+    "login": "Entrar"
+  },
+  "hero": {
+    "badge": "Pioneira em PsychTech",
+    "title": "Insights Clínicos Através de Experiências Lúdicas.",
+    "description": "A Teko transforma avaliações clínicas em jogos que as crianças amam, entregando dados prontos aos psicólogos antes da primeira sessão.",
+    "cta_primary": "Comece seu Teste Clínico",
+    "cta_secondary": "Como Funciona"
+  },
+  "modules": {
+    "title": "Um Ecossistema Triplo",
+    "subtitle": "Unindo o rigor clínico, o engajamento infantil e a tranquilidade dos pais.",
+    "child": {
+      "title": "A Interface Lúdica (Crianças)",
+      "description": "Explique como crianças de 5 a 12 anos se engajam em jogos que são avaliações clínicas. Sem estresse clínico, apenas diversão—capturando dados brutos e autênticos.",
+      "badge": "Otimizado para 5-12 Anos"
+    },
+    "psychologist": {
+      "title": "Mapas Comportamentais (Psicólogos)",
+      "description": "Dados prontos antes da primeira sessão. Destaque mapas comportamentais estruturados e painéis profissionais para clareza diagnóstica imediata.",
+      "badge": "Insights Instantâneos"
+    },
+    "parent": {
+      "title": "Conexão Familiar (Pais)",
+      "description": "Mostre o progresso de forma clara, sem jargões clínicos. Relatórios tranquilizadores e fáceis de entender que unem as famílias.",
+      "badge": "Linguagem Acessível"
+    }
+  },
+  "bento": {
+    "psychologist": {
+      "badge": "Para Psicólogos",
+      "title": "Economize horas na triagem com dados pré-sessão.",
+      "description": "Entre na primeira sessão com um roteiro comportamental detalhado. Nossa avaliação automática identifica marcadores-chave enquanto a criança joga, permitindo focar na conexão humana."
+    },
+    "clinic": {
+      "badge": "Para Clínicas",
+      "title": "Ganhe vantagem competitiva com tecnologia PsychTech.",
+      "description": "Otimize fluxos de trabalho e aumente a satisfação dos pacientes através de uma tecnologia que respeita os limites clínicos."
+    },
+    "parent": {
+      "badge": "Para Pais",
+      "title": "Finalmente entenda o progresso do seu filho.",
+      "description": "Preenchemos a lacuna entre dados clínicos complexos e atualizações compreensíveis para a família. Sem jargões, apenas clareza."
+    }
+  },
+  "cta_bottom": {
+    "title": "Pronto para redefinir a experiência clínica pediátrica?",
+    "description": "Junte-se a centenas de clínicas transformando seu processo de triagem e aprofundando o relacionamento com os pacientes.",
+    "button": "Comece seu Teste Clínico",
+    "note": "Não é necessário cartão de crédito para os 14 dias de teste."
+  },
+  "footer": {
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "contact": "Fale Conosco",
+    "rights": "© 2024 Teko PsychTech. Todos os direitos reservados."
+  }
+}
