@@ -12,8 +12,9 @@ COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/db/package.json ./packages/db/
 
-# Força a instalação das devDependencies (Tailwind, TypeScript, etc) mesmo que o Coolify injete NODE_ENV=production
-RUN npm ci --include=dev
+# Em monorepos onde o lockfile foi gerado no Windows, o npm ci ignora binarios de Linux (SWC, LightningCSS).
+# Por isso rodamos npm install para que ele avalie a arquitetura atual (Alpine Linux) e baixe as dependencias nativas corretas.
+RUN npm install
 
 # Fase 2: Construindo o projeto
 FROM base AS builder
