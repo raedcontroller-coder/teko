@@ -1,63 +1,41 @@
-FROM node:20-alpine AS base
+FROM docker.io/library/node:20-alpine AS builder
 
-# Fase 1: Instalando dependencias
-FROM base AS deps
+# Instalar dependencias do sistema necessarias
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copia package.json do root e o package-lock
+# Copiar os arquivos de lock e package.json
 COPY package.json package-lock.json ./
-
-# Copia package.json dos workspaces para o npm install funcionar direito
 COPY apps/web/package.json ./apps/web/
 COPY packages/db/package.json ./packages/db/
 
-# Em monorepos onde o lockfile foi gerado no Windows, o npm ci ignora binarios de Linux (SWC, LightningCSS).
-# Apagamos o lockfile de Windows e rodamos npm install puro para que a arvore de dependencias baixe os binarios corretos de Alpine Linux.
-RUN rm package-lock.json && npm install
+# Usamos npm ci para ser rápido e economizar RAM. 
+# O tailwindcss/node e postcss estão nas "dependencies" então ele vai baixar.
+RUN npm ci --include=dev
 
-# Fase 2: Construindo o projeto
-FROM base AS builder
-WORKDIR /app
-# Copia tudo do deps (incluindo node_modules raiz E os node_modules dos workspaces)
-COPY --from=deps /app ./
-# Agora copia o codigo fonte. O .dockerignore ja impede de sobrescrever os node_modules
+# Copiar o resto do código
 COPY . .
 
-# Desabilita telemetria no momento do build
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# O Next.js precisa das variáveis de ambiente na hora do build (para standalone)
-# Mas no Docker isso será passado pelo Coolify, então não se preocupe
-# Instalamos explicitamente o motor do Tailwind para contornar perdas de node_modules e NODE_ENV
-RUN npm install @tailwindcss/node @tailwindcss/postcss tailwindcss postcss --no-save
+# Fazer o build do Next.js
 RUN npm run build --workspace=@teko/web
 
-# Fase 3: Imagem final super leve apenas com o que o Next.js precisa
-FROM base AS runner
+# Fase final super leve
+FROM docker.io/library/node:20-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
+# Adicionar usuario nao-root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Copiar build e dependencias standalone
 COPY --from=builder /app/apps/web/public ./apps/web/public
-
-# Cria pasta .next com permissão
-RUN mkdir -p apps/web/.next
-RUN chown nextjs:nodejs apps/web/.next
-
-# Copia o build standalone gerado pelo Next.js
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 
 USER nextjs
 
 EXPOSE 3000
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# Executa o server.js gerado pelo standalone
 CMD ["node", "apps/web/server.js"]
