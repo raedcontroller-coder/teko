@@ -79,3 +79,4 @@ Atribuições secundárias	Atribuições secundárias	Atribuições secundárias
 UI/UX Designer Identidade Visual & Marca Comunicação Institucional	Fullstack Developer AI/ML Architect Scrum Master (informal)	Analista de Dados Frontend Developer Sales & Business Strategy
 Fonte: elaborado pelos autores (2026). Estrutura Scrum adaptada para equipes ençutas, conforme Agile Alliance.
  
+ok
