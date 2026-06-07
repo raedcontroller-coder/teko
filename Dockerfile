@@ -13,8 +13,8 @@ COPY apps/web/package.json ./apps/web/
 COPY packages/db/package.json ./packages/db/
 
 # Em monorepos onde o lockfile foi gerado no Windows, o npm ci ignora binarios de Linux (SWC, LightningCSS).
-# Por isso rodamos npm install para que ele avalie a arquitetura atual (Alpine Linux) e baixe as dependencias nativas corretas.
-RUN npm install
+# Apagamos o lockfile de Windows e rodamos npm install puro para que a arvore de dependencias baixe os binarios corretos de Alpine Linux.
+RUN rm package-lock.json && npm install
 
 # Fase 2: Construindo o projeto
 FROM base AS builder
