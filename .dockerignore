@@ -1,0 +1,14 @@
+node_modules
+apps/*/node_modules
+packages/*/node_modules
+.next
+apps/web/.next
+teko-stitch/
+.git
+.env
+.env.local
+.env.*
+.DS_Store
+README.md
+Chicote/
+docs/

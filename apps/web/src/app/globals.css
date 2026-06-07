@@ -1,45 +1,126 @@
 @import "tailwindcss";
 
-:root {
-  /* Teko Light Theme */
-  --background: #F6F0DF;
-  --foreground: #1A1A1A;
-  
-  --primary: #14625B;
-  --primary-foreground: #FFFFFF;
-  
-  --accent: #F7C54F;
-  --accent-foreground: #14625B;
-}
+@theme {
+  --color-error-container: #ffdad6;
+  --color-on-primary: #ffffff;
+  --color-tertiary-container: #824832;
+  --color-on-secondary-fixed-variant: #5b4300;
+  --color-surface-container: #efeded;
+  --color-on-error-container: #93000a;
+  --color-on-surface-variant: #3f4947;
+  --color-on-tertiary-fixed-variant: #6e3823;
+  --color-primary-fixed-dim: #8ed3ca;
+  --color-outline-variant: #bec9c6;
+  --color-secondary-fixed: #ffdf9d;
+  --color-primary-container: #14625b;
+  --color-inverse-surface: #303030;
+  --color-outline: #6f7977;
+  --color-surface-container-highest: #e4e2e2;
+  --color-tertiary-fixed-dim: #ffb59b;
+  --color-inverse-on-surface: #f2f0f0;
+  --color-on-secondary: #ffffff;
+  --color-background: #fbf9f8;
+  --color-on-surface: #1b1c1c;
+  --color-primary-fixed: #a9f0e6;
+  --color-inverse-primary: #8ed3ca;
+  --color-on-background: #1b1c1c;
+  --color-on-primary-container: #95dbd2;
+  --color-surface-container-low: #f5f3f3;
+  --color-surface-variant: #e4e2e2;
+  --color-surface-bright: #fbf9f8;
+  --color-on-primary-fixed-variant: #00504a;
+  --color-surface-container-high: #eae8e7;
+  --color-on-secondary-container: #725500;
+  --color-surface-dim: #dbd9d9;
+  --color-secondary-container: #fdcb54;
+  --color-on-secondary-fixed: #251a00;
+  --color-on-tertiary-container: #ffbfa9;
+  --color-secondary: #785a00;
+  --color-tertiary-fixed: #ffdbcf;
+  --color-on-tertiary-fixed: #370e01;
+  --color-on-error: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-error: #ba1a1a;
+  --color-surface: #fbf9f8;
+  --color-tertiary: #66321d;
+  --color-secondary-fixed-dim: #f1c04a;
+  --color-primary: #004943;
+  --color-on-tertiary: #ffffff;
+  --color-on-primary-fixed: #00201d;
+  --color-surface-tint: #1e6962;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --font-sans: "Inter", "Quicksand", sans-serif;
-}
+  --spacing-container-max: 1280px;
+  --spacing-gutter: 24px;
+  --spacing-lg: 48px;
+  --spacing-base: 8px;
+  --spacing-md: 24px;
+  --spacing-xs: 4px;
+  --spacing-xl: 80px;
+  --spacing-sm: 12px;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Teko Dark Theme */
-    --background: #121817;
-    --foreground: #F6F0DF;
-    
-    --primary: #8ED3CA;
-    --primary-foreground: #00201D;
-    
-    --accent: #F1C04A;
-    --accent-foreground: #251A00;
-  }
+  --font-headline-lg: "Quicksand", sans-serif;
+  --font-headline-md: "Quicksand", sans-serif;
+  --font-display-lg: "Quicksand", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-caption: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-headline-lg-mobile: "Quicksand", sans-serif;
+  --font-label-md: "Inter", sans-serif;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--font-weight: 600;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 600;
+
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--font-weight: 400;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 400;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+  --text-body-md--font-weight: 400;
+
+  --text-headline-lg-mobile: 28px;
+  --text-headline-lg-mobile--line-height: 36px;
+  --text-headline-lg-mobile--font-weight: 600;
+
+  --text-label-md: 14px;
+  --text-label-md--line-height: 20px;
+  --text-label-md--letter-spacing: 0.05em;
+  --text-label-md--font-weight: 600;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: #F6F0DF;
+  color: #1b1c1c;
+  overflow-x: hidden;
+  font-family: "Inter", sans-serif;
+}
+.tonal-layer-1 {
+  background-color: #ffffff;
+  border: 1px solid #E5DEC9;
+}
+.soft-shadow {
+  box-shadow: 0px 4px 20px rgba(20, 98, 91, 0.08);
+}
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.pill-badge {
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
 }

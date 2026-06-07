@@ -1,174 +1,260 @@
-import { ArrowRight, BrainCircuit, HeartHandshake, ShieldCheck, Gamepad2, LineChart, Users } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
-export default function LandingPage() {
+export default function Home() {
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)] selection:text-white flex flex-col font-sans">
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-[var(--background)]/90 backdrop-blur-md border-b border-[var(--primary)]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-[var(--primary)] flex items-center justify-center text-[var(--accent)] font-bold text-xl shadow-lg">
-                T
-              </div>
-              <span className="font-bold text-2xl tracking-tight text-[var(--primary)]">Teko</span>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#solucao" className="text-sm font-medium text-[var(--foreground)] hover:text-[var(--primary)] transition-colors">A Solução</a>
-              <a href="#modulos" className="text-sm font-medium text-[var(--foreground)] hover:text-[var(--primary)] transition-colors">Módulos</a>
-              <a href="#beneficios" className="text-sm font-medium text-[var(--foreground)] hover:text-[var(--primary)] transition-colors">Benefícios</a>
-            </nav>
-            <div className="flex items-center gap-4">
-              <button className="hidden md:block text-sm font-semibold text-[var(--primary)] hover:text-[var(--foreground)] transition-colors">Login</button>
-              <button className="bg-[var(--primary)] text-[var(--primary-foreground)] px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:bg-[#0f4a45] transition-all flex items-center gap-2">
-                Começar agora <ArrowRight size={16} />
-              </button>
-            </div>
+    <main className="font-body-md text-body-md">
+      {/* TopNavBar */}
+      <header className="fixed top-0 z-50 w-full bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline shadow-sm h-16">
+        <div className="flex justify-between items-center w-full px-md md:px-lg max-w-container-max mx-auto h-full">
+          <div className="flex items-center gap-xs">
+            <Image src="/Teko_logo.svg" alt="Teko Logo" width={150} height={48} className="h-12 w-auto ml-2" />
           </div>
+          <nav className="hidden md:flex items-center gap-md">
+            <Link
+              className="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary dark:border-primary-fixed-dim pb-1 font-body-md text-body-md"
+              href="#"
+            >
+              Product
+            </Link>
+            <Link
+              className="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 font-body-md text-body-md"
+              href="#"
+            >
+              Psychologists
+            </Link>
+            <Link
+              className="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 font-body-md text-body-md"
+              href="#"
+            >
+              Clinics
+            </Link>
+            <Link
+              className="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 font-body-md text-body-md"
+              href="#"
+            >
+              Parents
+            </Link>
+          </nav>
+          <Link href="/login">
+            <button className="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all">
+              Login
+            </button>
+          </Link>
         </div>
       </header>
-
-      {/* HERO SECTION */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-4xl mx-auto space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent)]/20 text-[var(--primary)] text-sm font-semibold mb-4 border border-[var(--accent)]/50">
-              <ShieldCheck size={16} /> <span>Validado Internacionalmente</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-balance text-[var(--primary)]">
-              Avaliação Psicológica que <span className="text-[var(--accent)]">parece brincadeira.</span>
-            </h1>
-            <p className="text-xl text-[var(--foreground)]/80 max-w-2xl mx-auto leading-relaxed">
-              O Teko transforma avaliações clínicas infantis em jogos lúdicos. Receba dados estruturados antes mesmo da primeira sessão, sem que a criança perceba que está sendo avaliada.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-              <button className="bg-[var(--primary)] text-white px-8 py-4 rounded-full text-lg font-bold shadow-xl hover:-translate-y-1 transition-all">
-                Conhecer a Plataforma
-              </button>
-              <button className="bg-white border-2 border-[var(--primary)]/20 text-[var(--primary)] px-8 py-4 rounded-full text-lg font-bold hover:bg-[var(--primary)]/5 transition-all">
-                Falar com Consultor
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* THREE MODULES SECTION */}
-      <section id="modulos" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[var(--primary)]">Uma Plataforma, Três Visões</h2>
-            <p className="mt-4 text-lg text-[var(--foreground)]/70 max-w-2xl mx-auto">Experiências dedicadas e focadas nas necessidades de cada envolvido no acompanhamento psicológico infantil.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Card 1 */}
-            <div className="bg-[var(--background)] p-8 rounded-3xl border border-[var(--primary)]/10 hover:shadow-xl transition-all group">
-              <div className="w-14 h-14 bg-[var(--accent)] text-[var(--primary)] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Gamepad2 size={28} />
-              </div>
-              <h3 className="text-2xl font-bold text-[var(--primary)] mb-3">A Criança</h3>
-              <p className="text-[var(--foreground)]/80 leading-relaxed">
-                Interface lúdica com narrativas interativas. Coleta dados comportamentais como prosódia, tempo de resposta e padrões faciais de forma invisível durante as dinâmicas e jogos.
+      
+      <div className="pt-16">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden py-xl px-md md:px-lg">
+          <div className="max-w-container-max mx-auto grid md:grid-cols-2 gap-lg items-center">
+            <div className="z-10">
+              <span className="inline-block pill-badge bg-secondary-container text-on-secondary-container mb-md">
+                Pioneering PsychTech
+              </span>
+              <h1 className="font-display-lg text-display-lg md:text-[48px] md:leading-[56px] text-primary mb-md leading-tight">
+                Clinical Insights Through Playful Experiences.
+              </h1>
+              <p className="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-[32rem]">
+                A Teko transforma avaliações clínicas em jogos que as crianças amam, entregando dados prontos aos psicólogos antes da primeira sessão.
               </p>
-            </div>
-
-            {/* Card 2 */}
-            <div className="bg-[var(--primary)] p-8 rounded-3xl text-white hover:shadow-xl transition-all shadow-[0_4px_20px_rgba(20,98,91,0.2)] transform md:-translate-y-4">
-              <div className="w-14 h-14 bg-white/10 text-[var(--accent)] rounded-2xl flex items-center justify-center mb-6">
-                <LineChart size={28} />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">O Psicólogo</h3>
-              <p className="text-white/80 leading-relaxed">
-                Dashboard profissional que gera mapas comportamentais estruturados baseados no CBCL, SDQ e WISC-V antes mesmo do paciente entrar no consultório.
-              </p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="bg-[var(--background)] p-8 rounded-3xl border border-[var(--primary)]/10 hover:shadow-xl transition-all group">
-              <div className="w-14 h-14 bg-[var(--accent)] text-[var(--primary)] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Users size={28} />
-              </div>
-              <h3 className="text-2xl font-bold text-[var(--primary)] mb-3">A Família</h3>
-              <p className="text-[var(--foreground)]/80 leading-relaxed">
-                Painel simplificado sem jargões clínicos. Demonstra a evolução do tratamento e fornece orientações práticas de engajamento baseadas nas sessões.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* VALUE PROPOSITION / BENEFÍCIOS */}
-      <section id="beneficios" className="py-24 bg-[var(--background)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <h2 className="text-3xl md:text-5xl font-bold text-[var(--primary)]">
-                Por que escolher o <span className="text-[var(--accent)]">Teko?</span>
-              </h2>
-              
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 mt-1">
-                  <div className="w-8 h-8 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)]">
-                    <BrainCircuit size={18} />
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold text-[var(--primary)]">Pule as sessões de mapeamento iniciais</h4>
-                  <p className="mt-2 text-[var(--foreground)]/80">Crianças possuem dificuldade em verbalizar. Obtenha dados estruturados automaticamente através dos jogos, reduzindo custos e acelerando o diagnóstico.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 mt-1">
-                  <div className="w-8 h-8 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)]">
-                    <HeartHandshake size={18} />
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold text-[var(--primary)]">A primeira sessão já é intervenção</h4>
-                  <p className="mt-2 text-[var(--foreground)]/80">Ofereça para os pais um diferencial claro: menos sessões gastas com perguntas sem respostas, mais tempo com acompanhamento psicológico focado.</p>
-                </div>
+              <div className="flex flex-col sm:flex-row gap-md">
+                <Link href="/login">
+                  <button className="bg-primary text-on-primary px-8 py-4 rounded-lg font-headline-md text-headline-md shadow-lg hover:shadow-xl transition-all active:scale-95">
+                    Comece seu Teste Clínico
+                  </button>
+                </Link>
+                <button className="border-2 border-primary text-primary px-8 py-4 rounded-lg font-headline-md text-headline-md hover:bg-primary-fixed-dim/10 transition-all">
+                  How it Works
+                </button>
               </div>
             </div>
-            
             <div className="relative">
-              <div className="aspect-square bg-[var(--primary)]/5 rounded-[3rem] p-8 border border-[var(--primary)]/10 shadow-2xl overflow-hidden relative">
-                {/* Abstract mockup representation */}
-                <div className="absolute inset-x-8 top-12 bottom-0 bg-white rounded-t-2xl shadow-xl border border-b-0 border-[var(--primary)]/10 p-6 flex flex-col gap-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="h-6 w-32 bg-[var(--primary)]/20 rounded-full animate-pulse"></div>
-                    <div className="h-8 w-8 rounded-full bg-[var(--accent)]"></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-24 bg-[var(--primary)]/5 rounded-xl border border-[var(--primary)]/10"></div>
-                    <div className="h-24 bg-[var(--primary)]/5 rounded-xl border border-[var(--primary)]/10"></div>
-                  </div>
-                  <div className="h-40 bg-[var(--primary)]/5 rounded-xl border border-[var(--primary)]/10 w-full mt-4"></div>
+              <div className="absolute -top-12 -right-12 w-64 h-64 bg-secondary-container opacity-20 rounded-full blur-3xl"></div>
+              {/* Note: Using remote images required next.config.ts update. Using standard img for placeholder */}
+              <img
+                alt="Friendly digital world for a child's game"
+                className="rounded-xl shadow-2xl relative z-10 w-full transform hover:rotate-1 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Nt7G_p4bjhZp3hrWGpEfPZXl2ZxWNDWZvmrQzjcV9znhQCq0qE40CPc-rrDCYJjyPhYfjVaRUydQN8tZ3JL2K-iZ81t4zFF8jI3UFs-GLM5ttpp4C0EgpANlDMduWnKOO3ILhJLhemm7TQMHqtvyCBh7dQm0zQXy_1nU68jY42zQYEKLum2dxTrn1vAXOuxYrt4V2u1pIGEVfbsyFnFaTGLX5sz7yVXzq6_Luxt6obFoQlb9-ASlaNT53zGOra7Yk46brJaIMaxS"
+              />
+              <div className="absolute -bottom-6 -left-6 bg-white p-md rounded-lg soft-shadow z-20 flex items-center gap-sm">
+                <div className="bg-primary-fixed p-xs rounded-full">
+                  <span className="text-primary font-bold">94%</span>
+                </div>
+                <div>
+                  <p className="font-label-md text-label-md">Engagement Rate</p>
+                  <p className="font-headline-md text-[18px] text-primary">of kids</p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FOOTER CTA */}
-      <footer className="bg-[var(--primary)] text-[var(--primary-foreground)] py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <h2 className="text-3xl md:text-5xl font-bold">Transforme sua clínica hoje.</h2>
-          <p className="text-white/80 max-w-2xl mx-auto text-lg">Faça parte do grupo de profissionais que está redefinindo a Psicologia Infantil.</p>
-          <button className="bg-[var(--accent)] text-[var(--primary)] px-8 py-4 rounded-full text-xl font-bold shadow-xl hover:-translate-y-1 transition-all mt-8">
-            Solicitar Acesso Antecipado
-          </button>
-          <div className="pt-16 mt-16 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-white/50">
-            <p>&copy; 2026 Teko. Todos os direitos reservados.</p>
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-              <a href="#" className="hover:text-white transition-colors">Privacidade</a>
+        {/* The Three Modules Section */}
+        <section className="py-xl bg-background px-md md:px-lg">
+          <div className="max-w-container-max mx-auto">
+            <div className="text-center mb-xl">
+              <h2 className="font-headline-lg text-[32px] font-bold text-primary mb-sm">
+                A Tri-Fold Ecosystem
+              </h2>
+              <p className="font-body-lg text-[18px] text-on-surface-variant max-w-2xl mx-auto">
+                Bridging the gap between clinical rigor, child engagement, and parental peace of mind.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-md">
+              {/* Child Module */}
+              <div className="tonal-layer-1 p-md md:p-lg rounded-xl flex flex-col hover:border-primary hover:-translate-y-1 transition-all duration-300">
+                <div className="h-48 overflow-hidden rounded-lg mb-md">
+                  <img
+                    alt="Children's game interface"
+                    className="w-full h-full object-cover"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Nt7G_p4bjhZp3hrWGpEfPZXl2ZxWNDWZvmrQzjcV9znhQCq0qE40CPc-rrDCYJjyPhYfjVaRUydQN8tZ3JL2K-iZ81t4zFF8jI3UFs-GLM5ttpp4C0EgpANlDMduWnKOO3ILhJLhemm7TQMHqtvyCBh7dQm0zQXy_1nU68jY42zQYEKLum2dxTrn1vAXOuxYrt4V2u1pIGEVfbsyFnFaTGLX5sz7yVXzq6_Luxt6obFoQlb9-ASlaNT53zGOra7Yk46brJaIMaxS"
+                  />
+                </div>
+                <h3 className="font-headline-md text-[24px] font-bold text-primary mb-sm">
+                  The Playful Interface (Children)
+                </h3>
+                <p className="font-body-md text-[16px] text-on-surface-variant mb-md flex-grow">
+                  Explain how children 5-12 engage in games that are actually clinical assessments. No clinical stress, just play—capturing raw, authentic data.
+                </p>
+                <div className="flex items-center gap-xs text-secondary font-label-md font-bold">
+                  <span>Ages 5-12 Optimized</span>
+                </div>
+              </div>
+              {/* Psychologist Module */}
+              <div className="tonal-layer-1 p-md md:p-lg rounded-xl flex flex-col hover:border-primary hover:-translate-y-1 transition-all duration-300">
+                <div className="h-48 overflow-hidden rounded-lg mb-md">
+                  <img
+                    alt="Psychologist dashboard behavioral map"
+                    className="w-full h-full object-cover"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfSqRCsT-Fi3gziKSEkqiJvJZSSnrSdvLAMvu5Fq2Nl7pJyTSHLokBn5pKsxUdLbplzMR6Vvt18mPvmJ0mAIchJewyR-HvebuyDLNOeWdz-p_X9-FKkQVEtLsVdZnzeYFZGEbrhh5SCYs7XWHks5LfDfFpNSuUw8Ov2HgDsK1xrAbi5I6lrzOG5IUOMBIlKNo8vD0MxDw3MkiKeyuQ7azJ_34rvWH0goDtPDM2lPgIasJWctaTIpjWO3bESmjOXQy3mbN61wpuYcpN"
+                  />
+                </div>
+                <h3 className="font-headline-md text-[24px] font-bold text-primary mb-sm">
+                  Behavioral Maps (Psychologists)
+                </h3>
+                <p className="font-body-md text-[16px] text-on-surface-variant mb-md flex-grow">
+                  Ready data before the first session. Highlight structured behavioral maps and professional dashboards for immediate diagnostic clarity.
+                </p>
+                <div className="flex items-center gap-xs text-secondary font-label-md font-bold">
+                  <span>Instant Insights</span>
+                </div>
+              </div>
+              {/* Parent Module */}
+              <div className="tonal-layer-1 p-md md:p-lg rounded-xl flex flex-col hover:border-primary hover:-translate-y-1 transition-all duration-300">
+                <div className="h-48 overflow-hidden rounded-lg mb-md">
+                  <img
+                    alt="Parental family connection panel"
+                    className="w-full h-full object-cover"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDipJyT8BlCbCVti6jBVErPK1RTilpNfEGfvTYI4XlEjHNNSRbacoXz9MelfTfAwgkshACBI9w3y48FWn2_tE1LXg9RgLQOXg6adaiT2gSLh4JP1XBuU2BRUnb5uBV5R0VoSTUom71oHQ8Skq_3mVaWJp9D0vi1TlEy6Vt1aAyBVTs1P2haHtQR81bdgDndcrXLg9jPN1VbswA55sKhVw0Eel1mydiipXWNysza3cq2X6a_4BFkrw8FwCxy2DQkDUKkjeHoARwHnRPY"
+                  />
+                </div>
+                <h3 className="font-headline-md text-[24px] font-bold text-primary mb-sm">
+                  Family Connection (Parents)
+                </h3>
+                <p className="font-body-md text-[16px] text-on-surface-variant mb-md flex-grow">
+                  Showcase clear visibility into progress without the clinical jargon. Reassuring and easy to understand reports that bring families together.
+                </p>
+                <div className="flex items-center gap-xs text-secondary font-label-md font-bold">
+                  <span>Accessible Language</span>
+                </div>
+              </div>
             </div>
           </div>
+        </section>
+
+        {/* Value Proposition Section (Bento Grid) */}
+        <section className="py-xl px-md md:px-lg bg-surface">
+          <div className="max-w-container-max mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-md h-auto md:h-[600px]">
+              {/* Psychologist Box */}
+              <div className="md:col-span-2 md:row-span-2 bg-primary-container text-on-primary-container p-lg rounded-xl flex flex-col justify-between relative overflow-hidden group">
+                <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                  <span className="text-[240px] font-black">?</span>
+                </div>
+                <div className="z-10">
+                  <span className="pill-badge bg-primary text-on-primary mb-sm">
+                    For Psychologists
+                  </span>
+                  <h3 className="font-display-lg text-[48px] font-bold mb-md mt-4 text-white">
+                    Save hours on intake with pre-session data.
+                  </h3>
+                  <p className="font-body-lg text-[18px] text-primary-fixed max-w-[28rem]">
+                    Enter your first session with a detailed behavioral roadmap. Our automated pre-assessment identifies key markers while the child plays, letting you focus on the human connection.
+                  </p>
+                </div>
+              </div>
+              {/* Clinic Box */}
+              <div className="md:col-span-2 bg-secondary-container p-lg rounded-xl flex flex-col justify-center relative group overflow-hidden">
+                <span className="pill-badge bg-secondary text-on-secondary w-fit mb-sm">
+                  For Clinics
+                </span>
+                <h3 className="font-headline-lg text-[28px] font-bold text-on-secondary-container mb-sm mt-2">
+                  Gain a competitive edge with cutting-edge PsychTech.
+                </h3>
+                <p className="font-body-md text-[16px] text-on-secondary-container/80">
+                  Streamline workflows and increase patient satisfaction through technology that respects clinical boundaries.
+                </p>
+              </div>
+              {/* Parent Box */}
+              <div className="md:col-span-2 bg-white border border-outline-variant p-lg rounded-xl flex flex-col justify-center group relative overflow-hidden">
+                <span className="pill-badge bg-primary-fixed text-on-primary-fixed-variant w-fit mb-sm">
+                  For Parents
+                </span>
+                <h3 className="font-headline-lg text-[28px] font-bold text-primary mb-sm mt-2">
+                  Finally see the progress your child is making.
+                </h3>
+                <p className="font-body-md text-[16px] text-on-surface-variant">
+                  We bridge the gap between complex clinical data and understandable family updates. No jargon, just clarity.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA Section */}
+        <section className="py-xl px-md md:px-lg relative overflow-hidden">
+          <div className="max-w-container-max mx-auto tonal-layer-1 rounded-xl p-lg md:p-xl flex flex-col items-center text-center relative z-10 overflow-hidden">
+            <h2 className="font-display-lg text-[40px] font-bold text-primary mb-md max-w-2xl">
+              Pronto para redefinir a experiência clínica pediátrica?
+            </h2>
+            <p className="font-body-lg text-[18px] text-on-surface-variant mb-lg max-w-[36rem]">
+              Junte-se a centenas de clínicas transformando seu processo de triagem e aprofundando o relacionamento com os pacientes.
+            </p>
+            <Link href="/login">
+              <button className="bg-secondary text-on-secondary px-10 py-5 rounded-lg font-headline-md text-headline-md hover:scale-105 transition-transform active:scale-95 shadow-lg flex items-center gap-sm">
+                Comece seu Teste Clínico
+              </button>
+            </Link>
+            <p className="mt-md font-caption text-[12px] text-on-surface-variant">
+              No credit card required for 14-day trial.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-surface-container dark:bg-surface-container-highest w-full py-lg px-md md:px-lg mt-xl">
+        <div className="max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
+          <div className="flex items-center gap-xs">
+            <Image src="/Teko_logo.svg" alt="Teko Logo" width={150} height={48} className="h-12 w-auto" />
+          </div>
+          <nav className="flex flex-wrap justify-center gap-md">
+            <Link className="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-body-md text-[16px]" href="#">
+              Privacy Policy
+            </Link>
+            <Link className="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-body-md text-[16px]" href="#">
+              Terms of Service
+            </Link>
+            <Link className="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-body-md text-[16px]" href="#">
+              Contact Us
+            </Link>
+          </nav>
+          <p className="text-on-surface-variant font-body-md text-[16px]">
+            © 2024 Teko PsychTech. All rights reserved.
+          </p>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
