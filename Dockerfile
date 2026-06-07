@@ -29,6 +29,8 @@ ENV NEXT_TELEMETRY_DISABLED 1
 
 # O Next.js precisa das variáveis de ambiente na hora do build (para standalone)
 # Mas no Docker isso será passado pelo Coolify, então não se preocupe
+# Instalamos explicitamente o motor do Tailwind para contornar perdas de node_modules e NODE_ENV
+RUN npm install @tailwindcss/node @tailwindcss/postcss tailwindcss postcss --no-save
 RUN npm run build --workspace=@teko/web
 
 # Fase 3: Imagem final super leve apenas com o que o Next.js precisa
