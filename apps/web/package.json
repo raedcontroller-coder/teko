@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tailwindcss/node": "^4.3.0",
     "@tailwindcss/postcss": "4",
     "bcryptjs": "^3.0.3",
     "cross-env": "^10.1.0",
