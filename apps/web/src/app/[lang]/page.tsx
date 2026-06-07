@@ -99,7 +99,7 @@ export default async function Home({ params }: { params: Promise<{ lang: 'en' | 
         <section className="py-xl bg-background px-md md:px-lg">
           <div className="max-w-container-max mx-auto">
             <div className="text-center mb-xl">
-              <h2 className="font-headline-lg text-[32px] font-bold text-primary mb-sm">
+              <h2 className="font-headline-lg text-[32px] leading-tight font-bold text-primary mb-sm">
                 {dict.modules.title}
               </h2>
               <p className="font-body-lg text-[18px] text-on-surface-variant max-w-2xl mx-auto">
@@ -181,7 +181,7 @@ export default async function Home({ params }: { params: Promise<{ lang: 'en' | 
                   <span className="pill-badge bg-primary text-on-primary mb-sm">
                     {dict.bento.psychologist.badge}
                   </span>
-                  <h3 className="font-display-lg text-[48px] font-bold mb-md mt-4 text-white">
+                  <h3 className="font-display-lg text-[48px] leading-tight font-bold mb-md mt-4 text-white">
                     {dict.bento.psychologist.title}
                   </h3>
                   <p className="font-body-lg text-[18px] text-primary-fixed max-w-[28rem]">
@@ -194,7 +194,7 @@ export default async function Home({ params }: { params: Promise<{ lang: 'en' | 
                 <span className="pill-badge bg-secondary text-on-secondary w-fit mb-sm">
                   {dict.bento.clinic.badge}
                 </span>
-                <h3 className="font-headline-lg text-[28px] font-bold text-on-secondary-container mb-sm mt-2">
+                <h3 className="font-headline-lg text-[28px] leading-tight font-bold text-on-secondary-container mb-sm mt-2">
                   {dict.bento.clinic.title}
                 </h3>
                 <p className="font-body-md text-[16px] text-on-secondary-container/80">
@@ -206,7 +206,7 @@ export default async function Home({ params }: { params: Promise<{ lang: 'en' | 
                 <span className="pill-badge bg-primary-fixed text-on-primary-fixed-variant w-fit mb-sm">
                   {dict.bento.parent.badge}
                 </span>
-                <h3 className="font-headline-lg text-[28px] font-bold text-primary mb-sm mt-2">
+                <h3 className="font-headline-lg text-[28px] leading-tight font-bold text-primary mb-sm mt-2">
                   {dict.bento.parent.title}
                 </h3>
                 <p className="font-body-md text-[16px] text-on-surface-variant">
@@ -220,7 +220,7 @@ export default async function Home({ params }: { params: Promise<{ lang: 'en' | 
         {/* Final CTA Section */}
         <section className="py-xl px-md md:px-lg relative overflow-hidden">
           <div className="max-w-container-max mx-auto tonal-layer-1 rounded-xl p-lg md:p-xl flex flex-col items-center text-center relative z-10 overflow-hidden">
-            <h2 className="font-display-lg text-[40px] font-bold text-primary mb-md max-w-2xl">
+            <h2 className="font-display-lg text-[40px] leading-tight font-bold text-primary mb-md max-w-2xl">
               {dict.cta_bottom.title}
             </h2>
             <p className="font-body-lg text-[18px] text-on-surface-variant mb-lg max-w-[36rem]">
