@@ -17,7 +17,9 @@ RUN npm ci
 # Fase 2: Construindo o projeto
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copia tudo do deps (incluindo node_modules raiz E os node_modules dos workspaces)
+COPY --from=deps /app ./
+# Agora copia o codigo fonte. O .dockerignore ja impede de sobrescrever os node_modules
 COPY . .
 
 # Desabilita telemetria no momento do build
