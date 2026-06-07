@@ -35,7 +35,7 @@ export default function NovoPsicologoPage() {
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
         <Link href="/dashboard/admin">
-          <Button variant="outline" className="p-3">
+          <Button variant="ghost" className="p-3">
             <ArrowLeft size={20} />
           </Button>
         </Link>
