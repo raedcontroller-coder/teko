@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  /* Teko Light Theme */
+  --background: #F6F0DF;
+  --foreground: #1A1A1A;
+  
+  --primary: #14625B;
+  --primary-foreground: #FFFFFF;
+  
+  --accent: #F7C54F;
+  --accent-foreground: #14625B;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --font-sans: "Inter", "Quicksand", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Teko Dark Theme */
+    --background: #121817;
+    --foreground: #F6F0DF;
+    
+    --primary: #8ED3CA;
+    --primary-foreground: #00201D;
+    
+    --accent: #F1C04A;
+    --accent-foreground: #251A00;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

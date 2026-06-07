@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Teko | Clinical Insights Through Playful Experiences</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#824832",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "surface-container": "#efeded",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#3f4947",
+                        "on-tertiary-fixed-variant": "#6e3823",
+                        "primary-fixed-dim": "#8ed3ca",
+                        "outline-variant": "#bec9c6",
+                        "secondary-fixed": "#ffdf9d",
+                        "primary-container": "#14625b",
+                        "inverse-surface": "#303030",
+                        "outline": "#6f7977",
+                        "surface-container-highest": "#e4e2e2",
+                        "tertiary-fixed-dim": "#ffb59b",
+                        "inverse-on-surface": "#f2f0f0",
+                        "on-secondary": "#ffffff",
+                        "background": "#fbf9f8",
+                        "on-surface": "#1b1c1c",
+                        "primary-fixed": "#a9f0e6",
+                        "inverse-primary": "#8ed3ca",
+                        "on-background": "#1b1c1c",
+                        "on-primary-container": "#95dbd2",
+                        "surface-container-low": "#f5f3f3",
+                        "surface-variant": "#e4e2e2",
+                        "surface-bright": "#fbf9f8",
+                        "on-primary-fixed-variant": "#00504a",
+                        "surface-container-high": "#eae8e7",
+                        "on-secondary-container": "#725500",
+                        "surface-dim": "#dbd9d9",
+                        "secondary-container": "#fdcb54",
+                        "on-secondary-fixed": "#251a00",
+                        "on-tertiary-container": "#ffbfa9",
+                        "secondary": "#785a00",
+                        "tertiary-fixed": "#ffdbcf",
+                        "on-tertiary-fixed": "#370e01",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface": "#fbf9f8",
+                        "tertiary": "#66321d",
+                        "secondary-fixed-dim": "#f1c04a",
+                        "primary": "#004943",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#00201d",
+                        "surface-tint": "#1e6962"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "gutter": "24px",
+                        "lg": "48px",
+                        "base": "8px",
+                        "md": "24px",
+                        "xs": "4px",
+                        "xl": "80px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Quicksand"],
+                        "headline-md": ["Quicksand"],
+                        "display-lg": ["Quicksand"],
+                        "body-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg-mobile": ["Quicksand"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #F6F0DF;
+            color: #1b1c1c;
+            overflow-x: hidden;
+        }
+        .tonal-layer-1 {
+            background-color: #ffffff;
+            border: 1px solid #E5DEC9;
+        }
+        .soft-shadow {
+            box-shadow: 0px 4px 20px rgba(20, 98, 91, 0.08);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pill-badge {
+            border-radius: 9999px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md">
+<!-- TopNavBar -->
+<header class="fixed top-0 z-50 w-full bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline shadow-sm h-16">
+<div class="flex justify-between items-center w-full px-md md:px-lg max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-xs">
+<img alt="Teko Logo" class="h-8 md:h-10" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAB4CAYAAADc36SXAAAQAElEQVR4AeydC3wcVb3H///ZbNJHQtvsci8iChekLaWIcAWEgrRFi6CWZ6DZTdvsttarVwUFEeQhD+WhlIeiXAvdDU130xJQRKHIG0TgUnmpKKUFBLwgsJu0TR/pJjv/+z+7SZsmuzOzm5l9/vczZ+fsOf/zP+d8Z3N+c+ZkZjWQlxAQAkJACAiBPAiIgOQBTYoIASEgBIQAgAiIfAuEQLEISL1CoMwJiICU+QGU5gsBISAEikVABKRY5KVeISAEhECZEyhjASlz8tJ8ISAEhECZExABKfMDKM0XAkJACBSLgAhIschLvUKgjAlI04WAIiACoihIEAJCQAgIgZwJiIDkjEwKCAEhIASEgCIgAqIoFDpIfUJACAiBCiAgAlIBB1G6IASEgBAoBgERkGJQlzqFgBAoFgGp10YCIiA2whRXQkAICIFqIiACUk1HW/oqBISAELCRgAiIjTCrwZX0UQgIASEwSEAEZJCE7IWAEBACQiAnAiIgOeESYyEgBIRAsQiUXr0iIKV3TKRFQkAICIGyICACUhaHSRopBISAECg9AhUlII1+/x6NQf8cT9DX6gn6L/QEfDd7g747vQH/k96gf7036OtJB46n01Yrm7Stf6Eqq3yU3mGSFtlAQFwIASFgM4GyF5A9FrV8ggf+c1kIHsE6iHGHfo+AYQS4BhG/BYBNgHAcAHwCAOvTgePptLOUTdoW2lJl2QcLysONrb5zlG+QlxAQAkJACGQkwGNmxvTSTWxqcnlbW2byTGIph3W1ROu5EzeyEMxGAPdoG658cDhB0/Am5VvVwTOY672B5uOB6x6tfykvBISAEKgUAprVjhTd7vLLNU/Av9DT4H4dNHoMAL/DYTI4/sLJPIM5D1B73FPv3sBtaAFui+PVSgVCQAgIgRInUBYC4g22zPW8vf5lRGhDwH2hSC9E3A8R2j1vrX9p0qKWLxapGVKtEBACQqAkCJS0gHgC847iM/5nAOg3CDC9JIhxI1hEDnER/c4b9D/VGJh3DCfJJgQcJCCuhUBpEihJAWkM+Kd5A77fIrqe5cH6M6WJLtWqGRq6/ugJ+O6dtOjskhG4VMvkTQgIASHgMIGSExBPq28+Av0ZEL/kcN9tc4+IX9Z010uNgeaAbU7FkRAQAkKgxAmUkoCgJ+C7CjVcwQOyy0ZuBXGl2qyhFvIG/FdwhXzFjd9lEwJCQAhUMIHSEJAlS9wsHnfxIHxJ2bNGuMwb9K2Gpqbasu+LdEAICAEhYECg6ALSsGCBx9u/5VEWj9MN2llmWdjkrXc/2LCk2VtmDZfmCgF7CYi3iiZQVAGZsHj+f9S5+p8DwGOh0l6Ix9f14bMTgr79K61r0h8hIASEgCJQNAHxBuc2uPXkA7xYXrkDLOIBNYD3y/O11FdNghAQApVGoFgCgkT1nQA4GSr8xavpU7Q6WMXd5Ci/57SJsRAQAkKgdAkURUA8QZ960OGJpYvF9padpPpsu1dxKASEgBAoIoGCC0hj0LcIAb9XxD4XpWrV58Zg81lFqVwqFQJCIGcCUsCcQEEFpDEw7xgeSG81b1ZlWmiEbZMW+mdUZu+kV0JACFQbgYIJSONi/z4aaPcgjP6R62V7kBDHujT6tWJRtn2QhgsBISAEBghoA3vHd5ikWwBxT8crKvUKmEGKRQHb6Qn4L/YG/E8WNBjW5/tlAbtvqSpv0LfUlE9wboMlZ2IkBKqEQEEERF22QcRTqoSpaTcVi0kLmj9pamifwVRAOK5UAgEeZl/X7PFEBIeY8enrra+xpzbxIgQqg0BBBIQv2/yoMnDZ1wvNhT+2z5t4EgJCQAjsJFCwiOMC4m1tmQmIxxeqR2NcBLP26Ycl0xNw7Yxe6DhpOzx42jZYO28LrF+YDiqu0lTeNcf0wlfYdiaXUWUL1U5EPDHFplAVSj1CQAgIAZsJOC4goOlX2dzmjO4O2zMJ1x7bCy/4tsKKE3vh0qMS4J/aD8funYSDGnXYazzAmBpIBRVXaSqv5aB+uIxt27nM81z2ahaUT3qTGeuwPRH1y233KQ6FgBAQAgUi4KiAeBY1nwrg3HOuGmp1CExLwEOnb4V7524H/5R+aBjFM3D34LLzWVDuO2U7rDl1G8yfmoDxbgLHXojHN7Y2f8Ex/+I4LwJSSAgIAWsEHBUQ0LUrrTUjN6uxNcQzjF742/xtcOXRCZg6yf5BfrpHh6tnJOAlnpVceuQOGMd15tZKa9aapl1rzVKshIAQEAKlRcAxAZnY6vsUIhxid3fnfLwPHj9jG69x9NvtOqM/ddlrySFc55nbYPbHHKnzUE9r89SMlUuiEBACQqCECdgvIAOddWlo+6WZHxy1A5Z/fgfsXW//jGOg2Vl3HxlPcMecXjjv8B1ZbfLO0DS+1Jd3adOC8XBkfiwUwZyC7h5r6pgNdErOyMkvt4PbcyQXlU0ICIEyJ6A51n4CWwdFtbi9eHofWH2t34jwqw01cMMLbvjm43Uw996xcHD7+FRQcZWm8pTNBra16vfcw/rgqqN7rZpbs7OZlbVKxUoICAEhMDoCjgjI+NamvQDItrPMCz69A9TitllXe/kKU8e6mpRYzL57PJzzxBi48cU6uOd1N7z4oQs2JzAVVFylqTxlM4ttT//dGFj9Wo1ZFan81mn9Ns9E6EhvS8tHUs7lTQjkT0BKCoGCEnBEQMZqtaciv+zoifovqG8eajzzeGMTwoV/rINPRcfDBU+NSYlFrnWvfb8Gzv/DGJjWPg4ufroO3tyMhi7UTES1zdDIYiajQqilUyyai5kQEAJCoCQIaE60gohsu3xldHPfVtaVq9fWwuy7x0HkVTds7TMe9K30tSehwYq/u2HWXeNA+d7WT1mLjb62Xa7tZLbLa/nGJs2f/3FP0H+hN+B7nMNrnqAv7g36yRPwd/Pn13n/HO9vmxT0n1RqvZwQaDncs8h/gpUwmrarWStzuIjZhD0B34OegP8VDt2KE7P5wBv0rfMG/U95gv5rGoPNR4+mLikrBDIRsF1A1E/VckWzONiyxXs16Mxwaempd10p4bj1z7WQJHuG8qENVj6V78/9ajw8+95ITOpS2RYbBGtInbMa/f49hnyuyujERfMO8wR8j7jc+lt8VK9JPcUA8UAEbFRAEGEip+3P+yN4v9gFcL8n6NvIA+YNk5Y0TYAiv7ytzV+uQVqLBA+bBSL90Hya6wk0z+Y+38Wz1neZw9XMphURP48I0zhMTPlE3BMAJwPADAS4UAPtaW/A/5436Lty4G+Us2QTAqMjMHJkHJ0/0PWGgxGxdpRudiv+Hb60dMWztaBmA1sTACrevGYsvLs13fwTpk2Bu7/xFfjLjy5JBRVXabs5MfigbFWZTOXf6dGg6f5xqTqH1q8ulRm4zDkrxcwN03IuWCEFJvh8k3hQDNeQ6wVmMTuXbiHgBBaTb2v97jdZfL6RS1k7bb3BeZ/mdqxGgPQX08g5wdKuUMcNRibD8xoD/mksAC8jao8g4BnD800/I/DaJF5KUP+Wp9VXdT/qZspHDHImYP5Fz9ElunT+kuZYyIL57a/UwlGrxsMRq8eBig8WmTP9IAgvng9H7L8vTBg7JhVUXKWpvEG7bHtlo2xVGaPyqs5M9Wfzm0+6U+zyaUshy0xc5NvXXQf/y4Ni62jq5fKTWHx+xkK0kv0gh4JtE1vn7UfkegAQx5pVSkDtsXDkfDO7ofmNgebFGsJaABz1U5wRcBJqeK2HZ3qlM+sFeZUhAdsFhEjbzykOG3dooNYohvr/+uzPDv24W9wob9DQyGZ4Xqb6B/3YsXeSnR3tc8KHWi+oIfgTD7wH2uWfB0i/N+hfZZc/Mz97LGpqrEHtYUTwmNly/pr4xydbF8rW1jEsiHdpqN3GZcdxsG1DxNlYB8+qtRTbnIqjqiKg2d1bBNrLbp9G/j7x796s2UZ5g4WMbIzyBsvbuS80Ozvbno8vddmqBvXfAmD2gwh5v87yBPzX5V3aasGmplo3udewAB5gXoSejPUkToXLL9fNbdMWXkzczYKY++WqdHHTdwQ4CGr1x2VdxBSVGGQgYLuAAGFBBSRDn8o3KX92Zdln9xiMIuDeOTR+AwGss2qPCBd4AvOOsmqfhx16Gmo7uQ/m9zwRPR/rc50MnZ0Jq/U0Bv1fYWE62ap9/nY4GaDhTi6PHGQTApYJ2C4gfBbt2CWsTL3a8H4sU3IqzSgvZcBvRjZGeVzUga2wszcHOmDZpafVdzobmz/uhuBfScQvAfTsEQtFDoyHIlNVnIWEy9P77MNwQ9RWGBqMItMT9N/MI+5cUxdE6/t2wOehvX2rqe2AwYSFZx+gEdw48NF0RwT/B0CdPLX5tq7TWUT0UyB6ybTgLoMveALN8sNvu3hIzAIB2wWEsLAzkF88+mTWbhrlDRYysjHKGyxv5x4LzM7Otufqi/t6sWkZPmuHPjy8e/nK+2Khe3sG7VWcheTXCeybxgPlQ4Ppmfc4uZEXoDPn5Z/qCfi+xuLxTTMPBPBPSvbN2hSNdpvZDs13a67lgDB+aFqmOAvHRtJpQTwc2ScWip7VFYrc1NUW7YyHo+fEwtHDoL9/Ci/aP5Op7PA0RO0iebDncCoWPlexie0CwmdBBb2E9eBf/w6B29th7Rtvwabtvamg4ipN5ZkdW2WjbFWZfMqb+c8ln4AKOnvLpW122jYGfCcCwuFGPtXAmND65sRWrnwvm93m5Z1dlMAz+TuXfRrKhTXQ/LyzbVP3egDiLaYOiT7sQ5wVX9HJswNT650Gk1r9h7D/43cmZIko8ex16VPjbdH2LCYQW7H6tXgoegzztPZvuxp+P5svSRcCwwk4ICDDq3D+8yN/Wwdn3HIbHHLxD1NBxVWa1ZqVrSqTb3mr9YhdmgAizE/Hsr8TwhVKILJbpHO6IpHNOhgPeizMx6efz5YuM5p36/d60JYk4Qmbl6/ckGt9GtISszIsCBt1d1/T1ts7TC/jKV/xcOTHQNCh4iah2bOg6aMmNpItBFIEHBAQ/FfKs7zlQaA62CHBnF1wRsYIQO/qSfxyZE7mFLa9Q5XJnAt8Mo9YB7WjXozGWtiXrNzrQdCbBDqpuy3yF8j1NXNmDTd4oVkxXmv8Ufeyzk1mdkPzdUh+jzn1DU0bHkfAGnDV2jpjG16HfK4cArYLCBKJgOT5/agGdnu0+g7kAXJPQ0REr0Fn53ZDm6GZ6j+bCF4ZmjQ8jkiHDU/L9bNLw9/y7Mn0Xo+khmd2hzqeytW/svfuv/fZCNCg4tkCzz7ejrnrb86Wny29K7zqHfb982z5g+ksTscNxmUvBIwI2C4gANVxFg2OvCqfXS3SbHN0+CdzmxEWL49IGZLAA/+nhnzMK8qD7z7mBWkHgf5Xc7tsFmi69gFAv4ZlywxnEtm86zqszpY3mE4IxwzGZV/ZBEbbO9sFhEBmIPkelOpgh1NM+SB91BPwXZVL4LPmjxn6JRz1DMTQ/85MrHMR/nTnx9wjpvfFg7flXgAADM1JREFUEOI/cnebLpFIam+kY9nfEbDRrjWj7LVITiUQsF1A+PKEXMLK95uBlT8DAQTTJw7zADYLES/JJQCanLkjjFd3vud7aHIphwBzvUHfrFzK7LQlMP1hMUQ9bwHZ0t7+ARCZXh6shVrjy4w7GyyRaiZgv4DIDGQU36eqmL2ZCsgoABoWddXp9YYGuWYa2BPBL6CpyWVgkjkLzQUkSa43Mxe2lmplBuPSyGvNm1hVMwHbBYT0qhgEHfnOoK7lfWbpSIOccErmN8c5UW3ap6shvXf+nWdPUz0NtV/PtSYCSJqV6dOSo5rl8wypy6yOpA5jzWwkXwhodiPQ+l0vE7/s9lvp/hhZArTNz1d8PxESxeojalSwGUiqjwRXqif1puKW38xPwMb24T6W3WUw5NmR6Q2rmgsMb87M4FaSqpCA7QKSvnMYnzNnKRbDCDymHtExLK0SP24sXqfQzhnIfTxb+IVRXxBhoptqrzKyGZFHkPXO+0Fb3UUHDMZz3vNlNW6X6Y2CesI1qllOzu2SAmVJQHOk1Qj3gLxyIoCIVcEMAU0FhIACsVAE7Q7x5ZFHcjooWYz5DP7pWE/i9ES/6zIWkZ4sZulkoq9OWnT29PQH83cCfNfMCkHbH/J8NdbXTrFStHvsWFMhs+JHbCqbgDMCoutVMRja9dXgy1e0XU9UBTPuq+kCMA+i0+xia7cfFo+/UQJOgs7ORM+KFXHQyfAJtnxi4HKR61ar7dCQTAduBMhbQDTSU7MXw/YQrc/3PhNDv5JZcQQcEZB4W8erlMPvNlQc1Zw7hM9tbeusiksGBLrpTYIa0cE5IyxAARa/d3opcYJ6/tZgdfHa+hsI6K3Bz5n3eOzA4+szZw9J1QEtPDmXToP5802f1DvE7a6ohr5dHzLHCPGBzDmSKgR2J+CIgKSroKo4o073dZTvVXTJr2tL8kVTWogzc72RrbHVd44n6Ptcw4IFpo8aMa0/i0EStS+PEPply/qQ6KIsRXYlIyzd9SF7rCsUeQgIPshuoXLQ66nRL1OxXMKEQMvhADgPTF46wBoTE8kWAikCjgkI6Vi5ApJCZ+NbNV3y6+zczmfyj5rQGzdWq73SxGZntifgb9E0vAkBH6qrSca8Ad8H3oD/MRaUW7xB/39NWuif4Q3OHfUCOvXqb++sdEgkFu7oAJMfb+JLWftxO81/AwXYE8JdQ9xnjiJ8e2LrPNP/phpauAbof4Z+zhQngH929yQezJQnaUJgOAHHBKSrLfIsT+1NFwSHN6jaPvMf7Lp4W8erVdVvgjYwebHIBCcsPNv8en3az9fSu4F3xD0BYSYLyn8DwK0uFzxFVJ/bf0NxwVy2pI7fMLNHhO/Xz5//b2Z2ehKiZjYI4Hah9tjEYMuhZrZ7NjXVs3j9ius/wsyWdPgBr++Y3oti5kfyq4OA5mQ3SadFTvqvBN+k6+dWQj9y6UMcajuBYKtRGUR01Wiuh80GSE+g+WpEMH74H9eVSNY4KiDdd0T+yCdMZrPucXU1+lKjfqs85YvnIa+ruFFAxP14VvGSp9Wf9YbFxoB/GjW4n0eE04x8DeRt4BO/0EC8VHfSrhIi4KiAdLV1PMB/CE+UUH9LqylET6QYlVarnG9NW1svX6m53KwiHBgg1fpG42L/PjvteQGZB8az+TIVD4ya6foDgf7T1H9M7XTgTKQf4DyeUfYZeUeElvRahJEVgI5k+qNbgx5Qg5/zDKPbE/Q9zSHsCfhu4vAAhzc1hFcAcDJYePWjnPBZwCQmQwg4KiCqHp7aX6z2EkYS4EHCdPAbWaoyUmLh6PVE8KyV3qj1DU2HdzwB/yZv0PeC161v4YFxFZj8LK7yzQN6T/8O/ImKOx02haJvcB2m6ww1FtYiukIdzzAfyz8vy8I0EQGP5tCKiOdwOJGD5TUSneg7G5dHn+T2yyYELBNwXEDUdJyvZ//GcouqxFAxUYNEobtbSvUhJs9gDpaf/4WpJ/liDo9lpx0sMqdtika7C9XvRL/rCiVaRvUhwhE8U2g1slF58XDkGt47/i+1LFTRrnD0Rq5LNiGQEwHHBUS1RteSl/BAIQtzCgYHxYJ0upijVb3FQqve1ftdx/OA+0/7QdAOQvyiXXefW22fulSGoJuutyDhNVbu5YjpbrV2cZvV+nO3oxtYqFpyLyclhABAQQSke/nqvwLgSpBXigAB3t51Rwdfm059rOq37vb2t3f0af9JADb+62hxxGPwQMZqGm4is5sLEfbyuJOXDpbJuuf1olgosgQAT+GZguljYMDii09iEtzGhbFQ9Dwuwvj5XTaHCVSe+4IIiMK2AxLf5T+AjP9Hr/KrJfAf7jt9bv2SaumvlX5uaW//IB6KnMjfj1YOm62UyWbDfB8iHY8r9Mxjt/YsW9anI1y4W1qGDwhw7sRFvn0zZI1IioVW3ot9OA2I7h+RmWMCq8W9mEweEg9FV+RYVMyFwG4ECiYgW8KdHya15Klc+zYO1bkRbU8SzO1Z1iGPys7wDeBLKXf0uvTJPEjyyQY9msHEKOk+QjoqHo7OibdF1hoZFiKve3l0FffjJeO6sM6lw83GNrty1ZOuY+HoFyGBe/MlUBYo+vOuXLMYbeEZR3uKUShySmzF6tfMSki+EDAjUDABUQ3ZuHzVi0D6YhWvxqAjtW5si5oMKiVCJn3pxPSJuF3hVU/b2eKtt3e8z4Pk9SwEJ8T6tHpd1+fwrOLrBHAtEKzms+dHAIgHZ1gKRN8FHfx6Up8eC0W+FF8ezftnBLi+OezDsL+5LsZzPw4z88n1qpOqnBAqIYm3Ra+LhaKHkq4fBKT7eOb2PWbzMxaJe5jXo7y/m53exvurdaIvsG1DPBRdMBpG7E82IbAbgYIKiKo5Fu7o4C/1dSpeTUH1uSvUcWc19XnUfW1v39rV1vFQPBy9NR6KXBQLR+bx/nOxULSZ4+fHwtHrY22RaDWvJ8XbOl6NhTs64uHIj+OhyLdYJE6Lh6Mn8P7MGK+dxEPRi7vC0d+P+liIAyGQgUDBBUS1gb/U6v6H+1S8SsKagT5XSXelm0JACFQUgSydKYqAcFtI3wE87aZXOV7RG19WWMd9nced5Ci/yyYEhIAQqBACxRIQUL+pgKidypd2NlUIyxHdUH3D/v65qq8jMiVBCAgBIVDmBIomIIpbLLRyHcKWj/GiX+XdqU70O9U3+W8XdaSrPUj/hUBlEiiqgCiksdC9PbzodxqfrVfMwrpOdH0sHJ2r+qb6KEEICAEhUIkEii4gA1ApHopeqP4lk2cjiYG08tsRbddBP7srHP0uN17WPBiCbEJACFQugVIRkBThWFskSkgzCWjoD1Gl8srg7b1kkj4j/6pbBkdKmigEhIAtBEpKQFSPeAB+pr8XpgPB0nKYjaTbSDf09dLB3Ss6crgzWPVWghAQAkKgfAmUnIAolJui0e5YOHJ+kvQpPBu5R6WVWmDh4EtUtEq1MRaKnqfaXGptlPYIgVETEAdCwIBASQrIYHs3tq36B6+NnKZTcgYLyZ8G04u9V21BHY5g4WhWbSx2e6R+ISAEhEAxCJS0gAwCUc9bYiE5Ui1Qc9qbHIq1vZlEalZtid0Rfb5YjZB6hYAQEAKlQKAsBGQAFPH6yJ2xnsSBSdCP0wF+wteQ1g3kObij19S/5SZ1/Kyqu1s9ZRV4hcZSjWIkBISAEKhcAuUkIOmj0NmZ7A51PNUVilwQD0WmJhAPJJ0uJIKnWVBYV9Jm+b4TURKInuDy5yvfsVB0ivq33O62lX8ArpvTZRMCQkAICAEmUH4Cwo0eum1evnJDvC16XTwcmRHvSYxVgz5PEGbzOsVCFoNLWQyWsf0ajr/CIrM5HUj9GuAalcfpl3Jaqyqjysa39I2LhaMzY6HIUuWby8omBIRAGRKQJjtPQHO+igLW0NmZUIM+zxoei4eiK+Lh6A9ZDL4aC0VO5vj0eDgyIR2i6vcjTo6Fo1/l9B/Gw5E7VBlVlmcZ5XsjYwFRS1VCQAgIgcoSEDmeQkAICAEhUDACIiAFQ11mFUlzhYAQEAImBERATABJthAQAkJACGQmIAKSmYukCgEhIASKRaBs6hUBKZtDJQ0VAkJACJQWARGQ0joe0hohIASEQNkQEAEpm0MlDbVKQOyEgBAoDAERkMJwllqEgBAQAhVHQASk4g6pdEgICAEhUBgCIwWkMPVKLUJACAgBIVDmBERAyvwASvOFgBAQAsUiIAJSLPJSrxAYSUBShEBZERABKavDJY0VAkJACJQOARGQ0jkW0hIhIASEQFkRqCgBKSvy0lghIASEQJkTEAEp8wMozRcCQkAIFIuACEixyEu9QqCiCEhnqpGACEg1HnXpsxAQAkLABgIiIDZAFBdCQAgIgWok8P8AAAD//1ISdAQAAAAGSURBVAMAWRjReNSv1N4AAAAASUVORK5CYII="/>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Teko</span>
+</div>
+<nav class="hidden md:flex items-center gap-md">
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary dark:border-primary-fixed-dim pb-1 font-body-md text-body-md" href="#">Product</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 font-body-md text-body-md" href="#">Psychologists</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 font-body-md text-body-md" href="#">Clinics</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 font-body-md text-body-md" href="#">Parents</a>
+</nav>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all">
+                Get Started
+            </button>
+</div>
+</header>
+<main class="pt-16">
+<!-- Hero Section -->
+<section class="relative overflow-hidden py-xl px-md md:px-lg">
+<div class="max-w-container-max mx-auto grid md:grid-cols-2 gap-lg items-center">
+<div class="z-10">
+<span class="inline-block pill-badge bg-secondary-container text-on-secondary-container mb-md">Pioneering PsychTech</span>
+<h1 class="font-display-lg text-display-lg md:text-display-lg text-primary mb-md leading-tight">
+                        Clinical Insights Through Playful Experiences.
+                    </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-lg">
+                        Teko transforms clinical assessments into games children love, giving psychologists ready data before the first session.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-md">
+<button class="bg-primary text-on-primary px-8 py-4 rounded-lg font-headline-md text-headline-md shadow-lg hover:shadow-xl transition-all active:scale-95">
+                            Start Your Clinical Trial
+                        </button>
+<button class="border-2 border-primary text-primary px-8 py-4 rounded-lg font-headline-md text-headline-md hover:bg-primary-fixed-dim/10 transition-all">
+                            How it Works
+                        </button>
+</div>
+</div>
+<div class="relative">
+<div class="absolute -top-12 -right-12 w-64 h-64 bg-secondary-container opacity-20 rounded-full blur-3xl"></div>
+<img alt="Friendly digital world for a child's game" class="rounded-xl shadow-2xl relative z-10 w-full transform hover:rotate-1 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Nt7G_p4bjhZp3hrWGpEfPZXl2ZxWNDWZvmrQzjcV9znhQCq0qE40CPc-rrDCYJjyPhYfjVaRUydQN8tZ3JL2K-iZ81t4zFF8jI3UFs-GLM5ttpp4C0EgpANlDMduWnKOO3ILhJLhemm7TQMHqtvyCBh7dQm0zQXy_1nU68jY42zQYEKLum2dxTrn1vAXOuxYrt4V2u1pIGEVfbsyFnFaTGLX5sz7yVXzq6_Luxt6obFoQlb9-ASlaNT53zGOra7Yk46brJaIMaxS"/>
+<div class="absolute -bottom-6 -left-6 bg-white p-md rounded-lg soft-shadow z-20 flex items-center gap-sm">
+<div class="bg-primary-fixed p-xs rounded-full">
+<span class="material-symbols-outlined text-primary" data-icon="child_care">child_care</span>
+</div>
+<div>
+<p class="font-label-md text-label-md">Engagement Rate</p>
+<p class="font-headline-md text-headline-md text-primary">94% of kids</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- The Three Modules Section -->
+<section class="py-xl bg-background px-md md:px-lg">
+<div class="max-w-container-max mx-auto">
+<div class="text-center mb-xl">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-sm">A Tri-Fold Ecosystem</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">Bridging the gap between clinical rigor, child engagement, and parental peace of mind.</p>
+</div>
+<div class="grid md:grid-cols-3 gap-md">
+<!-- Child Module -->
+<div class="tonal-layer-1 p-md md:p-lg rounded-xl flex flex-col hover:border-primary transition-colors duration-300">
+<div class="h-48 overflow-hidden rounded-lg mb-md">
+<img alt="Children's game interface" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Nt7G_p4bjhZp3hrWGpEfPZXl2ZxWNDWZvmrQzjcV9znhQCq0qE40CPc-rrDCYJjyPhYfjVaRUydQN8tZ3JL2K-iZ81t4zFF8jI3UFs-GLM5ttpp4C0EgpANlDMduWnKOO3ILhJLhemm7TQMHqtvyCBh7dQm0zQXy_1nU68jY42zQYEKLum2dxTrn1vAXOuxYrt4V2u1pIGEVfbsyFnFaTGLX5sz7yVXzq6_Luxt6obFoQlb9-ASlaNT53zGOra7Yk46brJaIMaxS"/>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-sm">The Playful Interface (Children)</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow">
+                            Explain how children 5-12 engage in games that are actually clinical assessments. No clinical stress, just play—capturing raw, authentic data.
+                        </p>
+<div class="flex items-center gap-xs text-secondary font-label-md">
+<span class="material-symbols-outlined" data-icon="videogame_asset">videogame_asset</span>
+<span>Ages 5-12 Optimized</span>
+</div>
+</div>
+<!-- Psychologist Module -->
+<div class="tonal-layer-1 p-md md:p-lg rounded-xl flex flex-col hover:border-primary transition-colors duration-300">
+<div class="h-48 overflow-hidden rounded-lg mb-md">
+<img alt="Psychologist dashboard behavioral map" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfSqRCsT-Fi3gziKSEkqiJvJZSSnrSdvLAMvu5Fq2Nl7pJyTSHLokBn5pKsxUdLbplzMR6Vvt18mPvmJ0mAIchJewyR-HvebuyDLNOeWdz-p_X9-FKkQVEtLsVdZnzeYFZGEbrhh5SCYs7XWHks5LfDfFpNSuUw8Ov2HgDsK1xrAbi5I6lrzOG5IUOMBIlKNo8vD0MxDw3MkiKeyuQ7azJ_34rvWH0goDtPDM2lPgIasJWctaTIpjWO3bESmjOXQy3mbN61wpuYcpN"/>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-sm">Behavioral Maps (Psychologists)</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow">
+                            Ready data before the first session. Highlight structured behavioral maps and professional dashboards for immediate diagnostic clarity.
+                        </p>
+<div class="flex items-center gap-xs text-secondary font-label-md">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span>Instant Insights</span>
+</div>
+</div>
+<!-- Parent Module -->
+<div class="tonal-layer-1 p-md md:p-lg rounded-xl flex flex-col hover:border-primary transition-colors duration-300">
+<div class="h-48 overflow-hidden rounded-lg mb-md">
+<img alt="Parental family connection panel" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDipJyT8BlCbCVti6jBVErPK1RTilpNfEGfvTYI4XlEjHNNSRbacoXz9MelfTfAwgkshACBI9w3y48FWn2_tE1LXg9RgLQOXg6adaiT2gSLh4JP1XBuU2BRUnb5uBV5R0VoSTUom71oHQ8Skq_3mVaWJp9D0vi1TlEy6Vt1aAyBVTs1P2haHtQR81bdgDndcrXLg9jPN1VbswA55sKhVw0Eel1mydiipXWNysza3cq2X6a_4BFkrw8FwCxy2DQkDUKkjeHoARwHnRPY"/>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-sm">Family Connection (Parents)</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow">
+                            Showcase clear visibility into progress without the clinical jargon. Reassuring and easy to understand reports that bring families together.
+                        </p>
+<div class="flex items-center gap-xs text-secondary font-label-md">
+<span class="material-symbols-outlined" data-icon="family_history">family_history</span>
+<span>Accessible Language</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Value Proposition Section (Bento Grid) -->
+<section class="py-xl px-md md:px-lg bg-surface">
+<div class="max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-md h-auto md:h-[600px]">
+<!-- Psychologist Box -->
+<div class="md:col-span-2 md:row-span-2 bg-primary-container text-on-primary-container p-lg rounded-xl flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
+<span class="material-symbols-outlined !text-[240px]" data-icon="psychology">psychology</span>
+</div>
+<div class="z-10">
+<span class="pill-badge bg-primary text-on-primary mb-sm">For Psychologists</span>
+<h3 class="font-display-lg text-display-lg mb-md">Save hours on intake with pre-session data.</h3>
+<p class="font-body-lg text-body-lg text-primary-fixed max-w-md">
+                                Enter your first session with a detailed behavioral roadmap. Our automated pre-assessment identifies key markers while the child plays, letting you focus on the human connection.
+                            </p>
+</div>
+<ul class="z-10 space-y-sm mt-lg">
+<li class="flex items-center gap-sm font-label-md"><span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> DSM-5 Alignment</li>
+<li class="flex items-center gap-sm font-label-md"><span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> Automated Reporting</li>
+<li class="flex items-center gap-sm font-label-md"><span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> Real-time Monitoring</li>
+</ul>
+</div>
+<!-- Clinic Box -->
+<div class="md:col-span-2 bg-secondary-container p-lg rounded-xl flex flex-col justify-center relative group overflow-hidden">
+<div class="absolute right-6 top-6">
+<span class="material-symbols-outlined text-on-secondary-container !text-48" data-icon="domain">domain</span>
+</div>
+<span class="pill-badge bg-secondary text-on-secondary w-fit mb-sm">For Clinics</span>
+<h3 class="font-headline-lg text-headline-lg text-on-secondary-container mb-sm">Gain a competitive edge with cutting-edge PsychTech.</h3>
+<p class="font-body-md text-body-md text-on-secondary-container/80">Streamline workflows and increase patient satisfaction through technology that respects clinical boundaries.</p>
+</div>
+<!-- Parent Box -->
+<div class="md:col-span-2 bg-white border border-outline-variant p-lg rounded-xl flex flex-col justify-center group relative overflow-hidden">
+<div class="absolute right-6 top-6">
+<span class="material-symbols-outlined text-primary !text-48" data-icon="home_health">home_health</span>
+</div>
+<span class="pill-badge bg-primary-fixed text-on-primary-fixed-variant w-fit mb-sm">For Parents</span>
+<h3 class="font-headline-lg text-headline-lg text-primary mb-sm">Finally see the progress your child is making.</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">We bridge the gap between complex clinical data and understandable family updates. No jargon, just clarity.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA Section -->
+<section class="py-xl px-md md:px-lg relative overflow-hidden">
+<div class="max-w-container-max mx-auto tonal-layer-1 rounded-xl p-lg md:p-xl flex flex-col items-center text-center relative z-10 overflow-hidden">
+<div class="absolute inset-0 opacity-5 bg-[radial-gradient(#14625B_1px,transparent_1px)] [background-size:20px_20px]"></div>
+<h2 class="font-display-lg text-display-lg text-primary mb-md max-w-2xl">Ready to redefine the pediatric clinical experience?</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-xl">Join hundreds of clinics transforming their intake process and deepening patient relationships.</p>
+<button class="bg-secondary text-on-secondary px-10 py-5 rounded-lg font-headline-md text-headline-md hover:scale-105 transition-transform active:scale-95 shadow-lg flex items-center gap-sm">
+                    Start Your Clinical Trial
+                    <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<p class="mt-md font-caption text-caption text-on-surface-variant">No credit card required for 14-day trial.</p>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-highest w-full py-lg px-md md:px-lg mt-xl">
+<div class="max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
+<div class="flex items-center gap-xs">
+<img alt="Teko Logo" class="h-8" src="data:image/png;base64,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"/>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Teko</span>
+</div>
+<nav class="flex flex-wrap justify-center gap-md">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Contact Us</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Clinical Standards</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Parent FAQ</a>
+</nav>
+<p class="text-on-surface-variant font-body-md text-body-md">
+                © 2024 Teko PsychTech. All rights reserved.
+            </p>
+</div>
+</footer>
+<script>
+        // Micro-interactions for hovering elements
+        document.querySelectorAll('.tonal-layer-1').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+                card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simple smooth scroll enhancement
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body></html>

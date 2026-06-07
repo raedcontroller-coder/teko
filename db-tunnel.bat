@@ -1,0 +1,3 @@
+@echo off
+echo Iniciando tunel SSH seguro com o Banco de Dados (VPS)...
+ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -L 5450:IP_INTERNO_DOCKER_BANCO:5432 root@IP_PUBLICO_VPS
