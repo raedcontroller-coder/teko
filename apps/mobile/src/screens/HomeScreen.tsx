@@ -45,17 +45,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectGame }) => {
             <Text style={styles.cardDescription}>Toque rápido no alvo e segure a emoção nos outros!</Text>
           </TouchableOpacity>
 
-          {/* Placeholder 2 */}
-          <View style={[styles.card, styles.cardLocked]}>
-            <View style={[styles.iconContainer, styles.iconLocked]}>
-              <Gamepad2 color="#9CA3AF" size={40} />
+          {/* Puzzle Game - Unlocked */}
+          <TouchableOpacity 
+            style={[styles.card, styles.cardUnlocked]} 
+            activeOpacity={0.8}
+            onPress={() => onSelectGame('Puzzle')}
+          >
+            <View style={[styles.iconContainer, { backgroundColor: '#FCE7F3' }]}>
+              <Puzzle color="#DB2777" size={48} />
             </View>
-            <Text style={styles.cardTitleLocked}>Desafio Rápido</Text>
-            <View style={styles.lockBadge}>
-              <Lock color="#4B5563" size={12} />
-              <Text style={styles.lockText}>Em breve</Text>
-            </View>
-          </View>
+            <Text style={styles.cardTitle}>Quebra-Cabeça</Text>
+            <Text style={styles.cardDescription}>Monte a imagem perfeitamente!</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
