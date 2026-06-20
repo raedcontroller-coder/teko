@@ -32,17 +32,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectGame }) => {
             <Text style={styles.cardDescription}>Fale palavras da categoria sorteada antes que o tempo estoure!</Text>
           </TouchableOpacity>
 
-          {/* Placeholder 1 */}
-          <View style={[styles.card, styles.cardLocked]}>
-            <View style={[styles.iconContainer, styles.iconLocked]}>
-              <Puzzle color="#9CA3AF" size={40} />
+          {/* Go/No-Go Game - Unlocked */}
+          <TouchableOpacity 
+            style={[styles.card, styles.cardUnlocked]} 
+            activeOpacity={0.8}
+            onPress={() => onSelectGame('GoNoGo')}
+          >
+            <View style={[styles.iconContainer, { backgroundColor: '#DBEAFE' }]}>
+              <Puzzle color="#3B82F6" size={48} />
             </View>
-            <Text style={styles.cardTitleLocked}>Memória</Text>
-            <View style={styles.lockBadge}>
-              <Lock color="#4B5563" size={12} />
-              <Text style={styles.lockText}>Em breve</Text>
-            </View>
-          </View>
+            <Text style={styles.cardTitle}>Go / No-Go</Text>
+            <Text style={styles.cardDescription}>Toque rápido no alvo e segure a emoção nos outros!</Text>
+          </TouchableOpacity>
 
           {/* Placeholder 2 */}
           <View style={[styles.card, styles.cardLocked]}>
