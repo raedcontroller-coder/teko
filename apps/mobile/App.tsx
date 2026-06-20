@@ -1,20 +1,22 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
+import { HomeScreen } from './src/screens/HomeScreen';
+import { BombaGame } from './src/games/Bomba/BombaGame';
 
 export default function App() {
+  const [currentScreen, setCurrentScreen] = useState<string>('Home');
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <View style={{ flex: 1 }}>
       <StatusBar style="auto" />
+      {currentScreen === 'Home' ? (
+        <HomeScreen onSelectGame={(gameId) => setCurrentScreen(gameId)} />
+      ) : currentScreen === 'Bomba' ? (
+        <BombaGame onBack={() => setCurrentScreen('Home')} />
+      ) : (
+        <HomeScreen onSelectGame={(gameId) => setCurrentScreen(gameId)} />
+      )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
