@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { ArrowLeft } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, Platform, StatusBar } from 'react-native';
+import { ArrowLeft, CheckCircle, RotateCcw } from 'lucide-react-native';
 import { PuzzlePiece } from './PuzzlePiece';
 import { TelemetryLogger, PuzzleAttempt } from './TelemetryLogger';
 import { EdgeType, PieceEdges } from './JigsawPathGenerator';
@@ -18,12 +18,12 @@ const PIECE_H = BOARD_HEIGHT / ROWS;
 
 const screenWidth = Dimensions.get('window').width;
 const BOARD_OFFSET_X = (screenWidth - BOARD_WIDTH) / 2;
-const BOARD_OFFSET_Y = 160;
+const BOARD_OFFSET_Y = 220;
 
 const ORIGIN_X_MIN = 10;
 const ORIGIN_X_MAX = screenWidth - 100;
-const ORIGIN_Y_MIN = 520;
-const ORIGIN_Y_MAX = 650;
+const ORIGIN_Y_MIN = 580;
+const ORIGIN_Y_MAX = 710;
 
 interface PieceState {
   id: string;
@@ -126,18 +126,29 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
     return (
       <View style={styles.container}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft color="#64748B" size={24} />
-          <Text style={styles.backText}>Voltar ao Menu</Text>
+          <ArrowLeft color="#fff" size={24} />
         </TouchableOpacity>
-        <Text style={styles.title}>Quebra-Cabeça</Text>
-        <Text style={styles.instructions}>
-          A presidente te aguarda.{'\n'}
-          Arraste e solte as peças clássicas para completar a imagem.
-        </Text>
-        <Image source={PUZZLE_IMAGE} style={styles.previewImage} />
-        <TouchableOpacity style={styles.button} onPress={startGame}>
-          <Text style={styles.buttonText}>Começar Montagem</Text>
-        </TouchableOpacity>
+        
+        <View style={styles.menuContent}>
+          <View style={styles.imageWrapper}>
+            <Image source={PUZZLE_IMAGE} style={styles.previewImage} />
+          </View>
+          
+          <Text style={styles.title}>Quebra-Cabeça</Text>
+          
+          <View style={styles.glassPanel}>
+            <Text style={styles.instructions}>
+              A presidente te aguarda.
+            </Text>
+            <Text style={styles.instructionsDesc}>
+              Arraste e solte as peças clássicas para completar a imagem e mostrar suas habilidades visuoespaciais.
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.startButton} onPress={startGame} activeOpacity={0.8}>
+            <Text style={styles.startButtonText}>Começar Montagem</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -145,36 +156,47 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
   if (gameState === 'finished') {
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft color="#64748B" size={24} />
-          <Text style={styles.backText}>Voltar ao Menu</Text>
-        </TouchableOpacity>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onBack} style={styles.iconButton}>
+            <ArrowLeft color="#fff" size={24} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Resultados</Text>
+          <View style={{ width: 44 }} />
+        </View>
         
-        <Text style={styles.title}>Montagem Concluída!</Text>
-        
-        {metrics && (
-          <View style={styles.metricsContainer}>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Índice de Encaixe de Primeira (IEP)</Text>
-              <Text style={[styles.metricValue, { color: '#10B981' }]}>{metrics.iep}%</Text>
-              <Text style={styles.metricDesc}>{metrics.correctFirstAttempts} de {metrics.totalPieces} peças perfeitas</Text>
-            </View>
-
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Tempo Total de Conclusão (TTC)</Text>
-              <Text style={[styles.metricValue, { color: '#3B82F6' }]}>{metrics.totalTimeSec} s</Text>
-            </View>
-
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Média de Tentativas</Text>
-              <Text style={[styles.metricValue, { color: '#F59E0B' }]}>{metrics.mtp} / peça</Text>
-            </View>
+        <View style={styles.resultsContent}>
+          <View style={styles.successIcon}>
+            <CheckCircle color="#9bf2e8" size={64} />
           </View>
-        )}
+          <Text style={styles.finishedTitle}>Montagem Concluída!</Text>
+          
+          {metrics && (
+            <View style={styles.metricsContainer}>
+              <View style={styles.metricGlassCard}>
+                <Text style={styles.metricLabel}>Índice de Encaixe de Primeira (IEP)</Text>
+                <Text style={[styles.metricValue, { color: '#9bf2e8' }]}>{metrics.iep}%</Text>
+                <Text style={styles.metricDesc}>{metrics.correctFirstAttempts} de {metrics.totalPieces} peças perfeitas</Text>
+              </View>
 
-        <TouchableOpacity style={styles.button} onPress={startGame}>
-          <Text style={styles.buttonText}>Montar Novamente</Text>
-        </TouchableOpacity>
+              <View style={styles.metricRow}>
+                <View style={[styles.metricGlassCard, { flex: 1 }]}>
+                  <Text style={styles.metricLabelSmall}>Tempo Total</Text>
+                  <Text style={[styles.metricValueSmall, { color: '#FFC857' }]}>{metrics.totalTimeSec} s</Text>
+                </View>
+
+                <View style={[styles.metricGlassCard, { flex: 1 }]}>
+                  <Text style={styles.metricLabelSmall}>Média de Erros</Text>
+                  <Text style={[styles.metricValueSmall, { color: '#E5DEFF' }]}>{metrics.mtp}</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          <TouchableOpacity style={styles.playAgainButton} onPress={startGame} activeOpacity={0.8}>
+            <RotateCcw color="#084D48" size={24} />
+            <Text style={styles.playAgainText}>Montar Novamente</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -182,15 +204,26 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
   return (
     <View style={styles.boardArea}>
       <TouchableOpacity onPress={onBack} style={[styles.backButton, { zIndex: 999 }]}>
-        <ArrowLeft color="#64748B" size={24} />
+        <ArrowLeft color="#fff" size={24} />
       </TouchableOpacity>
       
-      <View style={styles.referenceContainer}>
-        <Text style={styles.referenceText}>Referência:</Text>
+      <View style={styles.referenceFloating}>
         <Image source={PUZZLE_IMAGE} style={styles.referenceImage} />
+        <Text style={styles.referenceText}>Referência</Text>
       </View>
       
-      <View style={[styles.boardOutline, { left: BOARD_OFFSET_X, top: BOARD_OFFSET_Y, width: BOARD_WIDTH, height: BOARD_HEIGHT }]} />
+      {/* Tabuleiro Glassmorphism */}
+      <View 
+        style={[
+          styles.glassBoard, 
+          { 
+            left: BOARD_OFFSET_X, 
+            top: BOARD_OFFSET_Y, 
+            width: BOARD_WIDTH, 
+            height: BOARD_HEIGHT 
+          }
+        ]} 
+      />
 
       {pieces.map(p => (
         <PuzzlePiece
@@ -220,129 +253,234 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
   );
 };
 
+const paddingTop = Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 56;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#084D48',
   },
   boardArea: {
     flex: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#084D48', // Substituiu o cinza claro
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingTop,
+    paddingBottom: 16,
+    zIndex: 50,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 246, 227, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   backButton: {
     position: 'absolute',
-    top: 50,
-    left: 20,
-    flexDirection: 'row',
+    top: paddingTop,
+    left: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 246, 227, 0.1)',
     alignItems: 'center',
-    gap: 8,
-    padding: 10,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    zIndex: 10,
   },
-  backText: {
-    fontSize: 16,
-    color: '#64748B',
-    fontWeight: '600',
+  menuContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: '#1E293B',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  instructions: {
-    fontSize: 16,
-    color: '#475569',
-    textAlign: 'center',
-    marginBottom: 30,
-    lineHeight: 24,
+  imageWrapper: {
+    borderRadius: 24,
+    padding: 8,
+    backgroundColor: 'rgba(255, 246, 227, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 32,
   },
   previewImage: {
-    width: 250,
-    height: 250,
-    borderRadius: 12,
-    marginBottom: 40,
-    resizeMode: 'cover'
+    width: 200,
+    height: 200,
+    borderRadius: 16,
+    resizeMode: 'cover',
   },
-  button: {
-    backgroundColor: '#6366F1',
+  title: {
+    fontSize: 40,
+    fontWeight: '900',
+    color: '#FFF',
+    marginBottom: 24,
+    textAlign: 'center',
+    letterSpacing: -1,
+  },
+  glassPanel: {
+    backgroundColor: 'rgba(255, 246, 227, 0.1)',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    width: '100%',
+    marginBottom: 40,
+  },
+  instructions: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#9bf2e8',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  instructionsDesc: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: 'rgba(255, 255, 255, 0.8)',
+    lineHeight: 24,
+  },
+  startButton: {
+    backgroundColor: '#E6A800',
     paddingHorizontal: 40,
     paddingVertical: 18,
     borderRadius: 16,
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    width: '100%',
+    alignItems: 'center',
   },
-  buttonText: {
-    color: '#FFF',
+  startButtonText: {
+    color: '#084D48',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
-  boardOutline: {
+  glassBoard: {
     position: 'absolute',
     borderWidth: 2,
-    borderColor: '#CBD5E1',
-    backgroundColor: 'rgba(255,255,255,0.5)',
-    borderStyle: 'dashed',
-    borderRadius: 4,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 246, 227, 0.05)',
+    borderRadius: 4, // Removido o 16px para não cortar as quinas quadradas das peças
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
   },
-  referenceContainer: {
+  referenceFloating: {
     position: 'absolute',
-    top: 50,
+    top: paddingTop,
     alignSelf: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    padding: 6,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 246, 227, 0.15)',
+    padding: 8,
+    paddingRight: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     zIndex: 10,
-  },
-  referenceText: {
-    fontSize: 12,
-    color: '#64748B',
-    marginBottom: 4,
-    fontWeight: 'bold',
+    gap: 16,
   },
   referenceImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 6,
-    resizeMode: 'cover'
+    width: 96,
+    height: 96,
+    borderRadius: 12,
+    resizeMode: 'cover',
+  },
+  referenceText: {
+    fontSize: 18,
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
+  resultsContent: {
+    flex: 1,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    paddingTop: 20,
+  },
+  successIcon: {
+    marginBottom: 20,
+  },
+  finishedTitle: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: '#FFF',
+    marginBottom: 40,
+    textAlign: 'center',
   },
   metricsContainer: {
     width: '100%',
     gap: 16,
     marginBottom: 40,
   },
-  metricCard: {
-    backgroundColor: '#FFF',
-    padding: 20,
+  metricGlassCard: {
+    backgroundColor: 'rgba(255, 246, 227, 0.1)',
+    padding: 24,
     borderRadius: 16,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  metricRow: {
+    flexDirection: 'row',
+    gap: 16,
+    width: '100%',
   },
   metricLabel: {
-    fontSize: 16,
-    color: '#64748B',
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '600',
     marginBottom: 8,
+    textTransform: 'uppercase',
   },
   metricValue: {
-    fontSize: 32,
+    fontSize: 48,
     fontWeight: '900',
     marginBottom: 4,
   },
   metricDesc: {
     fontSize: 14,
-    color: '#94A3B8',
-  }
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  metricLabelSmall: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '600',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  metricValueSmall: {
+    fontSize: 32,
+    fontWeight: '900',
+  },
+  playAgainButton: {
+    backgroundColor: '#FFC857',
+    paddingHorizontal: 30,
+    paddingVertical: 18,
+    borderRadius: 99,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  playAgainText: {
+    color: '#084D48',
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
 });

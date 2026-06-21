@@ -130,7 +130,7 @@ export const PuzzlePiece: React.FC<PuzzlePieceProps> = ({
           clipPath={`url(#clip-${id})`}
           preserveAspectRatio="xMidYMid slice"
         />
-        <Path d={path} fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
+        <Path d={path} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
       </Svg>
     </Animated.View>
   );
