@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Validação Clínica - TekoPorã</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "teko-yellow": "#E6A800",
+                        "background": "#161308",
+                        "text-muted": "rgba(255, 255, 255, 0.8)",
+                        "tertiary-fixed": "#e5deff",
+                        "on-primary-container": "#a3faef",
+                        "surface-container-low": "#1f1b10",
+                        "secondary-fixed": "#ffdea4",
+                        "deep-forest": "#084D48",
+                        "on-tertiary-fixed-variant": "#441cc8",
+                        "glass-surface": "rgba(255, 246, 227, 0.05)",
+                        "on-tertiary-container": "#ede6ff",
+                        "secondary-fixed-dim": "#f4be4e",
+                        "on-tertiary-fixed": "#1a0063",
+                        "outline": "#889391",
+                        "on-primary-fixed": "#00201d",
+                        "tertiary": "#c9bfff",
+                        "on-primary-fixed-variant": "#00504a",
+                        "inverse-on-surface": "#343024",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#eae2cf",
+                        "error": "#ffb4ab",
+                        "surface-container": "#231f14",
+                        "surface-container-lowest": "#110e05",
+                        "on-error": "#690005",
+                        "on-secondary-fixed-variant": "#5d4200",
+                        "surface-bright": "#3d392c",
+                        "glass-border": "rgba(255, 255, 255, 0.15)",
+                        "tertiary-container": "#684ceb",
+                        "outline-variant": "#3e4947",
+                        "on-tertiary": "#2e009c",
+                        "secondary-container": "#b8891a",
+                        "surface-container-highest": "#393428",
+                        "primary-fixed": "#9bf2e8",
+                        "on-secondary-fixed": "#261900",
+                        "error-container": "#93000a",
+                        "primary-container": "#0d766e",
+                        "inverse-surface": "#eae2cf",
+                        "on-secondary-container": "#382700",
+                        "surface-container-high": "#2e2a1e",
+                        "surface-tint": "#7fd5cc",
+                        "on-surface": "#eae2cf",
+                        "on-secondary": "#412d00",
+                        "on-surface-variant": "#bdc9c6",
+                        "tertiary-fixed-dim": "#c9bfff",
+                        "surface-variant": "#393428",
+                        "primary-fixed-dim": "#7fd5cc",
+                        "surface-dim": "#161308",
+                        "surface": "#161308",
+                        "inverse-primary": "#006a63",
+                        "on-primary": "#003733",
+                        "secondary": "#f4be4e",
+                        "primary": "#7fd5cc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "stack-lg": "32px",
+                        "margin-desktop": "80px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "margin-mobile": "20px",
+                        "section-gap": "120px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg-mobile": ["Plus Jakarta Sans"],
+                        "cta-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "display-lg-mobile": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "cta-lg": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #084D48; /* deep-forest */
+            background-image: radial-gradient(circle at top right, rgba(127, 213, 204, 0.15) 0%, transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(127, 213, 204, 0.1) 0%, transparent 50%);
+            background-attachment: fixed;
+            color: #eae2cf; /* on-surface */
+            overflow-x: hidden;
+        }
+        
+        .glass-card {
+            background-color: rgba(255, 246, 227, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+            border-top-color: rgba(255, 255, 255, 0.3);
+            border-left-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary {
+            background-color: #E6A800;
+            color: #084D48;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(230, 168, 0, 0.4);
+        }
+
+        .btn-glass {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-glass:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-glass-surface backdrop-blur-md border-b border-glass-border flat no shadows">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 max-w-container-max mx-auto">
+<div class="flex items-center gap-4">
+<span class="font-display-lg text-headline-lg font-extrabold text-primary">TekoPorã</span>
+</div>
+<nav class="hidden md:flex items-center gap-stack-lg">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 transition-transform duration-200" href="#">Ciência</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 transition-transform duration-200" href="#">Planos</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 transition-transform duration-200" href="#">Download</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 transition-transform duration-200" href="#">Sobre Nós</a>
+</nav>
+<div class="hidden md:flex items-center gap-stack-md">
+<button class="font-label-md text-label-md px-4 py-2 rounded-full text-on-surface-variant hover:text-primary transition-colors hover:scale-105 transition-transform duration-200">Entrar</button>
+<button class="font-label-md text-label-md px-6 py-2 rounded-full btn-primary hover:scale-105 transition-transform duration-200">Começar Agora</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow pt-[120px] pb-section-gap px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto flex flex-col gap-section-gap">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center max-w-4xl mx-auto gap-stack-lg fade-in-up">
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-on-surface">A Ciência por trás do Brincar</h1>
+<p class="font-body-lg text-body-lg text-text-muted max-w-2xl">
+                Nossos serious games transformam avaliações neuropsicológicas complexas em dados clínicos engajadores, oferecendo uma janela precisa para o desenvolvimento cognitivo infantil, sem a ansiedade dos testes tradicionais.
+            </p>
+</section>
+<!-- The Dynamics (The "How") -->
+<section class="flex flex-col gap-stack-lg fade-in-up">
+<h2 class="font-headline-lg text-headline-lg text-teko-yellow text-center">Dinâmicas Clínicas</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="glass-card rounded-xl p-8 flex flex-col gap-stack-md items-start">
+<div class="p-3 rounded-full bg-[rgba(123,97,255,0.1)] border border-[rgba(123,97,255,0.3)] text-[#7B61FF]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">front_hand</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Desafio da Inibição (Go/No-Go)</h3>
+<p class="font-body-md text-body-md text-text-muted">Mede com precisão o controle inibitório e o gerenciamento de impulsos, fundamentais para a autorregulação.</p>
+</div>
+<!-- Card 2 -->
+<div class="glass-card rounded-xl p-8 flex flex-col gap-stack-md items-start">
+<div class="p-3 rounded-full bg-[rgba(127,213,204,0.1)] border border-[rgba(127,213,204,0.3)] text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">extension</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Labirintos Espaciais</h3>
+<p class="font-body-md text-body-md text-text-muted">Avalia a capacidade de planejamento visuoespacial e a memória de trabalho em ambientes tridimensionais.</p>
+</div>
+<!-- Card 3 -->
+<div class="glass-card rounded-xl p-8 flex flex-col gap-stack-md items-start">
+<div class="p-3 rounded-full bg-[rgba(230,168,0,0.1)] border border-[rgba(230,168,0,0.3)] text-teko-yellow">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">visibility</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Foco Sustentado</h3>
+<p class="font-body-md text-body-md text-text-muted">Rastreia a consistência da atenção ao longo do tempo, identificando flutuações e fadiga cognitiva.</p>
+</div>
+</div>
+</section>
+<!-- Precision Metrics (The "What") -->
+<section class="flex flex-col gap-stack-lg fade-in-up">
+<h2 class="font-headline-lg text-headline-lg text-teko-yellow text-center">Métricas de Precisão</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<div class="flex flex-col gap-stack-sm border-l-2 border-primary pl-4">
+<h4 class="font-headline-md text-headline-md text-primary">Telemetria Milimétrica</h4>
+<p class="font-body-md text-body-md text-text-muted">Precisão no tempo de reação registrada em milissegundos (ms).</p>
+</div>
+<div class="flex flex-col gap-stack-sm border-l-2 border-primary pl-4">
+<h4 class="font-headline-md text-headline-md text-primary">Omissão e Comissão</h4>
+<p class="font-body-md text-body-md text-text-muted">Dados quantitativos cruciais para triagem de TDAH e perfil cognitivo.</p>
+</div>
+<div class="flex flex-col gap-stack-sm border-l-2 border-primary pl-4">
+<h4 class="font-headline-md text-headline-md text-primary">Estabilidade de Resposta</h4>
+<p class="font-body-md text-body-md text-text-muted">Métricas de consistência e variabilidade durante toda a sessão lúdica.</p>
+</div>
+</div>
+</section>
+<!-- Scientific Foundation -->
+<section class="glass-card rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-stack-lg fade-in-up">
+<div class="flex-1 flex flex-col gap-stack-md">
+<div class="flex items-center gap-2 text-teko-yellow">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Fundação Científica</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Rigor Acadêmico, Prática Clínica</h2>
+<p class="font-body-lg text-body-lg text-text-muted">
+                    Todas as dinâmicas do TekoPorã são estritamente baseadas em pesquisas de Mestrado e Doutorado, construindo uma ponte sólida entre a vanguarda do conhecimento acadêmico e as necessidades reais da prática clínica diária.
+                </p>
+</div>
+<div class="flex-1 w-full flex justify-center">
+<div class="w-full max-w-[400px] h-[300px] rounded-xl overflow-hidden glass-card relative" data-alt="A highly detailed illustration in a bio-glassmorphism style featuring overlapping translucent glowing geometric shapes representing data points and brain waves. Set against a deep forest green background, illuminated by soft high-key white light from the top left corner. The color palette includes pristine whites, subtle water greens, and a touch of deep yellow. The mood is scientific yet ethereal, representing advanced cognitive technology in a naturalistic, nurturing digital space." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCoec7EZ66G3mFaIo0JZGBgGJ6TazWK580y2CILEYqR6UHMMFUuyE8fa8Fn9mDn3fOT3cf96TIgjTJYuY0dN-YO-mGTe70VdP4nZGQsjT9z_2o3S5kP_s0G1ejejncmcvjug8plSKT1dFcZ6qZ_wdv0WDpivzP43L4dBKyna5flq7mPTNoFqHeUffMG7jYTyPwLeC26cNG7GZruJAtTWdGRqklOYKhEViuTvRnn5NGRe-1xmXNuWPibLfNfi3TItNDmYdQ_d_TH1Fc')">
+<!-- Abstract representation of scientific data/brain -->
+<div class="absolute inset-0 bg-gradient-to-tr from-[rgba(127,213,204,0.2)] to-transparent"></div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section-gap bg-surface-container-lowest border-t border-glass-border flat no shadows">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="flex flex-col gap-stack-md col-span-1 md:col-span-1">
+<span class="font-headline-md text-headline-md text-primary">TekoPorã</span>
+<p class="font-body-md text-body-md text-text-muted mt-4">
+                    © 2024 TekoPorã. Transformando a psicometria infantil com tecnologia e afeto.
+                </p>
+</div>
+<div class="flex flex-col gap-stack-sm col-span-1 md:col-span-3 md:flex-row md:justify-end md:gap-stack-lg items-start md:items-center">
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 transition-transform" href="#">Termos de Uso</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 transition-transform" href="#">Privacidade</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 transition-transform" href="#">Contato</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 transition-transform" href="#">Trabalhe Conosco</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 transition-transform" href="#">Blog</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple Intersection Observer for scroll animations
+        document.addEventListener("DOMContentLoaded", () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in-up').forEach(element => {
+                observer.observe(element);
+            });
+        });
+    </script>
+</body></html>

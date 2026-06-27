@@ -1,0 +1,231 @@
+<!DOCTYPE html><html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Time - TekoPorã</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#441cc8",
+                        "inverse-primary": "#006a63",
+                        "on-secondary": "#412d00",
+                        "tertiary-fixed": "#e5deff",
+                        "surface-container": "#231f14",
+                        "on-surface-variant": "#bdc9c6",
+                        "surface-dim": "#161308",
+                        "on-secondary-container": "#382700",
+                        "tertiary-fixed-dim": "#c9bfff",
+                        "on-surface": "#eae2cf",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#ffdea4",
+                        "surface-container-high": "#2e2a1e",
+                        "on-tertiary-fixed": "#1a0063",
+                        "outline": "#889391",
+                        "text-muted": "rgba(255, 255, 255, 0.8)",
+                        "on-primary-fixed": "#00201d",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#ede6ff",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#393428",
+                        "primary-fixed-dim": "#7fd5cc",
+                        "glass-surface": "rgba(255, 246, 227, 0.05)",
+                        "primary": "#7fd5cc",
+                        "inverse-on-surface": "#343024",
+                        "inverse-surface": "#eae2cf",
+                        "outline-variant": "#3e4947",
+                        "on-primary": "#003733",
+                        "deep-forest": "#084D48",
+                        "secondary-fixed-dim": "#f4be4e",
+                        "on-background": "#eae2cf",
+                        "secondary-container": "#b8891a",
+                        "surface-variant": "#393428",
+                        "on-primary-fixed-variant": "#00504a",
+                        "surface-container-low": "#1f1b10",
+                        "surface": "#161308",
+                        "on-secondary-fixed-variant": "#5d4200",
+                        "primary-fixed": "#9bf2e8",
+                        "glass-border": "rgba(255, 255, 255, 0.15)",
+                        "surface-container-lowest": "#110e05",
+                        "tertiary-container": "#684ceb",
+                        "on-error": "#690005",
+                        "secondary": "#f4be4e",
+                        "on-primary-container": "#a3faef",
+                        "background": "#161308",
+                        "on-tertiary": "#2e009c",
+                        "surface-tint": "#7fd5cc",
+                        "teko-yellow": "#E6A800",
+                        "surface-bright": "#3d392c",
+                        "tertiary": "#c9bfff",
+                        "on-secondary-fixed": "#261900",
+                        "primary-container": "#0d766e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "margin-desktop": "80px",
+                        "gutter": "24px",
+                        "section-gap": "120px",
+                        "stack-lg": "32px",
+                        "container-max": "1280px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "cta-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "cta-lg": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg-mobile": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 246, 227, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .bg-gradient-radial {
+            background-image: radial-gradient(circle at center, var(--tw-gradient-stops));
+        }
+
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-deep-forest text-on-surface min-h-screen relative overflow-x-hidden font-body-md antialiased">
+<div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+<div class="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full bg-primary-container opacity-20 blur-[120px] mix-blend-screen animate-[pulse_10s_ease-in-out_infinite]"></div>
+</div>
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 bg-glass-surface backdrop-blur-md border-b border-glass-border"><div class="font-display-lg-mobile text-display-lg-mobile tracking-tight text-primary md:font-display-lg md:text-headline-md">TekoPorã</div><div class="hidden md:flex gap-gutter items-center"><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 duration-200" href="#">Início</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 duration-200" href="#">Validação</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 duration-200" href="#">Preços</a><a class="font-label-md text-label-md text-teko-yellow font-bold border-b-2 border-teko-yellow pb-1 hover:scale-105 transition-transform duration-200" href="#">Time</a></div><div class="flex items-center gap-4"><button class="hidden md:block font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:underline hover:scale-105 duration-200">Entrar</button><button class="font-cta-lg text-cta-lg bg-teko-yellow text-deep-forest px-6 py-2 rounded-full hover:scale-105 transition-transform duration-200 shadow-[0_0_15px_rgba(230,168,0,0.3)]">Começar Agora</button><button class="md:hidden text-primary hover:scale-105 transition-transform duration-200"><span class="material-symbols-outlined">menu</span></button></div></nav>
+<main class="pt-[120px] pb-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<section class="text-center mb-section-gap fade-in-up visible">
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary mb-stack-md">O Coração da TekoPorã</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">Conheça a equipe multidisciplinar que une precisão clínica, design empático e engenharia de ponta para transformar a avaliação psicométrica infantil.</p>
+</section>
+<div class="flex flex-col gap-section-gap">
+<section class="flex flex-col md:flex-row items-center gap-gutter fade-in-up group visible">
+<div class="w-full md:w-1/2 rounded-xl overflow-hidden glass-panel relative aspect-square md:aspect-[4/3] transform transition-transform duration-500 hover:scale-[1.02]">
+<div class="absolute inset-0 bg-gradient-to-tr from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"></div>
+<img class="w-full h-full object-cover" data-alt="A professional, high-end portrait of a female Product Owner and UI/UX Designer in her 30s. She exudes empathy and creativity, sitting in a warmly lit, modern design studio. The lighting is soft and cinematic, with subtle bio-glassmorphism elements in the background—translucent screens and deep green plants. The color palette emphasizes warm skin tones against cool deep forest greens and soft lilacs, conveying a premium, nurturing digital environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEHCnSKW1Sun5xq46OXCJ3ynngItwotxIIzb9UE04lonmjpXkGqAOy0_dNoB4fMpxEhimujImFJ8trV0saPWerrUGqGFpSaWAu2rjj2RSyGhmrCky26_-Jqme4PGDd32P67CIrKuhfnmjxzZ5sATBCOvv_SPqPZXodHopgUZxOo5XuvM0o_EFUUWwKxilQVdYprfdV5YN0wjpLe9FrFvZ0PPzrFcDD7WseuVY-Aq1se2PlUtGL3ZWsy955w4rDfY9bcp5os9tnD6c">
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-stack-md glass-panel p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Maria Victoria Batista Oliveira</h2>
+<h3 class="font-label-md text-label-md text-teko-yellow uppercase tracking-wider mt-1">Product Owner &amp; UI/UX Designer</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Liderando a visão de produto e a experiência do usuário, Maria Victoria garante que a TekoPorã seja intuitiva e acolhedora para crianças e psicólogos. Seu foco em maximizar o valor do produto e mapear jornadas empáticas é fundamental para a identidade da marca, traduzindo complexidade clínica em interações lúdicas e engajadoras.</p>
+<div class="flex gap-2 flex-wrap mt-2">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-tertiary-container/20 text-tertiary border border-tertiary/30">UX/UI Design</span>
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-tertiary-container/20 text-tertiary border border-tertiary/30">Product Strategy</span>
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-tertiary-container/20 text-tertiary border border-tertiary/30">Brand Identity</span>
+</div>
+</div>
+</section>
+<div class="w-full h-px bg-gradient-to-r from-transparent via-glass-border to-transparent opacity-50 fade-in-up visible"></div>
+<section class="flex flex-col md:flex-row-reverse items-center gap-gutter fade-in-up group visible">
+<div class="w-full md:w-1/2 rounded-xl overflow-hidden glass-panel relative aspect-square md:aspect-[4/3] transform transition-transform duration-500 hover:scale-[1.02]">
+<div class="absolute inset-0 bg-gradient-to-tr from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"></div>
+<img class="w-full h-full object-cover" data-alt="A sophisticated, cinematic portrait of a male Tech Lead and Fullstack Developer in his late 20s or 30s. He appears focused and analytical, working in a sleek, dimly lit tech environment. The background features subtle, abstract digital data visualizations glowing in water-green and cyan hues against deep forest tones. The lighting emphasizes a modern, high-tech aesthetic, blending clinical precision with cutting-edge software engineering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5RIlBXGheAeEBUravSJrEcTbKAiO1QMJkria0xCbgxXdeRrZ0f7drg9-ROgvvOzlgeOi8Ttv5g6RS6usOYPwCzrLRWVuXhqH3iZuGTv4usDInpoqJaf3T5PADypu5m8dt7vnqSXrChjen2zwVX1hFc7tdNSRfjem2eLGhvnuNOviZubxow-O0r0T-nw5jDY3ikiuWEa-Z02gko0rkFg3kdZGSRPoiFXVxMC7u9bB0b6lW8DsvtTzmRa98MfzakJ9yzRqWC6Wz3hk">
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-stack-md glass-panel p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Carlos Eduardo de Lima</h2>
+<h3 class="font-label-md text-label-md text-teko-yellow uppercase tracking-wider mt-1">Tech Lead &amp; Fullstack Developer</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Como arquiteto do sistema, Carlos lidera o desenvolvimento fullstack e a implementação dos pipelines de inteligência artificial. Ele é responsável pelas decisões críticas de engenharia, garantindo que a plataforma seja robusta, escalável e rigorosamente alinhada aos padrões de segurança e conformidade (LGPD), protegendo os dados sensíveis dos pacientes.</p>
+<div class="flex gap-2 flex-wrap mt-2">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary-container/20 text-primary border border-primary/30">System Architecture</span>
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary-container/20 text-primary border border-primary/30">AI Pipeline</span>
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary-container/20 text-primary border border-primary/30">Security &amp; LGPD</span>
+</div>
+</div>
+</section>
+<div class="w-full h-px bg-gradient-to-r from-transparent via-glass-border to-transparent opacity-50 fade-in-up visible"></div>
+<section class="flex flex-col md:flex-row items-center gap-gutter fade-in-up group visible">
+<div class="w-full md:w-1/2 rounded-xl overflow-hidden glass-panel relative aspect-square md:aspect-[4/3] transform transition-transform duration-500 hover:scale-[1.02]">
+<div class="absolute inset-0 bg-gradient-to-tr from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"></div>
+<img class="w-full h-full object-cover" data-alt="A polished, authoritative portrait of a male Business &amp; Data Lead in his 30s. He is dressed in smart-casual attire, exuding confidence and strategic insight. The setting is a contemporary office space with deep green walls and subtle, warm amber lighting accents. Floating, translucent data charts in soft glowing colors subtly frame the composition, representing financial strategy and KPI analysis in a premium digital health context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzQpujSg-oICPBvvU_UtlvBOybPM3Wr-KhiVWmOGJNZ92vwodlJDTZu3gd5v5w6k2uo0EwzHH8XCXsbs3Gp3aBwZLMXfleGmIrjd3zmZ9nV_tuy-Ot_XYXYDNt74uQo0Nsatpf5MWx5-TySlfZx0nX_J_itPAP513zlqtzJDOO0BlUpS_QJoCRJDRmSM3ZkOoFCVoYmKFne71eRadQ0fvcBDrrPmzQZ0Mb7169UAeW-78fTxV-mv4V_YJixsQXLUXfSQyXYCLeYH4">
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-stack-md glass-panel p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Miguel Rodrigues Pereira Francisco</h2>
+<h3 class="font-label-md text-label-md text-teko-yellow uppercase tracking-wider mt-1">Business &amp; Data Lead</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Miguel une estratégia financeira e análise de dados para impulsionar o crescimento sustentável da TekoPorã. Especialista em KPIs e validação de algoritmos, ele traduz métricas complexas em insights acionáveis de negócios. Sua visão analítica é complementada por contribuições no desenvolvimento frontend, assegurando que os dados sejam apresentados com clareza clínica.</p>
+<div class="flex gap-2 flex-wrap mt-2">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-secondary-container/20 text-secondary border border-secondary/30">Financial Strategy</span>
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-secondary-container/20 text-secondary border border-secondary/30">Data Analytics</span>
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-secondary-container/20 text-secondary border border-secondary/30">Algorithm Validation</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="w-full py-section-gap px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center bg-surface-container-lowest border-t border-glass-border">
+<div class="flex flex-col items-center md:items-start gap-stack-sm mb-8 md:mb-0">
+<div class="font-headline-lg text-headline-lg text-primary">TekoPorã</div>
+<p class="font-body-md text-body-md text-text-muted text-center md:text-left">© 2024 TekoPorã. Bio-digital precision in psychometry.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-gutter">
+<a class="font-body-md text-body-md text-text-muted hover:text-on-surface hover:underline transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-text-muted hover:text-on-surface hover:underline transition-colors" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-text-muted hover:text-on-surface hover:underline transition-colors" href="#">Clinical Ethics</a>
+<a class="font-body-md text-body-md text-text-muted hover:text-on-surface hover:underline transition-colors" href="#">Contact Us</a>
+</div>
+</footer>
+<script>
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-in-up').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+
+
+</body></html>

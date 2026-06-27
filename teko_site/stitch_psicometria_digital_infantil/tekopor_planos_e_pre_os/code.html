@@ -1,0 +1,469 @@
+<!DOCTYPE html><html class="dark" lang="pt-BR" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Planos e Preços - TekoPorã</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "on-secondary-fixed-variant": "#5d4200",
+                            "inverse-primary": "#006a63",
+                            "text-muted": "rgba(255, 255, 255, 0.8)",
+                            "surface-container-highest": "#393428",
+                            "surface-tint": "#7fd5cc",
+                            "outline-variant": "#3e4947",
+                            "error": "#ffb4ab",
+                            "surface-container": "#231f14",
+                            "on-tertiary": "#2e009c",
+                            "secondary-fixed-dim": "#f4be4e",
+                            "primary": "#7fd5cc",
+                            "tertiary-container": "#684ceb",
+                            "background": "#161308",
+                            "tertiary-fixed-dim": "#c9bfff",
+                            "on-error": "#690005",
+                            "tertiary-fixed": "#e5deff",
+                            "on-surface-variant": "#bdc9c6",
+                            "on-tertiary-fixed-variant": "#441cc8",
+                            "primary-container": "#0d766e",
+                            "deep-forest": "#084D48",
+                            "on-primary-fixed-variant": "#00504a",
+                            "inverse-surface": "#eae2cf",
+                            "on-primary-container": "#a3faef",
+                            "on-secondary": "#412d00",
+                            "inverse-on-surface": "#343024",
+                            "surface-container-low": "#1f1b10",
+                            "surface-bright": "#3d392c",
+                            "outline": "#889391",
+                            "surface-container-high": "#2e2a1e",
+                            "on-error-container": "#ffdad6",
+                            "surface-dim": "#161308",
+                            "surface-variant": "#393428",
+                            "on-primary-fixed": "#00201d",
+                            "error-container": "#93000a",
+                            "on-primary": "#003733",
+                            "glass-surface": "rgba(255, 246, 227, 0.05)",
+                            "on-background": "#eae2cf",
+                            "on-tertiary-fixed": "#1a0063",
+                            "secondary": "#f4be4e",
+                            "on-secondary-fixed": "#261900",
+                            "primary-fixed": "#9bf2e8",
+                            "teko-yellow": "#E6A800",
+                            "surface-container-lowest": "#110e05",
+                            "on-tertiary-container": "#ede6ff",
+                            "on-surface": "#eae2cf",
+                            "on-secondary-container": "#382700",
+                            "glass-border": "rgba(255, 255, 255, 0.15)",
+                            "secondary-container": "#b8891a",
+                            "tertiary": "#c9bfff",
+                            "surface": "#161308",
+                            "secondary-fixed": "#ffdea4",
+                            "primary-fixed-dim": "#7fd5cc"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "container-max": "1280px",
+                            "stack-lg": "32px",
+                            "stack-sm": "8px",
+                            "section-gap": "120px",
+                            "margin-desktop": "80px",
+                            "gutter": "24px",
+                            "stack-md": "16px",
+                            "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                            "display-lg": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "label-md": [
+                                    "Inter"
+                            ],
+                            "display-lg-mobile": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "body-lg": [
+                                    "Inter"
+                            ],
+                            "headline-md": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "headline-lg": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "cta-lg": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "body-md": [
+                                    "Inter"
+                            ]
+                    },
+                    "fontSize": {
+                            "display-lg": [
+                                    "64px",
+                                    {
+                                            "lineHeight": "72px",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "800"
+                                    }
+                            ],
+                            "label-md": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "letterSpacing": "0.01em",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "display-lg-mobile": [
+                                    "40px",
+                                    {
+                                            "lineHeight": "48px",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "800"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "18px",
+                                    {
+                                            "lineHeight": "28px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "headline-md": [
+                                    "24px",
+                                    {
+                                            "lineHeight": "32px",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "headline-lg": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "40px",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "cta-lg": [
+                                    "18px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "body-md": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "400"
+                                    }
+                            ]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #084D48; /* deep-forest */
+            color: #eae2cf; /* on-surface */
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Subtle radial gradients for background */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        body::before {
+            background: radial-gradient(circle at 20% 30%, rgba(127, 213, 204, 0.05) 0%, transparent 50%);
+            animation: pulse-slow 15s ease-in-out infinite alternate;
+        }
+        
+        body::after {
+            background: radial-gradient(circle at 80% 70%, rgba(127, 213, 204, 0.03) 0%, transparent 40%);
+            animation: pulse-slow 20s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes pulse-slow {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .glass-panel {
+            background: rgba(255, 246, 227, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .glass-panel-recommended {
+            background: rgba(255, 246, 227, 0.08);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: -2px -2px 10px rgba(255, 255, 255, 0.05), inset 1px 1px 0px rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        
+        .glass-panel-recommended::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(230, 168, 0, 0.4), transparent 40%);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .glass-panel-recommended:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background-color: #E6A800;
+            color: #084D48;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(230, 168, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #eae2cf;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+        
+        .divider-glass {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            width: 100%;
+            margin: 0;
+        }
+        
+        /* Intersection Observer Animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col pt-20">
+<!-- TopNavBar -->
+<header class="bg-glass-surface backdrop-blur-md fixed top-0 w-full z-50 border-b border-glass-border">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 max-w-container-max mx-auto">
+<div class="font-display-lg text-headline-lg font-extrabold text-primary cursor-pointer hover:scale-105 transition-transform duration-200">
+                TekoPorã
+            </div>
+<nav class="hidden md:flex gap-gutter items-center"><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 duration-200" href="#">Início</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 duration-200" href="#">Validação</a><a class="font-label-md text-label-md text-teko-yellow border-b-2 border-teko-yellow pb-1 hover:scale-105 transition-transform duration-200" href="#">Preços</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 duration-200" href="#">Time</a></nav>
+<div class="flex items-center gap-stack-md">
+<a class="hidden md:block font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hover:scale-105 duration-200" href="#">Entrar</a>
+<button class="font-cta-lg text-label-md btn-primary px-6 py-2 rounded-full hidden md:block">Começar Agora</button>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined" style="font-size: 28px;">menu</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-section-gap">
+<!-- Hero Section -->
+<section class="text-center w-full mb-section-gap fade-in-up visible">
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-stack-md">Escolha o seu <span class="text-primary">Ecossistema</span></h1>
+<p class="font-body-lg text-body-lg text-text-muted max-w-2xl mx-auto">
+                Potencialize sua prática clínica com tecnologia que respeita o afeto. Selecione o plano que melhor se adapta à sua jornada profissional.
+            </p>
+</section>
+<!-- Pricing Cards -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full w-full mb-section-gap items-center">
+<!-- Essencial Plan -->
+<div class="glass-panel rounded-xl p-stack-lg flex flex-col h-full fade-in-up transition-transform duration-300 hover:scale-[1.02] visible">
+<div class="mb-stack-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2" style="color: rgb(123, 97, 255);">Essencial</h3>
+<p class="font-body-md text-body-md text-text-muted mb-4">Para psicólogos individuais iniciando sua jornada digital.</p>
+<div class="flex items-end gap-2 mb-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">R$149</span>
+<span class="font-body-md text-body-md text-text-muted pb-1">/mês</span>
+</div>
+</div>
+<div class="flex-grow">
+<ul class="flex flex-col gap-stack-sm mb-stack-lg">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">1 Perfil de Psicólogo</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Até 10 pacientes geridos</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Relatórios clínicos básicos</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Armazenamento seguro</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Suporte padrão</span>
+</li>
+</ul>
+</div>
+<button class="w-full font-cta-lg text-label-md btn-secondary py-3 rounded-full mt-auto">Assinar Essencial</button>
+</div>
+<!-- Profissional Plan (Recommended) -->
+<div class="glass-panel-recommended rounded-xl p-stack-lg flex flex-col h-full transform scale-100 md:scale-105 z-10 fade-in-up visible" style="transition-delay: 100ms;">
+<div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-teko-yellow text-deep-forest px-4 py-1 rounded-full font-label-md text-label-md uppercase tracking-wider flex items-center gap-1 shadow-[0_0_10px_rgba(230,168,0,0.5)]">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+                    Recomendado
+                </div>
+<div class="mb-stack-lg mt-2">
+<h3 class="font-headline-md text-headline-md text-teko-yellow mb-2">Profissional</h3>
+<p class="font-body-md text-body-md text-text-muted mb-4">A escolha completa para clínicas e profissionais avançados.</p>
+<div class="flex items-end gap-2 mb-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">R$299</span>
+<span class="font-body-md text-body-md text-text-muted pb-1">/mês</span>
+</div>
+</div>
+<div class="flex-grow">
+<ul class="flex flex-col gap-stack-sm mb-stack-lg">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-teko-yellow text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold">Pacientes ilimitados</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-teko-yellow text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Acesso completo à telemetria (IEP, TEC, TO)</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-teko-yellow text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Relatórios neuropsicológicos detalhados</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-teko-yellow text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Rastreio automatizado de TDAH/Funções Executivas</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-teko-yellow text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Suporte prioritário</span>
+</li>
+</ul>
+</div>
+<button class="w-full font-cta-lg text-label-md btn-primary py-3 rounded-full mt-auto">Assinar Profissional</button>
+</div>
+<!-- Custom Plan -->
+<div class="glass-panel rounded-xl p-stack-lg flex flex-col h-full fade-in-up transition-transform duration-300 hover:scale-[1.02] visible" style="transition-delay: 200ms;">
+<div class="mb-stack-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2" style="color: rgb(123, 97, 255);">Corporativo</h3>
+<p class="font-body-md text-body-md text-text-muted mb-4">Soluções personalizadas para grandes instituições e redes.</p>
+<div class="flex items-end gap-2 mb-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">Sob Medida</span>
+<span class="font-body-md text-body-md text-text-muted pb-1">/projeto</span>
+</div>
+</div>
+<div class="flex-grow">
+<ul class="flex flex-col gap-stack-sm mb-stack-lg">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Gestão Multi-usuário avançada</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Múltiplos perfis de profissionais</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Integração via API</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Dashboards clínicos customizados</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] mt-1">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Sessões de treinamento &amp; Suporte VIP</span>
+</li>
+</ul>
+</div>
+<button class="w-full font-cta-lg text-label-md btn-secondary py-3 rounded-full mt-auto">Falar com Vendas</button>
+</div>
+</section>
+<div class="divider-glass mb-section-gap fade-in-up visible"></div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest w-full py-section-gap border-t border-glass-border mt-auto">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="col-span-1 md:col-span-1">
+<div class="font-headline-md text-headline-md text-primary mb-stack-md">TekoPorã</div>
+<p class="font-body-md text-body-md text-on-surface">
+                    © 2024 TekoPorã. Transformando a psicometria infantil com tecnologia e afeto.
+                </p>
+</div>
+<div class="col-span-1 md:col-span-3 flex flex-wrap gap-gutter md:justify-end items-start mt-stack-md md:mt-0">
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 duration-200" href="#">Termos de Uso</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 duration-200" href="#">Privacidade</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 duration-200" href="#">Contato</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 duration-200" href="#">Trabalhe Conosco</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-on-surface transition-colors hover:translate-x-1 duration-200" href="#">Blog</a>
+</div>
+</div>
+</footer>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in-up').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+
+
+</body></html>
