@@ -2,7 +2,7 @@ import React from "react";
 
 export function Table({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-outline-variant bg-white">
+    <div className="w-full overflow-x-auto rounded-xl border border-black/50 glass-panel bg-black/20 shadow-lg">
       <table className="w-full text-left border-collapse">
         {children}
       </table>
@@ -12,18 +12,18 @@ export function Table({ children }: { children: React.ReactNode }) {
 
 export function TableHeader({ children }: { children: React.ReactNode }) {
   return (
-    <thead className="bg-surface-container font-label-md text-on-surface-variant border-b border-outline-variant">
+    <thead className="bg-black/30 font-label-md text-white/60 border-b border-black/50">
       {children}
     </thead>
   );
 }
 
 export function TableBody({ children }: { children: React.ReactNode }) {
-  return <tbody className="font-body-md text-on-surface divide-y divide-outline-variant">{children}</tbody>;
+  return <tbody className="font-body-md text-white divide-y divide-black/50">{children}</tbody>;
 }
 
 export function TableRow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <tr className={`hover:bg-surface-container-lowest transition-colors ${className}`}>{children}</tr>;
+  return <tr className={`hover:bg-white/5 transition-colors ${className}`}>{children}</tr>;
 }
 
 export function TableHead({ children, className = "" }: { children: React.ReactNode; className?: string }) {

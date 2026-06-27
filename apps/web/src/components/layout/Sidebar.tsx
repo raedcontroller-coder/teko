@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutDashboard, Users, Gamepad2, Settings, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, Users, UserCircle, LogOut, Shield } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "../../actions/auth";
 
@@ -13,16 +13,15 @@ export function Sidebar({ role }: { role?: string }) {
   const links = [
     { name: "Painel Inicial", href: "/dashboard", icon: <LayoutDashboard size={20} /> },
     ...(role === "GLOBAL_ADMIN" ? [{ name: "Administração", href: "/dashboard/admin", icon: <Shield size={20} /> }] : []),
-    { name: "Meus Alunos", href: "/dashboard/alunos", icon: <Users size={20} /> },
-    { name: "Catálogo de Jogos", href: "/dashboard/jogos", icon: <Gamepad2 size={20} /> },
-    { name: "Configurações", href: "/dashboard/config", icon: <Settings size={20} /> },
+    { name: "Meus Pacientes", href: "/dashboard/pacientes", icon: <Users size={20} /> },
+    { name: "Meus Dados", href: "/dashboard/config", icon: <UserCircle size={20} /> },
   ];
 
   return (
-    <aside className="w-64 bg-surface border-r border-outline-variant h-screen flex flex-col fixed left-0 top-0">
-      <div className="p-6 flex justify-center w-full">
-        <Link href="/">
-          <Image src="/Teko_logo.svg" alt="Teko Logo" width={240} height={80} className="h-20 w-auto mb-8 hover:scale-105 transition-transform" />
+    <aside className="w-64 glass-panel border-r border-white/10 h-screen flex flex-col fixed left-0 top-0 z-50">
+      <div className="p-6 flex justify-center w-full mt-4">
+        <Link href="/" className="hover:scale-105 transition-transform duration-500">
+          <Image alt="Teko Logo" width={96} height={96} className="w-16 h-16 object-cover rounded-xl border-[2px] border-white/10 shadow-[0_5px_15px_rgba(0,0,0,0.3)]" src="/images/teko_icone.jpeg" />
         </Link>
       </div>
 
@@ -33,10 +32,10 @@ export function Sidebar({ role }: { role?: string }) {
             <Link
               key={link.name}
               href={link.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-label-md transition-colors ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-label-md transition-all duration-300 ${
                 isActive
-                  ? "bg-primary-container text-on-primary-container"
-                  : "text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"
+                  ? "bg-white/10 text-teko-yellow border-r-4 border-teko-yellow shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]"
+                  : "text-white/80 hover:bg-white/5 hover:text-[#7B61FF]"
               }`}
             >
               {link.icon}
@@ -46,8 +45,8 @@ export function Sidebar({ role }: { role?: string }) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-outline-variant">
-        <button onClick={() => logoutAction()} className="flex items-center gap-3 w-full px-4 py-3 text-error hover:bg-error-container hover:text-on-error-container rounded-lg font-label-md transition-colors">
+      <div className="p-4 border-t border-white/10">
+        <button onClick={() => logoutAction()} className="flex items-center gap-3 w-full px-4 py-3 text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-xl font-label-md transition-all duration-300">
           <LogOut size={20} />
           <span>Sair</span>
         </button>

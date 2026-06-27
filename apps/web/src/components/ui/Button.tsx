@@ -9,10 +9,10 @@ export function Button({ variant = "primary", size = "md", className = "", child
   const baseStyles = "inline-flex items-center justify-center font-label-md rounded-md transition-all active:scale-95";
   
   const variants = {
-    primary: "bg-primary text-on-primary hover:opacity-90 shadow-sm",
-    secondary: "border-2 border-primary text-primary hover:bg-primary-fixed-dim/10",
-    accent: "bg-secondary-container text-on-secondary-container hover:opacity-90 shadow-sm",
-    ghost: "text-on-surface-variant hover:bg-surface-variant",
+    primary: "bg-teko-yellow text-on-secondary-fixed hover:brightness-110 shadow-[0_4px_14px_rgba(230,168,0,0.39)]",
+    secondary: "border-2 border-white/20 text-white hover:border-teko-yellow hover:text-teko-yellow hover:bg-white/5",
+    accent: "bg-[#7B61FF] text-white hover:brightness-110 shadow-[0_4px_14px_rgba(123,97,255,0.39)]",
+    ghost: "text-white/70 hover:bg-white/10 hover:text-white",
   };
 
   const sizes = {

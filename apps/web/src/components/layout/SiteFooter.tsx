@@ -1,7 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function SiteFooter({ lang = "pt" }: { lang?: string }) {
+  const pathname = usePathname();
+  
+  if (pathname?.includes('/cadastro') || pathname?.includes('/login') || pathname?.includes('/dashboard')) {
+    return null;
+  }
+
   return (
     <footer className="bg-surface-container-lowest/80 backdrop-blur-xl w-full py-section-gap border-t border-white/10 mt-12 relative z-10">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">

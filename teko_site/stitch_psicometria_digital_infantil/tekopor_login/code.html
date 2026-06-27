@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - TekoPorã</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --deep-forest: #084D48;
+            --glass-surface: rgba(255, 246, 227, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.15);
+        }
+
+        body {
+            background-color: var(--deep-forest);
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-card {
+            background: var(--glass-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .bg-gradient-forest {
+            background: radial-gradient(circle at 50% 50%, #0a5d57 0%, #084D48 100%);
+        }
+
+        .animated-blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(127, 213, 204, 0.08) 0%, rgba(8, 77, 72, 0) 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(10%, 10%); }
+        }
+
+        .input-focus-effect:focus {
+            border-bottom-color: #7B61FF;
+            outline: none;
+            box-shadow: 0 4px 12px -4px rgba(123, 97, 255, 0.3);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#eae2cf",
+                        "on-surface-variant": "#bdc9c6",
+                        "secondary-container": "#b8891a",
+                        "error": "#ffb4ab",
+                        "primary": "#7fd5cc",
+                        "background": "#161308",
+                        "secondary": "#f4be4e",
+                        "deep-forest": "#084D48",
+                        "teko-yellow": "#E6A800",
+                        "glass-surface": "rgba(255, 246, 227, 0.05)",
+                        "glass-border": "rgba(255, 255, 255, 0.15)",
+                        "lilac-teko": "#7B61FF"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "section-gap": "120px",
+                        "margin-desktop": "80px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-forest min-h-screen flex items-center justify-center relative overflow-hidden">
+<!-- Atmospheric Background Elements -->
+<div class="animated-blob" style="top: -10%; left: -10%;"></div>
+<div class="animated-blob" style="bottom: -10%; right: -10%; animation-delay: -5s;"></div>
+<!-- Login Container -->
+<main class="w-full max-w-[440px] px-margin-mobile z-10">
+<!-- Header Brand (From JSON Reference) -->
+<header class="mb-stack-lg text-center">
+<div class="flex flex-col items-center gap-stack-md">
+<img alt="TekoPorã Logo" class="w-24 h-auto object-contain hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAR7uVbsq27NZwpf0DmFPA2LojD1ncYYXVHW05TBpvIDdYs9wGGBryF1dx5kQgFoeDkeOw7Cx6E1Z-Dabz8tuE5rDjT0oyFKSV-zrW2S10Ln0qGBAML8PNxvGTKPQz0vFKBgX_5LPQGGChKLTya3GluC74VKRGT5mR81QKS_UHg2wPnX3MaWhqDb7bXtPo61UM3a0AKhjempBMcOKwLCRBlP0ubW6kYkX4q6Ctc1z68vlktl296IfP-ADJHyvlvK9A_jgG8pWzT2JU"/>
+<h1 class="font-headline-lg text-headline-lg font-bold text-teko-yellow tracking-tight">TekoPorã</h1>
+</div>
+</header>
+<!-- Glassmorphism Card -->
+<div class="glass-card rounded-xl p-stack-lg md:p-10 transition-all duration-500">
+<div class="mb-stack-lg">
+<h2 class="font-headline-md text-headline-md text-on-background text-center mb-2">Bem-vindo de volta</h2>
+<p class="font-body-md text-body-md text-on-surface-variant text-center opacity-80">Acesse sua jornada terapêutica digital.</p>
+</div>
+<form class="space-y-stack-lg">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-background ml-1" for="email">E-mail</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50 group-focus-within:text-lilac-teko transition-colors">mail</span>
+<input class="w-full bg-black/20 border-0 border-b-2 border-glass-border py-4 pl-12 pr-4 text-on-background font-body-md placeholder:text-on-surface-variant/40 transition-all input-focus-effect rounded-t-lg" id="email" placeholder="nome@exemplo.com" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center px-1">
+<label class="font-label-md text-label-md text-on-background" for="password">Senha</label>
+<a class="font-label-md text-label-md text-on-surface-variant/70 hover:text-on-background transition-colors" href="#">Esqueci minha senha</a>
+</div>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50 group-focus-within:text-lilac-teko transition-colors">lock</span>
+<input class="w-full bg-black/20 border-0 border-b-2 border-glass-border py-4 pl-12 pr-4 text-on-background font-body-md placeholder:text-on-surface-variant/40 transition-all input-focus-effect rounded-t-lg" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-background transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-full py-4 px-6 bg-teko-yellow text-deep-forest font-cta-lg text-cta-lg rounded-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-[0_0_20px_rgba(230,168,0,0.2)] hover:shadow-[0_0_30px_rgba(230,168,0,0.4)] flex justify-center items-center gap-2 mt-4" type="submit">
+                    Entrar
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</form>
+<!-- Footer Links -->
+<footer class="mt-stack-lg pt-stack-lg border-t border-glass-border text-center">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                    Não tem uma conta? 
+                    <a class="font-bold text-teko-yellow hover:text-lilac-teko transition-colors duration-300 ml-1" href="#">Criar uma conta</a>
+</p>
+</footer>
+</div>
+<!-- System Footer (Minimalist Version for Login) -->
+<div class="mt-stack-lg flex flex-col md:flex-row justify-between items-center text-on-surface-variant opacity-40 font-label-md text-label-md gap-4">
+<span>© 2024 TekoPorã. All rights reserved.</span>
+<div class="flex gap-stack-md">
+<a class="hover:text-on-surface transition-colors" href="#">Termos</a>
+<a class="hover:text-on-surface transition-colors" href="#">Privacidade</a>
+<a class="hover:text-on-surface transition-colors" href="#">Suporte</a>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interaction for background movement based on mouse
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+            
+            const blobs = document.querySelectorAll('.animated-blob');
+            blobs.forEach((blob, index) => {
+                const speed = (index + 1) * 0.5;
+                blob.style.transform = `translate(${moveX * speed}px, ${moveY * speed}px)`;
+            });
+        });
+
+        // Form submission animation placeholder
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = form.querySelector('button[type="submit"]');
+            const originalContent = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Carregando...';
+            
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Sucesso';
+                btn.classList.replace('bg-teko-yellow', 'bg-primary');
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                    btn.classList.replace('bg-primary', 'bg-teko-yellow');
+                }, 2000);
+            }, 1500);
+        });
+    </script>
+</body></html>

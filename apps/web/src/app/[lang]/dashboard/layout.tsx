@@ -7,7 +7,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await getSession();
 
   return (
-    <div className="min-h-screen bg-background text-on-surface flex">
+    <div className="min-h-screen bg-deep-forest text-white flex">
       <Sidebar role={session?.role} />
       <div className="flex-1 ml-64 flex flex-col">
         <Topbar />

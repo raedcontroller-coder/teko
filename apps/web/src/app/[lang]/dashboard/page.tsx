@@ -19,17 +19,14 @@ export default function DashboardHome() {
       {/* Header Actions */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="font-headline-lg text-[28px] text-primary font-bold">Resumo Clínico</h1>
-          <p className="text-on-surface-variant font-body-md mt-1">Acompanhe o progresso dos seus pacientes em tempo real.</p>
+          <h1 className="font-headline-lg text-[28px] text-white font-bold">Resumo Clínico</h1>
+          <p className="text-white/70 font-body-md mt-1">Acompanhe o progresso dos seus pacientes em tempo real.</p>
         </div>
         <div className="flex gap-4">
-          <Button variant="secondary" className="gap-2">
-            <Activity size={18} />
-            Catálogo de Jogos
-          </Button>
+
           <Button variant="primary" className="gap-2">
             <UserPlus size={18} />
-            Novo Aluno
+            Novo Paciente
           </Button>
         </div>
       </div>
@@ -38,27 +35,25 @@ export default function DashboardHome() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card interactive className="flex flex-col gap-4">
           <div className="flex justify-between items-start">
-            <div className="p-3 bg-primary-fixed/30 text-primary-container rounded-lg">
+            <div className="p-3 bg-white/10 text-teko-yellow rounded-lg">
               <UsersIcon size={24} />
             </div>
-            <Badge variant="success">+2 esta semana</Badge>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-primary">24</h3>
-            <p className="text-on-surface-variant font-label-md">Alunos Ativos</p>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">24</h3>
+            <p className="text-white/70 font-label-md">Pacientes Ativos</p>
           </div>
         </Card>
 
         <Card interactive className="flex flex-col gap-4">
           <div className="flex justify-between items-start">
-            <div className="p-3 bg-secondary-container/50 text-secondary rounded-lg">
+            <div className="p-3 bg-white/10 text-[#7B61FF] rounded-lg">
               <FileText size={24} />
             </div>
-            <Badge variant="primary">3 novos</Badge>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-primary">12</h3>
-            <p className="text-on-surface-variant font-label-md">Relatórios Prontos</p>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">12</h3>
+            <p className="text-white/70 font-label-md">Relatórios Prontos</p>
           </div>
         </Card>
 
@@ -69,8 +64,8 @@ export default function DashboardHome() {
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-primary">8</h3>
-            <p className="text-on-surface-variant font-label-md">Sessões Concluídas Hoje</p>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">8</h3>
+            <p className="text-white/70 font-label-md">Sessões Concluídas</p>
           </div>
         </Card>
       </div>
@@ -78,16 +73,15 @@ export default function DashboardHome() {
       {/* Recent Patients Table */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-headline-md text-[20px] font-bold text-on-surface">Pacientes Recentes</h2>
-          <Button variant="ghost" size="sm">Ver todos</Button>
+          <h2 className="font-headline-md text-[20px] font-bold text-white">Pacientes Recentes</h2>
+          <Button variant="secondary" size="sm">Ver todos</Button>
         </div>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome do Aluno</TableHead>
+              <TableHead>Nome do Paciente</TableHead>
               <TableHead>Idade</TableHead>
               <TableHead>Última Sessão</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead className="text-right">Ação</TableHead>
             </TableRow>
           </TableHeader>
@@ -97,9 +91,6 @@ export default function DashboardHome() {
                 <TableCell className="font-bold">{patient.name}</TableCell>
                 <TableCell>{patient.age} anos</TableCell>
                 <TableCell>{patient.lastSession}</TableCell>
-                <TableCell>
-                  <Badge variant={patient.statusVariant}>{patient.status}</Badge>
-                </TableCell>
                 <TableCell className="text-right">
                   <Button variant="secondary" size="sm">Acessar Perfil</Button>
                 </TableCell>

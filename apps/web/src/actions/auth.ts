@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(prevState: any, formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
   const password = (formData.get("password") as string)?.trim();
   
@@ -18,31 +18,30 @@ export async function loginAction(formData: FormData) {
     return { error: "Preencha todos os campos." };
   }
 
-  // 1. Procurar usuario
+  // --- BYPASS MOCK: Ignorando DB real para testes de interface ---
+  /*
   const userRecord = await db.query.users.findFirst({
     where: eq(users.email, email),
   });
 
   if (!userRecord || !userRecord.passwordHash) {
-    console.log("Falha no login: Usuario nao encontrado para o email:", email);
     return { error: "Credenciais inválidas." };
   }
 
-  // 2. Verificar a senha
   const isValid = await bcrypt.compare(password, userRecord.passwordHash);
   if (!isValid) {
-    console.log("Falha no login: Senha incorreta para:", email);
     return { error: "Credenciais inválidas." };
   }
+  */
   
-  console.log("Login bem-sucedido para:", email);
+  console.log("Login (Mock) bem-sucedido para:", email);
 
-  // 3. Criar token JWT com dados basicos
+  // 3. Criar token JWT com dados básicos mockados
   const token = await new SignJWT({
-    sub: userRecord.id,
-    role: userRecord.role,
-    name: userRecord.name,
-    email: userRecord.email,
+    sub: "mock-id-psicologo-1234",
+    role: "PSICOLOGO",
+    name: "Maria Victoria (Mock)",
+    email: email,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -59,7 +58,8 @@ export async function loginAction(formData: FormData) {
     path: "/",
   });
 
-  redirect("/dashboard");
+  const lang = (formData.get("lang") as string) || "pt";
+  redirect(`/${lang}/dashboard`);
 }
 
 export async function getSession() {

@@ -14,6 +14,10 @@ export default function SiteHeader({ lang = "pt" }: { lang?: string }) {
     }`;
   };
 
+  if (pathname?.includes('/cadastro') || pathname?.includes('/login') || pathname?.includes('/dashboard')) {
+    return null;
+  }
+
   return (
     <nav className="bg-deep-forest/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-white/10 transition-all duration-300">
       <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 max-w-container-max mx-auto">
@@ -49,9 +53,11 @@ export default function SiteHeader({ lang = "pt" }: { lang?: string }) {
               Entrar
             </button>
           </Link>
-          <button className="bg-teko-yellow text-on-secondary-fixed font-cta-lg text-cta-lg px-6 py-2.5 rounded-full hover:scale-105 transition-all duration-300 shadow-[0_4px_14px_rgba(230,168,0,0.39)] hover:shadow-[0_6px_20px_rgba(230,168,0,0.5)]">
-            Começar Agora
-          </button>
+          <Link href={`/${lang}/cadastro`}>
+            <button className="bg-teko-yellow text-on-secondary-fixed font-cta-lg text-cta-lg px-6 py-2.5 rounded-full hover:scale-105 transition-all duration-300 shadow-[0_4px_14px_rgba(230,168,0,0.39)] hover:shadow-[0_6px_20px_rgba(230,168,0,0.5)]">
+              Começar Agora
+            </button>
+          </Link>
         </div>
       </div>
     </nav>

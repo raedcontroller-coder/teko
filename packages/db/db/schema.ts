@@ -9,8 +9,8 @@ export const users = pgTable('users', {
   role: roleEnum('role').notNull().default('ALUNO'),
   name: text('name').notNull(),
   
-  // E-mail is optional because an ALUNO might login using only a PIN Code
-  email: text('email').unique(),
+  // E-mail for user verification (Mandatory)
+  email: text('email').notNull().unique(),
   
   cpf: text('cpf').unique(),
   crp: text('crp'),

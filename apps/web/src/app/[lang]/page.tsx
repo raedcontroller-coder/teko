@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Home() {
+export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
   return (
     <>
       {/* Hero Section */}
@@ -24,14 +25,14 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5 pt-4">
-              <Link href="/planos" className="bg-teko-yellow text-on-secondary-fixed font-cta-lg text-cta-lg px-8 py-4 rounded-full hover:scale-105 transition-transform duration-300 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(230,168,0,0.4)] animate-glow">
+              <Link href={`/${lang}/cadastro`} className="bg-teko-yellow text-on-secondary-fixed font-cta-lg text-cta-lg px-8 py-4 rounded-full hover:scale-105 transition-transform duration-300 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(230,168,0,0.4)] animate-glow">
                 Conheça o Sistema
                 <span className="material-symbols-outlined text-lg">arrow_forward</span>
               </Link>
-              <button className="glass-panel text-white font-cta-lg text-cta-lg px-8 py-4 rounded-full hover:bg-white/10 transition-colors duration-300 flex items-center justify-center gap-2">
+              <Link href={`/${lang}/login`} className="glass-panel text-white font-cta-lg text-cta-lg px-8 py-4 rounded-full hover:bg-white/10 transition-colors duration-300 flex items-center justify-center gap-2">
                 Acesso Clínico
                 <span className="material-symbols-outlined text-lg">login</span>
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -147,7 +148,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-headline-sm font-bold text-white text-lg">Relatório Clínico - Joãozinho</h3>
+                  <h3 className="font-headline-sm font-bold text-white text-lg">Relatório Clínico - João</h3>
                   <span className="glass-pill px-3 py-1 rounded-full text-sm text-teko-yellow font-black border border-teko-yellow/20">Validado</span>
                 </div>
 

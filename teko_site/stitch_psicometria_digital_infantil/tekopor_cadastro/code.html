@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Registro | TekoPorã</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#eae2cf",
+                        "on-surface-variant": "#bdc9c6",
+                        "secondary-container": "#b8891a",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#f4be4e",
+                        "primary": "#7fd5cc",
+                        "tertiary-container": "#684ceb",
+                        "on-primary-fixed": "#00201d",
+                        "on-primary-container": "#a3faef",
+                        "inverse-surface": "#eae2cf",
+                        "background": "#161308",
+                        "secondary": "#f4be4e",
+                        "surface-tint": "#7fd5cc",
+                        "surface-container": "#231f14",
+                        "primary-container": "#0d766e",
+                        "on-tertiary-container": "#ede6ff",
+                        "deep-forest": "#084D48",
+                        "on-tertiary-fixed-variant": "#441cc8",
+                        "text-muted": "rgba(255, 255, 255, 0.8)",
+                        "primary-fixed": "#9bf2e8",
+                        "tertiary": "#c9bfff",
+                        "surface-container-high": "#2e2a1e",
+                        "outline": "#889391",
+                        "on-secondary-fixed-variant": "#5d4200",
+                        "inverse-on-surface": "#343024",
+                        "teko-yellow": "#E6A800",
+                        "glass-surface": "rgba(255, 246, 227, 0.05)",
+                        "primary-fixed-dim": "#7fd5cc",
+                        "surface-container-low": "#1f1b10",
+                        "outline-variant": "#3e4947",
+                        "tertiary-fixed-dim": "#c9bfff",
+                        "surface-container-lowest": "#110e05",
+                        "surface-bright": "#3d392c",
+                        "on-tertiary": "#2e009c",
+                        "on-surface": "#eae2cf",
+                        "surface-container-highest": "#393428",
+                        "error-container": "#93000a",
+                        "surface": "#161308",
+                        "tertiary-fixed": "#e5deff",
+                        "inverse-primary": "#006a63",
+                        "on-secondary-fixed": "#261900",
+                        "glass-border": "rgba(255, 255, 255, 0.15)",
+                        "surface-variant": "#393428",
+                        "secondary-fixed": "#ffdea4",
+                        "on-tertiary-fixed": "#1a0063",
+                        "surface-dim": "#161308",
+                        "on-secondary": "#412d00",
+                        "on-primary": "#003733",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-container": "#382700",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#00504a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "margin-desktop": "80px",
+                        "gutter": "24px",
+                        "section-gap": "120px",
+                        "container-max": "1280px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "cta-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "cta-lg": ["18px", {"lineHeight": "24px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #084D48; /* Deep Forest Base */
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(255, 246, 227, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .input-glass {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .input-glass:focus {
+            border-color: #7B61FF; /* Lilac focus */
+            background: rgba(0, 0, 0, 0.3);
+            outline: none;
+            box-shadow: 0 0 10px rgba(123, 97, 255, 0.2);
+        }
+
+        .btn-teko-primary {
+            background-color: #E6A800;
+            color: #084D48;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-teko-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(230, 168, 0, 0.4);
+        }
+
+        .animate-fade-up {
+            animation: fadeUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .forest-gradient {
+            background: radial-gradient(circle at 50% -20%, #106b63 0%, #084d48 70%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop forest-gradient font-body-md text-on-background">
+<!-- WebGL Background Element (Atmospheric) -->
+
+<main class="w-full max-w-[480px] z-10 animate-fade-up">
+<div class="glass-card rounded-[2rem] p-stack-lg md:p-12 flex flex-col items-center">
+<!-- Brand Icon -->
+<div class="mb-stack-lg w-24 h-24 rounded-full overflow-hidden border-2 border-glass-border p-1 bg-surface-container-low">
+<img alt="TekoPorã Brand Icon" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAR7uVbsq27NZwpf0DmFPA2LojD1ncYYXVHW05TBpvIDdYs9wGGBryF1dx5kQgFoeDkeOw7Cx6E1Z-Dabz8tuE5rDjT0oyFKSV-zrW2S10Ln0qGBAML8PNxvGTKPQz0vFKBgX_5LPQGGChKLTya3GluC74VKRGT5mR81QKS_UHg2wPnX3MaWhqDb7bXtPo61UM3a0AKhjempBMcOKwLCRBlP0ubW6kYkX4q6Ctc1z68vlktl296IfP-ADJHyvlvK9A_jgG8pWzT2JU"/>
+</div>
+<!-- Header Text -->
+<div class="text-center mb-stack-lg">
+<h1 class="font-headline-lg text-headline-lg mb-2">Criar sua conta</h1>
+<p class="text-on-surface-variant font-body-md">Inicie sua jornada na clínica gamificada do futuro.</p>
+</div>
+<!-- Registration Form -->
+<form action="#" class="w-full space-y-stack-md">
+<!-- Full Name -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md ml-1 text-on-surface-variant" for="full_name">Nome Completo</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">person</span>
+<input class="w-full pl-12 pr-4 py-4 rounded-xl input-glass text-on-background placeholder:text-on-surface-variant/40" id="full_name" name="full_name" placeholder="Ex: Dr. João Silva" type="text"/>
+</div>
+</div>
+<!-- Professional Email (CRP) -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md ml-1 text-on-surface-variant" for="email">E-mail Profissional (CRP)</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">badge</span>
+<input class="w-full pl-12 pr-4 py-4 rounded-xl input-glass text-on-background placeholder:text-on-surface-variant/40" id="email" name="email" placeholder="nome@psicologo.com.br" type="email"/>
+</div>
+</div>
+<!-- Password Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Password -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md ml-1 text-on-surface-variant" for="password">Senha</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
+<input class="w-full pl-12 pr-4 py-4 rounded-xl input-glass text-on-background placeholder:text-on-surface-variant/40" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md ml-1 text-on-surface-variant" for="confirm_password">Confirmar</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">check_circle</span>
+<input class="w-full pl-12 pr-4 py-4 rounded-xl input-glass text-on-background placeholder:text-on-surface-variant/40" id="confirm_password" name="confirm_password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+</div>
+<!-- Terms Checkbox (UX Enhancement) -->
+<div class="flex items-start gap-3 mt-4 px-1">
+<input class="mt-1 w-5 h-5 rounded border-glass-border bg-transparent text-teko-yellow focus:ring-teko-yellow" id="terms" type="checkbox"/>
+<label class="text-sm text-on-surface-variant leading-tight" for="terms">
+                        Eu concordo com os <a class="text-teko-yellow hover:underline" href="#">Termos de Serviço</a> e a <a class="text-teko-yellow hover:underline" href="#">Política de Privacidade</a>.
+                    </label>
+</div>
+<!-- Submit Button -->
+<button class="w-full mt-stack-lg py-4 rounded-xl btn-teko-primary font-cta-lg text-cta-lg flex items-center justify-center gap-2" type="submit">
+                    Cadastrar Agora
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</form>
+<!-- Footer Link -->
+<div class="mt-stack-lg pt-stack-md border-t border-glass-border w-full text-center">
+<p class="text-on-surface-variant font-body-md">
+                    Já possui uma conta? 
+                    <a class="text-secondary font-bold hover:text-teko-yellow transition-colors ml-1" href="#">Entrar</a>
+</p>
+</div>
+</div>
+<!-- System Status Labels (Atmospheric) -->
+<div class="mt-stack-lg flex justify-center gap-stack-md opacity-60">
+<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-glass-surface border border-glass-border text-xs">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                Servidores Online
+            </div>
+<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-glass-surface border border-glass-border text-xs">
+<span class="material-symbols-outlined text-[14px]">encrypted</span>
+                SSL 256-bit
+            </div>
+</div>
+</main>
+<script>
+        // Simple micro-interaction for input hover effects or validation focus
+        document.querySelectorAll('.input-glass').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.parentElement.classList.add('scale-[1.02]');
+                input.parentElement.parentElement.style.transition = 'transform 0.3s ease';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.parentElement.classList.remove('scale-[1.02]');
+            });
+        });
+    </script>
+</body></html>
