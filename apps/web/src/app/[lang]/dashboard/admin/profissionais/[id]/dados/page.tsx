@@ -1,9 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { UserCircle, Lock, Save, AlertTriangle, XCircle, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { UserCircle, Lock, Save, AlertTriangle, XCircle, Trash2, ArrowLeft } from "lucide-react";
 
-export default function MyDataPage() {
+export default function AdminProfissionalDadosPage() {
+  const params = useParams();
+  const lang = params?.lang as string || "pt";
+
   // Mock initial state for Psychologist
   const [personalData, setPersonalData] = useState({
     name: "Dra. Maria Victoria",
@@ -31,7 +36,7 @@ export default function MyDataPage() {
   };
 
   const handleSavePersonal = () => {
-    alert("Dados pessoais atualizados com sucesso!");
+    alert("Dados pessoais do profissional atualizados com sucesso!");
   };
 
   const handleSaveSecurity = () => {
@@ -39,7 +44,7 @@ export default function MyDataPage() {
       alert("A nova senha e a confirmação não conferem.");
       return;
     }
-    alert("Senha atualizada com sucesso!");
+    alert("Senha do profissional atualizada com sucesso!");
     setSecurityData({
       currentPassword: "",
       newPassword: "",
@@ -48,13 +53,21 @@ export default function MyDataPage() {
   };
 
   const handleDeleteAccount = () => {
-    alert("Sua conta foi excluída permanentemente. (Mock)");
+    alert("Conta do profissional foi excluída permanentemente. (Mock)");
     setIsDeleteModalOpen(false);
   };
 
   return (
     <div className="w-full pb-16 animate-fade-in max-w-5xl mx-auto space-y-6 relative">
-      
+      <div className="mb-6">
+        <Link href={`/${lang}/dashboard/admin/profissionais`}>
+          <button className="flex items-center gap-2 text-white/70 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl border border-white/10">
+            <ArrowLeft size={18} />
+            <span className="font-bold text-sm">Voltar para Profissionais</span>
+          </button>
+        </Link>
+      </div>
+
       {/* Seção de Dados Pessoais */}
       <section className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
         <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 hover:bg-[#FFF6E3]/10 transition-all duration-300 rounded-xl p-8 md:p-12 relative overflow-hidden">
@@ -69,8 +82,8 @@ export default function MyDataPage() {
             
             <div className="flex-1 space-y-8 w-full">
               <div>
-                <h1 className="font-headline-lg text-3xl font-bold text-white mb-2">Meus Dados</h1>
-                <p className="text-white/80 font-body-md opacity-80">Gerencie suas informações pessoais de perfil e contato.</p>
+                <h1 className="font-headline-lg text-3xl font-bold text-white mb-2">Credenciais do Profissional</h1>
+                <p className="text-white/80 font-body-md opacity-80">Gerencie as informações pessoais e de contato deste psicólogo.</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -142,22 +155,11 @@ export default function MyDataPage() {
             
             <div className="flex-1 space-y-8 w-full">
               <div>
-                <h1 className="font-headline-lg text-3xl font-bold text-white mb-2">Segurança e Acesso</h1>
-                <p className="text-white/80 font-body-md opacity-80">Atualize sua senha para manter sua conta segura.</p>
+                <h1 className="font-headline-lg text-3xl font-bold text-white mb-2">Redefinir Senha</h1>
+                <p className="text-white/80 font-body-md opacity-80">Altere a senha deste profissional caso ele tenha perdido o acesso.</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-[#7B61FF] opacity-80 block">Senha Atual</label>
-                  <input
-                    type="password"
-                    name="currentPassword"
-                    placeholder="••••••••"
-                    value={securityData.currentPassword}
-                    onChange={handleSecurityChange}
-                    className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-[#7B61FF] rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/20"
-                  />
-                </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-[#7B61FF] opacity-80 block">Nova Senha</label>
                   <input
@@ -207,12 +209,12 @@ export default function MyDataPage() {
             <div className="flex-1 space-y-4 w-full">
               <div>
                 <h1 className="font-headline-lg text-3xl font-bold text-red-500 mb-2">Exclusão de Conta</h1>
-                <p className="text-white/80 font-body-md opacity-80">Encerre sua conta e exclua todos os seus dados da plataforma.</p>
+                <p className="text-white/80 font-body-md opacity-80">Remover este profissional e todos os seus dados da plataforma.</p>
               </div>
               
               <div className="pt-4">
                 <button onClick={() => setIsDeleteModalOpen(true)} className="bg-red-500 text-white px-10 py-4 rounded-full font-bold hover:bg-red-600 hover:shadow-[0_4px_14px_rgba(239,68,68,0.39)] transition-all flex items-center gap-3">
-                  <Trash2 size={20} /> Excluir Conta
+                  <Trash2 size={20} /> Excluir Profissional
                 </button>
               </div>
             </div>
@@ -234,7 +236,7 @@ export default function MyDataPage() {
               <div>
                 <h2 className="text-2xl font-bold text-white mb-2">Ação Irreversível</h2>
                 <p className="text-white/70 text-sm">
-                  Você está prestes a excluir permanentemente sua conta. Ao prosseguir, você perderá instantaneamente todos os seus <strong>acessos, pacientes, relatórios, jogos e benefícios psicométricos</strong> fornecidos pela plataforma Teko.
+                  Você está prestes a excluir permanentemente a conta de <strong>{personalData.name}</strong>. Ao prosseguir, todos os dados de pacientes e relatórios atrelados a este profissional serão perdidos.
                 </p>
                 <p className="text-red-400 font-bold mt-4">
                   Tem certeza absoluta que deseja continuar?

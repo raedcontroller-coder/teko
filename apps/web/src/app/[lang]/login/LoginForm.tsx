@@ -28,7 +28,6 @@ export default function LoginForm() {
             id="email"
             name="email"
             placeholder="psicologo@teco.com.br"
-            defaultValue="psicologo@teco.com.br"
             type="email"
             required
           />
@@ -48,7 +47,6 @@ export default function LoginForm() {
             id="password"
             name="password"
             placeholder="••••••••"
-            defaultValue="eusoudoido"
             type="password"
             required
           />

@@ -76,6 +76,36 @@ export default async function CadastroPage({ params }: { params: Promise<{ lang:
               </div>
             </div>
 
+            {/* CRP & Clinic */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="crp">CRP <span className="text-white/50 text-xs">(Opcional)</span></label>
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-teko-yellow transition-colors">id_card</span>
+                  <input
+                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border-2 border-white/10 text-white placeholder:text-white/40 focus:border-teko-yellow focus:ring-0 focus:outline-none transition-all"
+                    id="crp"
+                    name="crp"
+                    placeholder="00/00000"
+                    type="text"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="clinicName">Nome da Clínica <span className="text-white/50 text-xs">(Opcional)</span></label>
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-teko-yellow transition-colors">domain</span>
+                  <input
+                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border-2 border-white/10 text-white placeholder:text-white/40 focus:border-teko-yellow focus:ring-0 focus:outline-none transition-all"
+                    id="clinicName"
+                    name="clinicName"
+                    placeholder="Clínica Mente Viva"
+                    type="text"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Password Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Password */}

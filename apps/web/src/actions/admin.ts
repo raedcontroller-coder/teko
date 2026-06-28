@@ -14,13 +14,12 @@ export async function registerPsicologoAction(formData: FormData) {
 
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
-  const cpf = formData.get("cpf") as string;
   const crp = formData.get("crp") as string;
   const clinicName = formData.get("clinicName") as string;
   const password = formData.get("password") as string;
 
-  if (!name || !email || !password || !cpf) {
-    return { error: "Preencha os campos obrigatórios (Nome, E-mail, CPF, Senha)." };
+  if (!name || !email || !password) {
+    return { error: "Preencha os campos obrigatórios (Nome, E-mail, Senha)." };
   }
 
   const existingUser = await db.query.users.findFirst({
@@ -38,7 +37,6 @@ export async function registerPsicologoAction(formData: FormData) {
       role: "PSICOLOGO",
       name,
       email,
-      cpf,
       crp,
       clinicName,
       passwordHash,
@@ -62,7 +60,6 @@ export async function listPsicologosAction() {
       id: true,
       name: true,
       email: true,
-      cpf: true,
       crp: true,
       clinicName: true,
       createdAt: true,

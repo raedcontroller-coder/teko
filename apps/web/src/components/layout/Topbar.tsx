@@ -10,7 +10,9 @@ export async function Topbar() {
   return (
     <header className="h-16 glass-panel border-b border-white/10 flex items-center justify-between px-8 sticky top-0 z-40 backdrop-blur-xl bg-black/20">
       <div>
-        <h2 className="font-headline-md text-white font-bold">Painel do Psicólogo</h2>
+        <h2 className="font-headline-md text-white font-bold">
+          {session?.role === "GLOBAL_ADMIN" ? "Painel do Administrador" : "Painel do Psicólogo"}
+        </h2>
       </div>
 
       <div className="flex items-center gap-6">

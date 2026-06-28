@@ -18,8 +18,6 @@ export async function loginAction(prevState: any, formData: FormData) {
     return { error: "Preencha todos os campos." };
   }
 
-  // --- BYPASS MOCK: Ignorando DB real para testes de interface ---
-  /*
   const userRecord = await db.query.users.findFirst({
     where: eq(users.email, email),
   });
@@ -32,16 +30,13 @@ export async function loginAction(prevState: any, formData: FormData) {
   if (!isValid) {
     return { error: "Credenciais inválidas." };
   }
-  */
   
-  console.log("Login (Mock) bem-sucedido para:", email);
-
-  // 3. Criar token JWT com dados básicos mockados
+  // 3. Criar token JWT com dados reais
   const token = await new SignJWT({
-    sub: "mock-id-psicologo-1234",
-    role: "PSICOLOGO",
-    name: "Maria Victoria (Mock)",
-    email: email,
+    sub: userRecord.id,
+    role: userRecord.role,
+    name: userRecord.name,
+    email: userRecord.email,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -78,5 +73,5 @@ export async function getSession() {
 export async function logoutAction() {
   const cookieStore = await cookies();
   cookieStore.delete("teko_session");
-  redirect("/login");
+  redirect("/");
 }
