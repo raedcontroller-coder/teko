@@ -22,11 +22,20 @@ export const users = pgTable('users', {
   // MULTITENANCY LINK: If ALUNO or FAMILIAR, this points to their PSICOLOGO's User ID
   psicologoId: uuid('psicologo_id').references((): AnyPgColumn => users.id),
   
-  // Optional: For FAMILIAR, link them to the specific ALUNO
+  // Deprecated Optional: For FAMILIAR, link them to the specific ALUNO
   alunoId: uuid('aluno_id').references((): AnyPgColumn => users.id),
+  
+  // For FAMILIAR, unique phone number (so we can reuse them across multiple children)
+  phone: text('phone').unique(),
+  
+  // For ALUNO, specific child details
+  age: text('age'),
+  gender: text('gender'),
+  guardianId: uuid('guardian_id').references((): AnyPgColumn => users.id),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'),
 });
 
 // 3. Games Table (Catalog of Minigames/Mechanics)

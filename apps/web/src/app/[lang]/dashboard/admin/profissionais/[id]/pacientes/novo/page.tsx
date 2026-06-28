@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, User, Shield, Save, Baby } from "lucide-react";
+import { ArrowLeft, User, Shield, Save, Baby, Loader2, CheckCircle2 } from "lucide-react";
+import { createPatientAction } from "@/actions/patients";
 
 export default function AdminNovoPacientePage() {
   const params = useParams();
@@ -21,18 +22,68 @@ export default function AdminNovoPacientePage() {
     guardianPhone: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    if (name === "guardianPhone") {
+      let v = value.replace(/\D/g, "");
+      if (v.length > 11) v = v.slice(0, 11);
+      v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+      v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+      setFormData((prev) => ({ ...prev, [name]: v }));
+    } else if (name === "age") {
+      let v = value.replace(/\D/g, "");
+      if (v.length > 3) v = v.slice(0, 3);
+      setFormData((prev) => ({ ...prev, [name]: v }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleSave = () => {
-    if (!formData.name || !formData.guardianName) {
-      alert("Por favor, preencha pelo menos o nome do paciente e o nome do responsável.");
+  const handleSave = async () => {
+    setErrorMsg("");
+    if (!formData.name || !formData.age || !formData.gender || !formData.guardianName || !formData.guardianEmail || !formData.guardianPhone) {
+      setErrorMsg("Todos os campos são obrigatórios.");
       return;
     }
-    alert(`Paciente ${formData.name} cadastrado com sucesso! (Mock)`);
-    router.push(`/${lang}/dashboard/admin/profissionais/${id}/pacientes`);
+
+    setIsLoading(true);
+    
+    // We create a FormData object to pass to the server action
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("age", formData.age);
+    data.append("gender", formData.gender);
+    data.append("guardianName", formData.guardianName);
+    data.append("guardianEmail", formData.guardianEmail);
+    data.append("guardianPhone", formData.guardianPhone);
+
+    const res = await createPatientAction(data, id);
+    setIsLoading(false);
+
+    if (res.error) {
+      setErrorMsg(res.error);
+    } else {
+      setIsSuccessModalOpen(true);
+      
+      // Reset the form so they can add another child, keeping the guardian info
+      setFormData({
+        name: "",
+        age: "",
+        gender: "",
+        guardianName: formData.guardianName,
+        guardianEmail: formData.guardianEmail,
+        guardianPhone: formData.guardianPhone,
+      });
+      
+      setTimeout(() => {
+        setIsSuccessModalOpen(false);
+      }, 4000);
+    }
   };
 
   return (
@@ -43,6 +94,12 @@ export default function AdminNovoPacientePage() {
       </Link>
 
       <div className="space-y-6">
+        {errorMsg && (
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-6 rounded-xl font-bold animate-fade-up">
+            {errorMsg}
+          </div>
+        )}
+
         {/* Identificação do Paciente */}
         <section className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
           <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 hover:bg-[#FFF6E3]/10 transition-all duration-300 rounded-xl p-8 md:p-12 relative overflow-hidden">
@@ -67,7 +124,7 @@ export default function AdminNovoPacientePage() {
                     <input
                       type="text"
                       name="name"
-                      placeholder="Ex: Joãozinho"
+                      placeholder="João"
                       value={formData.name}
                       onChange={handleChange}
                       className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-teko-yellow rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/30"
@@ -78,7 +135,7 @@ export default function AdminNovoPacientePage() {
                     <input
                       type="text"
                       name="age"
-                      placeholder="Ex: 7 Anos"
+                      placeholder="Ex: 7"
                       value={formData.age}
                       onChange={handleChange}
                       className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-teko-yellow rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/30"
@@ -86,14 +143,17 @@ export default function AdminNovoPacientePage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-teko-yellow opacity-80 block">Gênero</label>
-                    <input
-                      type="text"
+                    <select
                       name="gender"
-                      placeholder="Ex: Masculino"
                       value={formData.gender}
                       onChange={handleChange}
-                      className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-teko-yellow rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/30"
-                    />
+                      className="w-full bg-white/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-teko-yellow rounded-lg p-4 font-headline-md text-white outline-none transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled className="text-black bg-white">Selecione...</option>
+                      <option value="Masculino" className="text-black bg-white">Masculino</option>
+                      <option value="Feminino" className="text-black bg-white">Feminino</option>
+                      <option value="Prefiro não dizer" className="text-black bg-white">Prefiro não dizer</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -143,13 +203,14 @@ export default function AdminNovoPacientePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-[#7B61FF] opacity-80 block">Telefone de Contato</label>
+                    <label className="text-sm font-bold text-[#7B61FF] opacity-80 block">Telefone (WhatsApp)</label>
                     <input
                       type="text"
                       name="guardianPhone"
                       placeholder="(11) 99999-9999"
                       value={formData.guardianPhone}
                       onChange={handleChange}
+                      maxLength={15}
                       className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-[#7B61FF] rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/30"
                     />
                   </div>
@@ -161,12 +222,39 @@ export default function AdminNovoPacientePage() {
         </section>
 
         <div className="pt-8 flex justify-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
-          <button onClick={handleSave} className="bg-teko-yellow text-[#084D48] px-12 py-5 rounded-full font-bold text-lg hover:bg-[#7B61FF] hover:text-white hover:shadow-[0_4px_24px_rgba(123,97,255,0.5)] transition-all flex items-center gap-3 active:scale-95">
-            <Save size={24} /> Cadastrar Paciente
+          <button onClick={handleSave} disabled={isLoading} className="bg-teko-yellow text-[#084D48] px-12 py-5 rounded-full font-bold text-lg hover:bg-[#7B61FF] hover:text-white hover:shadow-[0_4px_24px_rgba(123,97,255,0.5)] transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50">
+            {isLoading ? <Loader2 size={24} className="animate-spin" /> : <Save size={24} />}
+            {isLoading ? "Salvando..." : "Cadastrar Paciente"}
           </button>
         </div>
 
       </div>
+
+      {isSuccessModalOpen && (
+        <div className="fixed top-8 right-8 z-50 animate-fade-left">
+          <div className="bg-[#FFF6E3]/10 border border-white/20 backdrop-blur-xl rounded-xl p-6 pr-10 shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex items-center gap-5 min-w-[360px]">
+            <div className="w-12 h-12 bg-[#7B61FF]/20 rounded-full flex items-center justify-center shrink-0">
+              <CheckCircle2 size={28} className="text-[#7B61FF]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold font-headline-md text-white text-base mb-1">
+                Sucesso!
+              </h3>
+              <p className="text-white/80 font-body-md text-sm">
+                Paciente cadastrado.
+              </p>
+            </div>
+            {/* Progress bar invisível/sutil apenas para tempo */}
+            <div className="absolute bottom-0 left-0 h-1 bg-[#7B61FF] rounded-b-xl transition-all ease-linear" 
+              style={{ width: '0%', transitionDuration: '4000ms' }}
+              ref={(el) => {
+                if (el) setTimeout(() => { el.style.width = '100%' }, 50);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

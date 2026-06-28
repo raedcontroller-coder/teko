@@ -6,17 +6,29 @@ import { useParams } from "next/navigation";
 import { Card } from "../../../components/ui/Card";
 import { Button } from "../../../components/ui/Button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../components/ui/Table";
-import { UserPlus, FileText, CheckCircle2 } from "lucide-react";
+import { UserPlus, FileText, Gamepad2, Loader2 } from "lucide-react";
+import { getPatientsAction } from "@/actions/patients";
 
 export default function PsychologistDashboard() {
   const params = useParams();
   const lang = (params?.lang as string) || "pt";
 
-  const recentPatients = [
-    { id: 1, name: "Lucas M.", age: 7, lastSession: "Hoje, 14:30", status: "Sessão Concluída", statusVariant: "success" as const },
-    { id: 2, name: "Mariana S.", age: 6, lastSession: "Ontem", status: "Relatório Pronto", statusVariant: "primary" as const },
-    { id: 3, name: "Pedro A.", age: 8, lastSession: "Há 2 dias", status: "Aguardando", statusVariant: "neutral" as const },
-  ];
+  const [patients, setPatients] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchPatients = async () => {
+      setIsLoading(true);
+      const res = await getPatientsAction();
+      if (res.data) {
+        setPatients(res.data);
+      }
+      setIsLoading(false);
+    };
+    fetchPatients();
+  }, []);
+
+  const recentPatients = patients.slice(0, 3);
 
   return (
     <div className="space-y-8 animate-fade-in pb-16">
@@ -45,31 +57,36 @@ export default function PsychologistDashboard() {
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-white">24</h3>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">
+              {isLoading ? <Loader2 className="w-8 h-8 animate-spin text-white/50" /> : patients.length}
+            </h3>
             <p className="text-white/70 font-label-md">Pacientes Ativos</p>
           </div>
         </Card>
 
-        <Card interactive className="flex flex-col gap-4">
+        <Card className="flex flex-col gap-4 opacity-50 select-none relative overflow-hidden" style={{ cursor: 'not-allowed' }}>
           <div className="flex justify-between items-start">
-            <div className="p-3 bg-white/10 text-[#7B61FF] rounded-lg">
+            <div className="p-3 bg-white/10 text-white/40 rounded-lg">
               <FileText size={24} />
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-white">12</h3>
-            <p className="text-white/70 font-label-md">Relatórios Prontos</p>
+            <h3 className="font-headline-md text-[32px] font-bold text-white/50">0</h3>
+            <p className="text-white/50 font-label-md">Relatórios Prontos</p>
+            <span className="inline-block mt-2 px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
+              Em breve...
+            </span>
           </div>
         </Card>
 
         <Card interactive className="flex flex-col gap-4">
           <div className="flex justify-between items-start">
-            <div className="p-3 bg-[#D8E6CC] text-[#2E5C14] rounded-lg">
-              <CheckCircle2 size={24} />
+            <div className="p-3 bg-teko-yellow/20 text-teko-yellow rounded-lg">
+              <Gamepad2 size={24} />
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-white">8</h3>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">0</h3>
             <p className="text-white/70 font-label-md">Sessões Concluídas</p>
           </div>
         </Card>
@@ -89,13 +106,31 @@ export default function PsychologistDashboard() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentPatients.map((patient) => (
-              <TableRow key={patient.id}>
-                <TableCell className="font-bold">{patient.name}</TableCell>
-                <TableCell>{patient.age} anos</TableCell>
-                <TableCell>{patient.lastSession}</TableCell>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto text-teko-yellow" />
+                </TableCell>
               </TableRow>
-            ))}
+            ) : recentPatients.length > 0 ? (
+              recentPatients.map((patient) => (
+                <TableRow key={patient.id}>
+                  <TableCell className="font-bold">{patient.name}</TableCell>
+                  <TableCell>{patient.age}</TableCell>
+                  <TableCell>
+                    <span className="inline-block px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
+                      Em breve
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-8 text-white/50">
+                  Nenhum paciente cadastrado ainda.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
         <div className="flex justify-center mt-6">

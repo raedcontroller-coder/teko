@@ -17,7 +17,7 @@ export function Sidebar({ role }: { role?: string }) {
     ? [
         { name: "Painel Inicial", href: `/${lang}/dashboard`, icon: <LayoutDashboard size={20} /> },
         { name: "Meus profissionais", href: `/${lang}/dashboard/admin/profissionais`, icon: <Shield size={20} /> },
-        { name: "Meus Pacientes", href: `/${lang}/dashboard/pacientes`, icon: <Users size={20} /> },
+        { name: "Dados gerados", href: `/${lang}/dashboard/admin/dados-gerados`, icon: <Users size={20} /> },
         { name: "Meus Dados", href: `/${lang}/dashboard/my-data`, icon: <UserCircle size={20} /> },
       ]
     : [

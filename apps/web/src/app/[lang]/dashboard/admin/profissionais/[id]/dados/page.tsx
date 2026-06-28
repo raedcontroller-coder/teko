@@ -1,32 +1,80 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { UserCircle, Lock, Save, AlertTriangle, XCircle, Trash2, ArrowLeft } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { UserCircle, Lock, Save, AlertTriangle, XCircle, Trash2, ArrowLeft, Loader2, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { getPsicologoByIdAction, updatePsicologoAction, updatePsicologoPasswordAction, deletePsicologoAction } from "@/actions/admin";
 
 export default function AdminProfissionalDadosPage() {
   const params = useParams();
   const lang = params?.lang as string || "pt";
 
-  // Mock initial state for Psychologist
+  const router = useRouter();
+  const psicologoId = params?.id as string;
+
   const [personalData, setPersonalData] = useState({
-    name: "Dra. Maria Victoria",
-    email: "maria.victoria@teko.com.br",
-    crp: "06/12345",
-    clinicName: "Clínica Crescer",
+    name: "",
+    email: "",
+    crp: "",
+    clinicName: "",
   });
 
   const [securityData, setSecurityData] = useState({
-    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSavingPersonal, setIsSavingPersonal] = useState(false);
+  const [isSavingSecurity, setIsSavingSecurity] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const [errorToast, setErrorToast] = useState("");
+  const [successToast, setSuccessToast] = useState("");
+
+  const showError = (msg: string) => {
+    setErrorToast(msg);
+    setTimeout(() => setErrorToast(""), 4000);
+  };
+
+  const showSuccess = (msg: string) => {
+    setSuccessToast(msg);
+    setTimeout(() => setSuccessToast(""), 4000);
+  };
+
+  useEffect(() => {
+    const fetchPsi = async () => {
+      const res = await getPsicologoByIdAction(psicologoId);
+      if (res.error || !res.data) {
+        showError("Profissional não encontrado.");
+      } else {
+        setPersonalData({
+          name: res.data.name,
+          email: res.data.email,
+          crp: res.data.crp || "",
+          clinicName: res.data.clinicName || "",
+        });
+      }
+      setIsLoading(false);
+    };
+    fetchPsi();
+  }, [psicologoId]);
 
   const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    
+    if (name === "crp") {
+      value = value.replace(/\D/g, "");
+      if (value.length > 2) {
+        value = `${value.slice(0, 2)}/${value.slice(2, 7)}`;
+      }
+    }
+    
     setPersonalData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -35,27 +83,60 @@ export default function AdminProfissionalDadosPage() {
     setSecurityData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSavePersonal = () => {
-    alert("Dados pessoais do profissional atualizados com sucesso!");
+  const handleSavePersonal = async () => {
+    setIsSavingPersonal(true);
+    const res = await updatePsicologoAction(psicologoId, {
+      name: personalData.name,
+      email: personalData.email,
+      crp: personalData.crp,
+      clinicName: personalData.clinicName
+    });
+    setIsSavingPersonal(false);
+    if (res.error) showError(res.error);
+    else showSuccess("Dados atualizados com sucesso!");
   };
 
-  const handleSaveSecurity = () => {
+  const handleSaveSecurity = async () => {
     if (securityData.newPassword !== securityData.confirmPassword) {
-      alert("A nova senha e a confirmação não conferem.");
+      showError("A nova senha e a confirmação não conferem.");
       return;
     }
-    alert("Senha do profissional atualizada com sucesso!");
-    setSecurityData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    if (securityData.newPassword.length < 6) {
+      showError("A nova senha deve ter no mínimo 6 caracteres.");
+      return;
+    }
+    
+    setIsSavingSecurity(true);
+    const res = await updatePsicologoPasswordAction(psicologoId, securityData.newPassword);
+    setIsSavingSecurity(false);
+    
+    if (res.error) showError(res.error);
+    else {
+      showSuccess("Senha atualizada com sucesso!");
+      setSecurityData({ newPassword: "", confirmPassword: "" });
+    }
   };
 
-  const handleDeleteAccount = () => {
-    alert("Conta do profissional foi excluída permanentemente. (Mock)");
-    setIsDeleteModalOpen(false);
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    const res = await deletePsicologoAction(psicologoId);
+    if (res.error) {
+      showError(res.error);
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
+    } else {
+      setIsDeleteModalOpen(false);
+      router.push(`/${lang}/dashboard/admin/profissionais`);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full pb-16 flex justify-center items-center h-64">
+        <Loader2 size={40} className="animate-spin text-teko-yellow" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full pb-16 animate-fade-in max-w-5xl mx-auto space-y-6 relative">
@@ -112,6 +193,7 @@ export default function AdminProfissionalDadosPage() {
                   <input
                     type="text"
                     name="crp"
+                    maxLength={8}
                     value={personalData.crp}
                     onChange={handlePersonalChange}
                     className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-teko-yellow rounded-lg p-4 font-headline-md text-white outline-none transition-all"
@@ -132,8 +214,9 @@ export default function AdminProfissionalDadosPage() {
               </div>
               
               <div className="pt-4">
-                <button onClick={handleSavePersonal} className="bg-teko-yellow text-[#084D48] px-10 py-4 rounded-full font-bold hover:bg-white hover:text-[#084D48] hover:shadow-[0_4px_14px_rgba(230,168,0,0.39)] transition-all flex items-center gap-3">
-                  <Save size={20} /> Salvar Alterações
+                <button onClick={handleSavePersonal} disabled={isSavingPersonal} className="bg-teko-yellow text-[#084D48] px-10 py-4 rounded-full font-bold hover:bg-white hover:text-[#084D48] hover:shadow-[0_4px_14px_rgba(230,168,0,0.39)] transition-all flex items-center gap-3 disabled:opacity-50">
+                  {isSavingPersonal ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+                  {isSavingPersonal ? "Salvando..." : "Salvar Alterações"}
                 </button>
               </div>
             </div>
@@ -162,31 +245,50 @@ export default function AdminProfissionalDadosPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-[#7B61FF] opacity-80 block">Nova Senha</label>
-                  <input
-                    type="password"
-                    name="newPassword"
-                    placeholder="••••••••"
-                    value={securityData.newPassword}
-                    onChange={handleSecurityChange}
-                    className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-[#7B61FF] rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/20"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      name="newPassword"
+                      placeholder="••••••••"
+                      value={securityData.newPassword}
+                      onChange={handleSecurityChange}
+                      className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-[#7B61FF] rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/20 pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors"
+                    >
+                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-[#7B61FF] opacity-80 block">Confirmar Nova Senha</label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="••••••••"
-                    value={securityData.confirmPassword}
-                    onChange={handleSecurityChange}
-                    className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-[#7B61FF] rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/20"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      value={securityData.confirmPassword}
+                      onChange={handleSecurityChange}
+                      className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-[#7B61FF] rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/20 pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
               </div>
               
               <div className="pt-4">
-                <button onClick={handleSaveSecurity} className="bg-[#7B61FF] text-white px-10 py-4 rounded-full font-bold hover:brightness-110 active:scale-95 transition-all flex items-center gap-3">
-                  <Save size={20} /> Atualizar Senha
+                <button onClick={handleSaveSecurity} disabled={isSavingSecurity} className="bg-[#7B61FF] text-white px-10 py-4 rounded-full font-bold hover:brightness-110 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50">
+                  {isSavingSecurity ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+                  {isSavingSecurity ? "Atualizando..." : "Atualizar Senha"}
                 </button>
               </div>
             </div>
@@ -213,7 +315,7 @@ export default function AdminProfissionalDadosPage() {
               </div>
               
               <div className="pt-4">
-                <button onClick={() => setIsDeleteModalOpen(true)} className="bg-red-500 text-white px-10 py-4 rounded-full font-bold hover:bg-red-600 hover:shadow-[0_4px_14px_rgba(239,68,68,0.39)] transition-all flex items-center gap-3">
+                <button onClick={() => setIsDeleteModalOpen(true)} disabled={isDeleting} className="bg-red-500 text-white px-10 py-4 rounded-full font-bold hover:bg-red-600 hover:shadow-[0_4px_14px_rgba(239,68,68,0.39)] transition-all flex items-center gap-3 disabled:opacity-50">
                   <Trash2 size={20} /> Excluir Profissional
                 </button>
               </div>
@@ -247,8 +349,8 @@ export default function AdminProfissionalDadosPage() {
                 <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 bg-white/10 hover:bg-white/20 text-white px-6 py-4 rounded-xl font-bold transition-all">
                   Cancelar
                 </button>
-                <button onClick={handleDeleteAccount} className="flex-1 bg-red-500 hover:bg-red-600 text-white px-6 py-4 rounded-xl font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all">
-                  Sim, Excluir
+                <button onClick={handleDeleteAccount} disabled={isDeleting} className="flex-1 bg-red-500 hover:bg-red-600 text-white px-6 py-4 rounded-xl font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all flex justify-center items-center disabled:opacity-50">
+                  {isDeleting ? <Loader2 size={20} className="animate-spin" /> : "Sim, Excluir"}
                 </button>
               </div>
             </div>
@@ -256,6 +358,35 @@ export default function AdminProfissionalDadosPage() {
         </div>
       )}
 
+
+
+      {successToast && (
+        <div className="fixed top-8 right-8 z-[200] animate-fade-left">
+          <div className="bg-[#FFF6E3]/10 border border-white/20 backdrop-blur-xl rounded-xl p-6 pr-10 shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex items-center gap-5 min-w-[360px]">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-[#7B61FF]/20">
+              <CheckCircle2 size={28} className="text-[#7B61FF]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold font-headline-md text-white text-base mb-1">Sucesso!</h3>
+              <p className="text-white/80 font-body-md text-sm">{successToast}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {errorToast && (
+        <div className="fixed top-8 right-8 z-[200] animate-fade-left">
+          <div className="bg-red-500/10 border border-red-500/30 backdrop-blur-xl rounded-xl p-6 pr-10 shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex items-center gap-5 min-w-[360px]">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-red-500/20">
+              <AlertTriangle size={28} className="text-red-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold font-headline-md text-red-400 text-base mb-1">Atenção</h3>
+              <p className="text-white/80 font-body-md text-sm">{errorToast}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

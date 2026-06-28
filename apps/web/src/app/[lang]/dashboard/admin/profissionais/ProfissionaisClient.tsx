@@ -14,6 +14,7 @@ type Psicologo = {
   clinicName: string | null;
   createdAt: Date;
   childrenCount?: number;
+  sessionsCount?: number;
   reportsCount?: number;
 };
 
@@ -51,8 +52,8 @@ export default function ProfissionaisClient({ initialData }: { initialData: Psic
             />
           </div>
           <Link href={`/${lang}/dashboard/admin/novo-psicologo`} className="w-full md:w-auto">
-            <button className="w-full bg-teko-yellow text-[#084D48] px-6 py-2.5 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-[#7B61FF] hover:text-white hover:shadow-[0_4px_14px_rgba(123,97,255,0.4)] transition-all">
-              <Plus size={20} />
+            <button className="w-full bg-teko-yellow text-[#084D48] px-4 py-2 text-sm rounded-full font-bold flex items-center justify-center gap-2 hover:bg-[#7B61FF] hover:text-white hover:shadow-[0_4px_14px_rgba(123,97,255,0.4)] transition-all">
+              <Plus size={18} />
               Novo Profissional
             </button>
           </Link>
@@ -69,6 +70,7 @@ export default function ProfissionaisClient({ initialData }: { initialData: Psic
               <TableHead>CRP</TableHead>
               <TableHead>Clínica</TableHead>
               <TableHead>Crianças</TableHead>
+              <TableHead>Sessões</TableHead>
               <TableHead>Relatórios</TableHead>
               <TableHead className="text-right">Ação</TableHead>
             </TableRow>
@@ -76,7 +78,7 @@ export default function ProfissionaisClient({ initialData }: { initialData: Psic
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-white/50 italic py-8">
+                <TableCell colSpan={8} className="text-center text-white/50 italic py-8">
                   Nenhum profissional encontrado para "{searchTerm}".
                 </TableCell>
               </TableRow>
@@ -88,6 +90,7 @@ export default function ProfissionaisClient({ initialData }: { initialData: Psic
                   <TableCell>{psi.crp || "-"}</TableCell>
                   <TableCell>{psi.clinicName || "-"}</TableCell>
                   <TableCell>{psi.childrenCount || 0}</TableCell>
+                  <TableCell>{psi.sessionsCount || 0}</TableCell>
                   <TableCell>{psi.reportsCount || 0}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="secondary" size="sm" onClick={() => setSelectedPsi(psi)}>

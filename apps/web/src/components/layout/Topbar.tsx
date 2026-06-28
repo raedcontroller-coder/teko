@@ -1,10 +1,21 @@
 import React from "react";
 import { Search, Bell } from "lucide-react";
 import { getSession } from "../../actions/auth";
+import { db } from "../../../../../packages/db/db/index";
+import { users } from "../../../../../packages/db/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function Topbar() {
   const session = await getSession();
-  const name = session?.name || "Psicólogo(a)";
+  let name = session?.name || "Psicólogo(a)";
+  
+  if (session?.sub) {
+    const [dbUser] = await db.select({ name: users.name }).from(users).where(eq(users.id, session.sub));
+    if (dbUser) {
+      name = dbUser.name;
+    }
+  }
+
   const initials = name.charAt(0).toUpperCase();
 
   return (

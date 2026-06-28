@@ -27,7 +27,7 @@ export default function LoginForm() {
             className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border-2 border-white/10 text-white placeholder:text-white/40 focus:border-teko-yellow focus:ring-0 focus:outline-none transition-all"
             id="email"
             name="email"
-            placeholder="psicologo@teco.com.br"
+            placeholder="nome@psicologo.com.br"
             type="email"
             required
           />

@@ -1,18 +1,14 @@
 import React from "react";
 import Link from "next/link";
 import { Plus, Users, FileText, Baby } from "lucide-react";
-import { listPsicologosAction } from "../../../actions/admin";
+import { listPsicologosAction, getAdminDashboardStatsAction } from "../../../actions/admin";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../components/ui/Table";
 
 export default async function AdminDashboard() {
   const dbPsicologos = await listPsicologosAction();
+  const stats = await getAdminDashboardStatsAction();
   
-  const mockPsicologos = [
-    { id: "mock-1", name: "Dr. Carlos Eduardo", email: "carlos@teko.com.br", crp: "06/12345", clinicName: "Clínica Crescer" },
-    { id: "mock-2", name: "Dra. Beatriz Lima", email: "beatriz@teko.com.br", crp: "06/98765", clinicName: "Espaço Infância" },
-  ];
-  
-  const psicologos = [...dbPsicologos, ...mockPsicologos];
+  const psicologos = [...dbPsicologos];
 
   return (
     <div className="space-y-8 animate-fade-in w-full pb-16">
@@ -39,7 +35,7 @@ export default async function AdminDashboard() {
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-white">42</h3>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">{stats.profissionais}</h3>
             <p className="text-white/70 font-label-md">Profissionais ativos</p>
           </div>
         </div>
@@ -51,7 +47,7 @@ export default async function AdminDashboard() {
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-white">1.284</h3>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">{stats.relatorios}</h3>
             <p className="text-white/70 font-label-md">Relatórios gerados</p>
           </div>
         </div>
@@ -63,7 +59,7 @@ export default async function AdminDashboard() {
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-white">356</h3>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">{stats.criancas}</h3>
             <p className="text-white/70 font-label-md">Crianças na plataforma</p>
           </div>
         </div>

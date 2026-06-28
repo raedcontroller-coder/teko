@@ -26,6 +26,10 @@ export async function loginAction(prevState: any, formData: FormData) {
     return { error: "Credenciais inválidas." };
   }
 
+  if (userRecord.deletedAt !== null) {
+    return { error: "Esta conta foi inativada/excluída. Entre em contato com o suporte para restaurá-la." };
+  }
+
   const isValid = await bcrypt.compare(password, userRecord.passwordHash);
   if (!isValid) {
     return { error: "Credenciais inválidas." };
@@ -64,7 +68,19 @@ export async function getSession() {
 
   try {
     const verified = await jwtVerify(token, JWT_SECRET);
-    return verified.payload as { sub: string; role: string; name: string; email: string };
+    const payload = verified.payload as { sub: string; role: string; name: string; email: string };
+    
+    // Validar com o banco para barrar contas excluídas que ainda têm token ativo
+    const userRecord = await db.query.users.findFirst({
+      where: eq(users.id, payload.sub),
+      columns: { deletedAt: true }
+    });
+
+    if (!userRecord || userRecord.deletedAt !== null) {
+      return null;
+    }
+    
+    return payload;
   } catch (err) {
     return null;
   }
@@ -74,4 +90,85 @@ export async function logoutAction() {
   const cookieStore = await cookies();
   cookieStore.delete("teko_session");
   redirect("/");
+}
+
+export async function publicRegisterAction(formData: FormData) {
+  const name = (formData.get("full_name") as string)?.trim();
+  const email = (formData.get("email") as string)?.trim();
+  const password = (formData.get("password") as string)?.trim();
+  const confirmPassword = (formData.get("confirm_password") as string)?.trim();
+  const crp = (formData.get("crp") as string)?.trim();
+  const clinicName = (formData.get("clinicName") as string)?.trim();
+  
+  if (!name || !email || !password || !confirmPassword) {
+    return { error: "Preencha todos os campos obrigatórios." };
+  }
+
+  if (password !== confirmPassword) {
+    return { error: "As senhas não coincidem." };
+  }
+
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  if (existingUser) {
+    return { error: "Este e-mail já está em uso." };
+  }
+
+  if (crp) {
+    const existingCrp = await db.query.users.findFirst({
+      where: eq(users.crp, crp),
+    });
+    if (existingCrp) {
+      return { error: "Este CRP já está cadastrado em outra conta." };
+    }
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  try {
+    await db.insert(users).values({
+      role: "PSICOLOGO",
+      name,
+      email,
+      crp,
+      clinicName,
+      passwordHash,
+    });
+
+    const newUser = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (!newUser) {
+      return { error: "Erro ao recuperar usuário após o cadastro." };
+    }
+
+    // Gerar token e logar o usuário automaticamente
+    const token = await new SignJWT({
+      sub: newUser.id,
+      role: newUser.role,
+      name: newUser.name,
+      email: newUser.email,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("8h")
+      .sign(JWT_SECRET);
+
+    const cookieStore = await cookies();
+    cookieStore.set("teko_session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 8, // 8 hours
+      path: "/",
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Erro no cadastro público:", err);
+    return { error: "Erro interno no servidor ao tentar cadastrar." };
+  }
 }

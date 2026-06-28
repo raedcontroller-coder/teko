@@ -2,9 +2,16 @@ import React from "react";
 import { Sidebar } from "../../../components/layout/Sidebar";
 import { Topbar } from "../../../components/layout/Topbar";
 import { getSession } from "../../../actions/auth";
+import { redirect } from "next/navigation";
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children, params }: { children: React.ReactNode, params: any }) {
   const session = await getSession();
+  
+  if (!session) {
+    const resolvedParams = await params;
+    const lang = resolvedParams?.lang || "pt";
+    redirect(`/${lang}`);
+  }
 
   return (
     <div className="min-h-screen bg-deep-forest text-white flex">

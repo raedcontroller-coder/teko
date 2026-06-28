@@ -1,25 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../../../../../components/ui/Table";
 import { Button } from "../../../../../../../components/ui/Button";
 import { Search, ArrowLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { getPatientsAction } from "@/actions/patients";
 
 export default function AdminProfissionalPacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [patients, setPatients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const params = useParams();
   const lang = (params?.lang as string) || "pt";
+  const psicologoId = params?.id as string;
 
-  const mockPatients = [
-    { id: 1, name: "Lucas M.", age: 7, lastSession: "Hoje, 14:30" },
-    { id: 2, name: "Mariana S.", age: 6, lastSession: "Ontem" },
-    { id: 3, name: "Pedro A.", age: 8, lastSession: "Há 2 dias" },
-    { id: 4, name: "João V.", age: 9, lastSession: "Na semana passada" },
-  ];
+  useEffect(() => {
+    const fetchPatients = async () => {
+      const res = await getPatientsAction(psicologoId);
+      if (res.data) {
+        setPatients(res.data);
+      }
+      setIsLoading(false);
+    };
+    fetchPatients();
+  }, [psicologoId]);
 
-  const filteredPatients = mockPatients.filter((patient) =>
+  const filteredPatients = patients.filter((patient) =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -73,14 +82,20 @@ export default function AdminProfissionalPacientesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredPatients.length > 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8 text-white/50">
+                  Carregando pacientes...
+                </TableCell>
+              </TableRow>
+            ) : filteredPatients.length > 0 ? (
               filteredPatients.map((patient) => (
                 <TableRow key={patient.id}>
                   <TableCell className="font-bold">{patient.name}</TableCell>
                   <TableCell>{patient.age} anos</TableCell>
-                  <TableCell>{patient.lastSession}</TableCell>
+                  <TableCell>-</TableCell>
                   <TableCell className="text-right">
-                    <Link href={`/${lang}/dashboard/admin/profissionais/${params.id}/pacientes/${patient.id}`}>
+                    <Link href={`/${lang}/dashboard/admin/profissionais/${psicologoId}/pacientes/${patient.id}`}>
                       <Button variant="secondary" size="sm">Acessar Perfil</Button>
                     </Link>
                   </TableCell>
@@ -89,7 +104,7 @@ export default function AdminProfissionalPacientesPage() {
             ) : (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-8 text-white/50">
-                  Nenhum paciente encontrado para "{searchTerm}".
+                  Nenhum paciente encontrado.
                 </TableCell>
               </TableRow>
             )}
