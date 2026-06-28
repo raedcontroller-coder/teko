@@ -14,15 +14,6 @@ export async function Topbar() {
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={18} />
-          <input
-            type="text"
-            placeholder="Buscar paciente ou relatório..."
-            className="pl-12 pr-4 py-2 bg-black/20 border border-white/10 rounded-full text-[14px] font-body-md outline-none focus:border-teko-yellow text-white placeholder:text-white/40 transition-all w-64"
-          />
-        </div>
-
 
 
         <div className="flex items-center gap-3 pl-4 border-l border-white/10">

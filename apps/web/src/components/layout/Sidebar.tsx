@@ -4,17 +4,19 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { LayoutDashboard, Users, UserCircle, LogOut, Shield } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { logoutAction } from "../../actions/auth";
 
 export function Sidebar({ role }: { role?: string }) {
   const pathname = usePathname();
+  const params = useParams();
+  const lang = (params?.lang as string) || "pt";
 
   const links = [
-    { name: "Painel Inicial", href: "/dashboard", icon: <LayoutDashboard size={20} /> },
-    ...(role === "GLOBAL_ADMIN" ? [{ name: "Administração", href: "/dashboard/admin", icon: <Shield size={20} /> }] : []),
-    { name: "Meus Pacientes", href: "/dashboard/pacientes", icon: <Users size={20} /> },
-    { name: "Meus Dados", href: "/dashboard/config", icon: <UserCircle size={20} /> },
+    { name: "Painel Inicial", href: `/${lang}/dashboard`, icon: <LayoutDashboard size={20} /> },
+    ...(role === "GLOBAL_ADMIN" ? [{ name: "Administração", href: `/${lang}/dashboard/admin`, icon: <Shield size={20} /> }] : []),
+    { name: "Meus Pacientes", href: `/${lang}/dashboard/pacientes`, icon: <Users size={20} /> },
+    { name: "Meus Dados", href: `/${lang}/dashboard/my-data`, icon: <UserCircle size={20} /> },
   ];
 
   return (
@@ -27,7 +29,9 @@ export function Sidebar({ role }: { role?: string }) {
 
       <nav className="flex-1 px-4 space-y-2">
         {links.map((link) => {
-          const isActive = pathname === link.href;
+          const isActive = link.href === `/${lang}/dashboard` 
+            ? pathname === link.href 
+            : pathname.startsWith(link.href);
           return (
             <Link
               key={link.name}

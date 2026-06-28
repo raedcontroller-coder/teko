@@ -9,7 +9,7 @@ export function Button({ variant = "primary", size = "md", className = "", child
   const baseStyles = "inline-flex items-center justify-center font-label-md rounded-md transition-all active:scale-95";
   
   const variants = {
-    primary: "bg-teko-yellow text-on-secondary-fixed hover:brightness-110 shadow-[0_4px_14px_rgba(230,168,0,0.39)]",
+    primary: "bg-teko-yellow text-on-secondary-fixed hover:bg-[#7B61FF] hover:text-white shadow-[0_4px_14px_rgba(230,168,0,0.39)] hover:shadow-[0_4px_14px_rgba(123,97,255,0.39)]",
     secondary: "border-2 border-white/20 text-white hover:border-teko-yellow hover:text-teko-yellow hover:bg-white/5",
     accent: "bg-[#7B61FF] text-white hover:brightness-110 shadow-[0_4px_14px_rgba(123,97,255,0.39)]",
     ghost: "text-white/70 hover:bg-white/10 hover:text-white",

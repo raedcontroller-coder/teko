@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { Card } from "../../../components/ui/Card";
 import { Button } from "../../../components/ui/Button";
 import { Badge } from "../../../components/ui/Badge";
@@ -8,6 +10,9 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from ".
 import { UserPlus, Activity, FileText, CheckCircle2 } from "lucide-react";
 
 export default function DashboardHome() {
+  const params = useParams();
+  const lang = (params?.lang as string) || "pt";
+
   const recentPatients = [
     { id: 1, name: "Lucas M.", age: 7, lastSession: "Hoje, 14:30", status: "Sessão Concluída", statusVariant: "success" as const },
     { id: 2, name: "Mariana S.", age: 6, lastSession: "Ontem", status: "Relatório Pronto", statusVariant: "primary" as const },
@@ -74,7 +79,6 @@ export default function DashboardHome() {
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-headline-md text-[20px] font-bold text-white">Pacientes Recentes</h2>
-          <Button variant="secondary" size="sm">Ver todos</Button>
         </div>
         <Table>
           <TableHeader>
@@ -82,7 +86,6 @@ export default function DashboardHome() {
               <TableHead>Nome do Paciente</TableHead>
               <TableHead>Idade</TableHead>
               <TableHead>Última Sessão</TableHead>
-              <TableHead className="text-right">Ação</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -91,13 +94,17 @@ export default function DashboardHome() {
                 <TableCell className="font-bold">{patient.name}</TableCell>
                 <TableCell>{patient.age} anos</TableCell>
                 <TableCell>{patient.lastSession}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="secondary" size="sm">Acessar Perfil</Button>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        <div className="flex justify-center mt-6">
+          <Link href={`/${lang}/dashboard/pacientes`}>
+            <Button variant="primary" className="px-8 py-3 text-sm font-bold shadow-[0_0_20px_rgba(230,168,0,0.3)] hover:shadow-[0_0_20px_rgba(123,97,255,0.4)]">
+              Ver todos os pacientes
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
