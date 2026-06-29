@@ -122,14 +122,32 @@ export async function getAdminDashboardStatsAction() {
     .from(users)
     .where(and(eq(users.role, "PSICOLOGO"), isNull(users.deletedAt)));
 
-  const resultCriancas = await db.select({ value: count(users.id) })
+  // Obter apenas psicólogos ativos para não contabilizar crianças de contas deletadas
+  const psicologosAtivos = await db.select({ id: users.id })
     .from(users)
-    .where(and(eq(users.role, "ALUNO"), isNull(users.deletedAt)));
+    .where(and(eq(users.role, "PSICOLOGO"), isNull(users.deletedAt)));
+    
+  const psicologoIds = psicologosAtivos.map(p => p.id);
+
+  let totalCriancas = 0;
+  if (psicologoIds.length > 0) {
+    const { inArray } = await import("drizzle-orm");
+    const resultCriancas = await db.select({ value: count(users.id) })
+      .from(users)
+      .where(
+        and(
+          eq(users.role, "ALUNO"),
+          isNull(users.deletedAt),
+          inArray(users.psicologoId, psicologoIds)
+        )
+      );
+    totalCriancas = resultCriancas[0]?.value || 0;
+  }
 
   return {
     profissionais: resultProfissionais[0]?.value || 0,
     relatorios: 0,
-    criancas: resultCriancas[0]?.value || 0,
+    criancas: totalCriancas,
   };
 }
 
@@ -238,20 +256,31 @@ export async function getAdminDadosGeradosAction() {
 
   try {
     const { inArray } = await import("drizzle-orm");
-    const alunos = await db.select().from(users).where(and(eq(users.role, "ALUNO"), isNull(users.deletedAt)));
+    
+    // 1. Obter apenas psicólogos ativos
+    const psicologosAtivos = await db.select().from(users).where(and(eq(users.role, "PSICOLOGO"), isNull(users.deletedAt)));
+    if (psicologosAtivos.length === 0) return { data: [] };
+    
+    const psiIdsAtivos = psicologosAtivos.map(p => p.id);
+
+    // 2. Obter alunos (crianças) pertencentes APENAS aos psicólogos ativos
+    const alunos = await db.select().from(users).where(
+      and(
+        eq(users.role, "ALUNO"),
+        isNull(users.deletedAt),
+        inArray(users.psicologoId, psiIdsAtivos)
+      )
+    );
     
     if (alunos.length === 0) return { data: [] };
 
-    const psiIds = Array.from(new Set(alunos.map(a => a.psicologoId).filter(Boolean))) as string[];
     const guardianIds = Array.from(new Set(alunos.map(a => a.guardianId).filter(Boolean))) as string[];
-
-    const psicologos = psiIds.length > 0 ? await db.select().from(users).where(inArray(users.id, psiIds)) : [];
     const guardians = guardianIds.length > 0 ? await db.select().from(users).where(inArray(users.id, guardianIds)) : [];
 
     const alunoIds = alunos.map(a => a.id);
     const sessions = alunoIds.length > 0 ? await db.select().from(gameSessions).where(inArray(gameSessions.alunoId, alunoIds)) : [];
 
-    const psiMap = new Map(psicologos.map(p => [p.id, p]));
+    const psiMap = new Map(psicologosAtivos.map(p => [p.id, p]));
     const guardMap = new Map(guardians.map(g => [g.id, g]));
 
     const metricsMap = new Map();

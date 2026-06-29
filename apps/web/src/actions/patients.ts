@@ -32,16 +32,26 @@ export async function createPatientAction(formData: FormData, adminPsicologoId?:
       return { error: "Todos os campos são obrigatórios." };
     }
 
-    // 1. Procurar se o responsável já existe (apenas por email)
+    // 1. Procurar se o responsável já existe (por email ou telefone)
     const [existingGuardianByEmail] = await db.select().from(users).where(eq(users.email, guardianEmail));
+    const [existingGuardianByPhone] = await db.select().from(users).where(eq(users.phone, guardianPhone));
     
     let guardianId = "";
 
-    if (existingGuardianByEmail) {
-      if (existingGuardianByEmail.role !== "FAMILIAR") {
-        return { error: "Este email já está em uso por outro tipo de conta." };
+    if (existingGuardianByEmail || existingGuardianByPhone) {
+      if (existingGuardianByEmail && existingGuardianByEmail.phone !== guardianPhone) {
+        return { error: "Este e-mail já está cadastrado com outro número de telefone. Por favor, verifique os dados." };
       }
-      guardianId = existingGuardianByEmail.id;
+      if (existingGuardianByPhone && existingGuardianByPhone.email !== guardianEmail) {
+        return { error: "Este telefone já está cadastrado com outro e-mail. Por favor, verifique os dados." };
+      }
+      
+      const existingGuardian = existingGuardianByEmail || existingGuardianByPhone;
+      
+      if (existingGuardian.role !== "FAMILIAR") {
+        return { error: "Os dados de contato fornecidos já pertencem a outro tipo de conta." };
+      }
+      guardianId = existingGuardian.id;
     } else {
       // Criar o novo responsável
       const [newGuardian] = await db.insert(users).values({
@@ -191,11 +201,23 @@ export async function updateGuardianAction(guardianId: string, data: { name: str
     revalidatePath("/[lang]/dashboard/pacientes/[id]", "page");
     return { success: true };
   } catch (error: any) {
-    console.error(error);
-    if (error.code === '23505') {
-      return { error: "Este email ou telefone já está em uso por outra conta." };
+    const pgError = error.cause || error;
+    
+    if (pgError.code === '23505') {
+      const isPhone = pgError.constraint === 'users_phone_unique';
+      const isEmail = pgError.constraint === 'users_email_unique';
+      
+      const msg = isPhone 
+        ? "O telefone informado já pertence a outro usuário." 
+        : isEmail 
+          ? "O e-mail informado já pertence a outro usuário."
+          : "Este email ou telefone já está em uso por outra conta.";
+          
+      console.log(`\n[Teko Info] Bloqueio na edição: Tentativa de usar ${isPhone ? 'telefone' : 'e-mail'} já cadastrado.`);
+      return { error: msg };
     }
-    return { error: "Erro ao atualizar dados do responsável." };
+    console.error("Erro interno ao atualizar responsável:", error);
+    return { error: "Erro interno ao atualizar dados do responsável." };
   }
 }
 

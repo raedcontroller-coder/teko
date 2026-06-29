@@ -11,11 +11,22 @@ import { redirect } from "next/navigation";
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
 
 export async function loginAction(prevState: any, formData: FormData) {
-  const email = (formData.get("email") as string)?.trim();
-  const password = (formData.get("password") as string)?.trim();
+  const rawEmail = formData.get("email") as string || "";
+  const rawPassword = formData.get("password") as string || "";
+
+  if (rawEmail.length > 0 && rawEmail.trim() === "") {
+    return { error: "O e-mail não pode conter apenas espaços.", email: rawEmail };
+  }
+
+  if (rawPassword.length > 0 && rawPassword.trim() === "") {
+    return { error: "A senha não pode conter apenas espaços.", email: rawEmail };
+  }
+
+  const email = rawEmail.trim();
+  const password = rawPassword.trim();
   
   if (!email || !password) {
-    return { error: "Preencha todos os campos." };
+    return { error: "Preencha todos os campos.", email: rawEmail };
   }
 
   const userRecord = await db.query.users.findFirst({

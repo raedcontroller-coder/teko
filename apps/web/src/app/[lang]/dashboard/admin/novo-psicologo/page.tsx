@@ -14,6 +14,14 @@ export default function NovoPsicologoPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [crp, setCrp] = useState("");
+
+  const handleCrpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 7) value = value.slice(0, 7);
+    if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+    setCrp(value);
+  };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -126,6 +134,8 @@ export default function NovoPsicologoPage() {
                     <input
                       type="text"
                       name="crp"
+                      value={crp}
+                      onChange={handleCrpChange}
                       placeholder="00/00000"
                       className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-[#7B61FF] rounded-lg p-4 font-headline-md text-white outline-none transition-all placeholder:text-white/30"
                     />

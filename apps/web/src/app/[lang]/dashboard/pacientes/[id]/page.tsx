@@ -16,7 +16,8 @@ export default function PacientePerfilPage() {
   const [isSavingPatient, setIsSavingPatient] = useState(false);
   const [isSavingGuardian, setIsSavingGuardian] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(""); // This is for loading errors
+  const [errorToast, setErrorToast] = useState("");
   const [successToast, setSuccessToast] = useState("");
   const [toastType, setToastType] = useState<"success" | "delete">("success");
   
@@ -67,6 +68,7 @@ export default function PacientePerfilPage() {
   }, [id]);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isGuardianModalOpen, setIsGuardianModalOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -105,10 +107,14 @@ export default function PacientePerfilPage() {
     }, duration);
   };
 
+  const showError = (msg: string) => {
+    setErrorToast(msg);
+    setTimeout(() => setErrorToast(""), 4000);
+  };
+
   const handleSave = async () => {
-    setErrorMsg("");
     if (!formData.name.trim() || !formData.age || !formData.gender) {
-      setErrorMsg("Nome, idade e gênero do paciente são obrigatórios.");
+      showError("Nome, idade e gênero do paciente são obrigatórios.");
       return;
     }
     
@@ -121,7 +127,7 @@ export default function PacientePerfilPage() {
     
     setIsSavingPatient(false);
     if (res.error) {
-      setErrorMsg(res.error);
+      showError(res.error);
     } else {
       showToast("Dados da criança salvos!");
     }
@@ -131,7 +137,7 @@ export default function PacientePerfilPage() {
     setIsDeleting(true);
     const res = await deletePatientAction(id);
     if (res.error) {
-      setErrorMsg(res.error);
+      showError(res.error);
       setIsDeleting(false);
       setIsDeleteModalOpen(false);
     } else {
@@ -140,17 +146,19 @@ export default function PacientePerfilPage() {
     }
   };
 
-  const handleSaveGuardian = async () => {
-    setErrorMsg("");
+  const handleOpenGuardianModal = () => {
     if (!guardianId) {
-      setErrorMsg("Nenhum responsável vinculado.");
+      showError("Nenhum responsável vinculado.");
       return;
     }
     if (!formData.guardianName.trim() || !formData.guardianEmail.trim() || formData.guardianPhone.length < 10) {
-      setErrorMsg("Dados do responsável inválidos.");
+      showError("Dados do responsável inválidos.");
       return;
     }
-    
+    setIsGuardianModalOpen(true);
+  };
+
+  const handleSaveGuardian = async () => {
     setIsSavingGuardian(true);
     const res = await updateGuardianAction(guardianId, {
       name: formData.guardianName,
@@ -159,8 +167,9 @@ export default function PacientePerfilPage() {
     });
     
     setIsSavingGuardian(false);
+    setIsGuardianModalOpen(false);
     if (res.error) {
-      setErrorMsg(res.error);
+      showError(res.error);
     } else {
       showToast("Ficha do responsável salva!");
     }
@@ -366,7 +375,7 @@ export default function PacientePerfilPage() {
                 
                 <div className="pt-4">
                   <button 
-                    onClick={handleSaveGuardian} 
+                    onClick={handleOpenGuardianModal} 
                     disabled={isSavingGuardian}
                     className="bg-[#7B61FF] text-white px-10 py-4 rounded-full font-bold hover:brightness-110 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
                   >
@@ -426,6 +435,45 @@ export default function PacientePerfilPage() {
         </div>
       )}
 
+      {isGuardianModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsGuardianModalOpen(false)}></div>
+          
+          <div className="bg-[#161308] border border-[#7B61FF]/30 shadow-[0_0_40px_rgba(123,97,255,0.15)] rounded-2xl w-full max-w-md p-8 relative z-10 animate-fade-up">
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="w-16 h-16 rounded-full bg-[#7B61FF]/10 flex items-center justify-center border border-[#7B61FF]/50">
+                <Shield size={32} className="text-[#7B61FF]" />
+              </div>
+              
+              <div>
+                <h2 className="text-xl font-bold text-white mb-2">Atualizar Responsável</h2>
+                <p className="text-white/70 text-sm mb-4">
+                  Atenção: A modificação dos dados de contato afetará <strong>todos os pacientes</strong> vinculados a este responsável.
+                </p>
+                <div className="bg-[#7B61FF]/10 border border-[#7B61FF]/20 p-4 rounded-xl text-left">
+                  <p className="text-white/90 text-sm font-bold flex items-center gap-2 mb-1">
+                    <CheckCircle2 size={16} className="text-[#7B61FF]" />
+                    Modificação Universal
+                  </p>
+                  <p className="text-white/70 text-xs">
+                    Ao confirmar, o nome, e-mail e telefone serão atualizados simultaneamente para todas as crianças ligadas a este familiar.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4 w-full pt-4">
+                <button onClick={() => setIsGuardianModalOpen(false)} disabled={isSavingGuardian} className="flex-1 bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-xl font-bold transition-all disabled:opacity-50">
+                  Revisar
+                </button>
+                <button onClick={handleSaveGuardian} disabled={isSavingGuardian} className="flex-1 bg-[#7B61FF] hover:brightness-110 text-white px-4 py-3 rounded-xl font-bold shadow-[0_0_15px_rgba(123,97,255,0.3)] transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                  {isSavingGuardian ? <Loader2 size={20} className="animate-spin" /> : "Confirmar"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {successToast && (
         <div className="fixed top-8 right-8 z-[200] animate-fade-left">
           <div className="bg-[#FFF6E3]/10 border border-white/20 backdrop-blur-xl rounded-xl p-6 pr-10 shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex items-center gap-5 min-w-[360px]">
@@ -442,6 +490,30 @@ export default function PacientePerfilPage() {
             </div>
             <div className={`absolute bottom-0 left-0 h-1 rounded-b-xl transition-all ease-linear ${toastType === 'delete' ? 'bg-red-500' : 'bg-[#7B61FF]'}`}
               style={{ width: '0%', transitionDuration: toastType === 'delete' ? '3000ms' : '4000ms' }}
+              ref={(el) => {
+                if (el) setTimeout(() => { el.style.width = '100%' }, 50);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {errorToast && (
+        <div className="fixed top-8 right-8 z-[200] animate-fade-left">
+          <div className="bg-red-500/10 border border-red-500/30 backdrop-blur-xl rounded-xl p-6 pr-10 shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex items-center gap-5 min-w-[360px]">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-red-500/20">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold font-headline-md text-red-400 text-base mb-1">
+                Atenção
+              </h3>
+              <p className="text-white/80 font-body-md text-sm">
+                {errorToast}
+              </p>
+            </div>
+            <div className="absolute bottom-0 left-0 h-1 rounded-b-xl transition-all ease-linear bg-red-500"
+              style={{ width: '0%', transitionDuration: '4000ms' }}
               ref={(el) => {
                 if (el) setTimeout(() => { el.style.width = '100%' }, 50);
               }}

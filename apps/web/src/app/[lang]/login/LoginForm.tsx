@@ -30,6 +30,7 @@ export default function LoginForm() {
             placeholder="nome@psicologo.com.br"
             type="email"
             required
+            defaultValue={state?.email || ""}
           />
         </div>
       </div>
