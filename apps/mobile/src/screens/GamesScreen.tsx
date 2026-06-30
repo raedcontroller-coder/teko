@@ -2,11 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar } from 'react-native';
 import { Bomb, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock } from 'lucide-react-native';
 
-interface HomeScreenProps {
+interface GamesScreenProps {
   onSelectGame: (gameId: string) => void;
 }
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectGame }) => {
+export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
   const animatedValues = useRef(Array.from({ length: 6 }).map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
@@ -35,17 +35,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectGame }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <View style={styles.logoRow}>
-              <Image source={require('../../assets/teko_logo.jpg')} style={styles.logoImage} resizeMode="contain" />
-            </View>
-            <TouchableOpacity style={styles.profileButton}>
-              <User color="#a3faef" size={24} />
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* Removed Header as per Dashboard alignment */}
 
         {/* Main Scroll */}
         <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
@@ -154,30 +144,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onSelectGame }) => {
           </View>
         </ScrollView>
 
-        {/* FAB */}
-        <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
-          <Plus color="#181c1c" size={32} />
-        </TouchableOpacity>
-
-        {/* Bottom Nav */}
-        <View style={styles.bottomNav}>
-          <TouchableOpacity style={styles.navItemActive}>
-            <Home color="#181c1c" size={24} />
-            <Text style={styles.navTextActive}>Início</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Users color="rgba(255,246,227,0.8)" size={24} />
-            <Text style={styles.navText}>Pacientes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <BarChart2 color="rgba(255,246,227,0.8)" size={24} />
-            <Text style={styles.navText}>Relatórios</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <User color="rgba(255,246,227,0.8)" size={24} />
-            <Text style={styles.navText}>Perfil</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Removed FAB and Bottom Nav to avoid conflicts */}
       </View>
     </SafeAreaView>
   );
@@ -194,7 +161,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 56,
+    paddingTop: 24,
     paddingBottom: 16,
     alignItems: 'center',
     zIndex: 40,

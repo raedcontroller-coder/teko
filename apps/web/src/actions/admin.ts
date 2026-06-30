@@ -250,9 +250,11 @@ export async function deletePsicologoAction(id: string) {
   }
 }
 
-export async function getAdminDadosGeradosAction() {
-  const session = await getSession();
-  if (session?.role !== "GLOBAL_ADMIN") return { error: "Acesso negado." };
+export async function getAdminDadosGeradosAction(skipAuth: boolean = false) {
+  if (!skipAuth) {
+    const session = await getSession();
+    if (session?.role !== "GLOBAL_ADMIN") return { error: "Acesso negado." };
+  }
 
   try {
     const { inArray } = await import("drizzle-orm");
@@ -321,8 +323,8 @@ export async function getAdminDadosGeradosAction() {
   }
 }
 
-export async function exportAdminDadosGeradosCsvAction() {
-  const result = await getAdminDadosGeradosAction();
+export async function exportAdminDadosGeradosCsvAction(skipAuth: boolean = false) {
+  const result = await getAdminDadosGeradosAction(skipAuth);
   if (result.error || !result.data) {
     return { error: result.error || "Erro ao gerar CSV" };
   }
