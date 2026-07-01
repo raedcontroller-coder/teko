@@ -9,11 +9,26 @@ export class TelemetryLogger {
   private attempts: PuzzleAttempt[] = [];
   private startTime: number = 0;
   private totalPieces: number = 0;
+  private pauseTime: number = 0;
+  private totalPausedTime: number = 0;
 
   startSession(pieces: number) {
     this.startTime = performance.now();
     this.totalPieces = pieces;
     this.attempts = [];
+    this.totalPausedTime = 0;
+    this.pauseTime = 0;
+  }
+
+  pause() {
+    this.pauseTime = performance.now();
+  }
+
+  resume() {
+    if (this.pauseTime > 0) {
+      this.totalPausedTime += performance.now() - this.pauseTime;
+      this.pauseTime = 0;
+    }
   }
 
   logAttempt(attempt: PuzzleAttempt) {
@@ -21,7 +36,7 @@ export class TelemetryLogger {
   }
 
   getMetrics() {
-    const totalTimeMs = performance.now() - this.startTime;
+    const totalTimeMs = performance.now() - this.startTime - this.totalPausedTime;
     
     // Quantas peças foram acertadas de primeira?
     const correctFirstAttempts = this.attempts.filter(a => a.isCorrect && a.isFirstAttempt).length;

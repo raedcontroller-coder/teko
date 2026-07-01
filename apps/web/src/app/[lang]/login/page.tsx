@@ -43,7 +43,7 @@ export default async function LoginPage({ params }: { params: Promise<{ lang: st
 
           {/* Header Text */}
           <div className="text-center mb-stack-lg">
-            <h1 className="font-headline-lg text-3xl font-black text-white mb-2">Bem-vindo de volta</h1>
+            <h1 className="font-headline-lg text-3xl font-black text-white mb-2">Bem-vindo(a) de volta</h1>
             <p className="text-white/70 font-body-md">Acesse sua jornada terapêutica digital.</p>
           </div>
 

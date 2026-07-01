@@ -10,6 +10,7 @@ const PUZZLE_IMAGE = require('../../../assets/puzzle.png');
 const COLS = 4;
 const ROWS = 3;
 const TOTAL_PIECES = COLS * ROWS;
+const MAX_LEVELS = 10;
 
 const BOARD_WIDTH = 320;
 const BOARD_HEIGHT = 320;
@@ -81,14 +82,16 @@ interface PuzzleGameProps {
 }
 
 export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
-  const [gameState, setGameState] = useState<'menu' | 'playing' | 'finished'>('menu');
+  const [gameState, setGameState] = useState<'menu' | 'playing' | 'level_transition' | 'finished'>('menu');
+  const [currentLevel, setCurrentLevel] = useState(1);
   const [pieces, setPieces] = useState<PieceState[]>([]);
   const [metrics, setMetrics] = useState<any>(null);
   const logger = useMemo(() => new TelemetryLogger(), []);
 
   const startGame = () => {
+    setCurrentLevel(1);
     setPieces(generatePuzzleGrid());
-    logger.startSession(TOTAL_PIECES);
+    logger.startSession(TOTAL_PIECES * MAX_LEVELS);
     setGameState('playing');
     setMetrics(null);
   };
@@ -114,8 +117,13 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
       
       if (newPieces.every(p => p.isPlaced)) {
         setTimeout(() => {
-          setMetrics(logger.getMetrics());
-          setGameState('finished');
+          if (currentLevel < MAX_LEVELS) {
+            logger.pause();
+            setGameState('level_transition');
+          } else {
+            setMetrics(logger.getMetrics());
+            setGameState('finished');
+          }
         }, 800);
       }
       return newPieces;
@@ -147,6 +155,39 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
 
           <TouchableOpacity style={styles.startButton} onPress={startGame} activeOpacity={0.8}>
             <Text style={styles.startButtonText}>Começar Montagem</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  const handleNextLevel = () => {
+    setCurrentLevel(prev => prev + 1);
+    setPieces(generatePuzzleGrid());
+    logger.resume();
+    setGameState('playing');
+  };
+
+  if (gameState === 'level_transition') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.menuContent}>
+          <View style={styles.successIcon}>
+            <CheckCircle color="#FFC857" size={64} />
+          </View>
+          <Text style={styles.title}>Nível {currentLevel} Concluído!</Text>
+          
+          <View style={styles.glassPanel}>
+            <View style={[styles.imageWrapper, { marginBottom: 16 }]}>
+              <Image source={PUZZLE_IMAGE} style={[styles.previewImage, { width: 150, height: 150, alignSelf: 'center' }]} />
+            </View>
+            <Text style={styles.instructionsDesc}>
+              Excelente! A imagem foi montada com sucesso. Prepare-se para o nível {currentLevel + 1}.
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.startButton} onPress={handleNextLevel} activeOpacity={0.8}>
+            <Text style={styles.startButtonText}>Avançar para Nível {currentLevel + 1}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -209,7 +250,10 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
       
       <View style={styles.referenceFloating}>
         <Image source={PUZZLE_IMAGE} style={styles.referenceImage} />
-        <Text style={styles.referenceText}>Referência</Text>
+        <View style={{ gap: 4 }}>
+          <Text style={styles.referenceText}>Referência</Text>
+          <Text style={styles.levelCounterText}>Nível {currentLevel} de {MAX_LEVELS}</Text>
+        </View>
       </View>
       
       {/* Tabuleiro Glassmorphism */}
@@ -403,6 +447,11 @@ const styles = StyleSheet.create({
   referenceText: {
     fontSize: 18,
     color: '#FFF',
+    fontWeight: 'bold',
+  },
+  levelCounterText: {
+    fontSize: 14,
+    color: '#FFC857',
     fontWeight: 'bold',
   },
   resultsContent: {

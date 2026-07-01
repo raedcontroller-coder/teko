@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Animated, PanResponder, StyleSheet } from 'react-native';
+import { Animated, PanResponder, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path, ClipPath, Defs, Image as SvgImage } from 'react-native-svg';
 import { getPiecePath, PieceEdges } from './JigsawPathGenerator';
 
@@ -84,8 +84,25 @@ export const PuzzlePiece: React.FC<PuzzlePieceProps> = ({
           }).start();
           onAttempt(id, false, distance);
         } else {
-          // Soltou fora do tabuleiro (área branca) -> só organizando, fica onde soltou
-          // Não chamamos onAttempt para não penalizar a pontuação
+          // Soltou fora do tabuleiro -> só organizando
+          const screenW = Dimensions.get('window').width;
+          const screenH = Dimensions.get('window').height;
+          
+          let safeX = absoluteX;
+          let safeY = absoluteY;
+          
+          // Clamp bounds so it doesn't get lost off-screen
+          if (safeX < -w/2) safeX = 10;
+          if (safeX > screenW - w/2) safeX = screenW - w - 10;
+          if (safeY < -h/2) safeY = 10;
+          if (safeY > screenH - h/2) safeY = screenH - h - 10;
+          
+          if (safeX !== absoluteX || safeY !== absoluteY) {
+            Animated.spring(pan, {
+              toValue: { x: safeX, y: safeY },
+              useNativeDriver: false,
+            }).start();
+          }
         }
       }
     })

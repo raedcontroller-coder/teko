@@ -104,7 +104,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onNavi
 
           {/* Header Text */}
           <View style={styles.headerContainer}>
-            <Text style={styles.title}>Bem-vindo de volta</Text>
+            <Text style={styles.title}>Bem-vindo(a) de volta</Text>
             <Text style={styles.subtitle}>Acesse sua jornada terapêutica digital.</Text>
           </View>
 
