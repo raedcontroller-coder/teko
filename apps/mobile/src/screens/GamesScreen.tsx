@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar, Pressable } from 'react-native';
 import { Bomb, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock } from 'lucide-react-native';
 
 interface GamesScreenProps {
@@ -47,7 +47,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
           <View style={styles.grid}>
             {/* Jogo da Bomba */}
             <Animated.View style={[styles.cardWrapper, getAnimatedStyle(0)]}>
-              <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={() => onSelectGame('Bomba')}>
+              <View style={styles.card}>
                 <View style={styles.iconBoxLilas}>
                   <Bomb color="#FFF" size={32} />
                 </View>
@@ -58,48 +58,66 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
                   </View>
                 </View>
                 <Text style={styles.cardDesc}>Alternância de turnos com categorias semânticas sob pressão de tempo.</Text>
-                <View style={styles.buttonYellow}>
-                  <Text style={styles.buttonYellowText}>INICIAR JOGO</Text>
-                </View>
-              </TouchableOpacity>
+                
+                <Pressable 
+                  style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
+                  onPress={() => onSelectGame('Bomba')}
+                >
+                  {({ pressed }) => (
+                    <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
+                  )}
+                </Pressable>
+              </View>
             </Animated.View>
 
             {/* Go / No-Go */}
             <Animated.View style={[styles.cardWrapper, getAnimatedStyle(1)]}>
-              <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={() => onSelectGame('GoNoGo')}>
+              <View style={styles.card}>
                 <View style={styles.iconBoxLilas}>
                   <Pointer color="#FFF" size={32} />
                 </View>
                 <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitle}>Go / No-Go</Text>
+                  <Text style={styles.cardTitle}>Toca Rápido!</Text>
                   <View style={styles.pillBox}>
                     <Text style={styles.pillText}>Controle Inibitório</Text>
                   </View>
                 </View>
                 <Text style={styles.cardDesc}>Teste de atenção e inibição motora com estímulos positivos e negativos.</Text>
-                <View style={styles.buttonYellow}>
-                  <Text style={styles.buttonYellowText}>INICIAR JOGO</Text>
-                </View>
-              </TouchableOpacity>
+                
+                <Pressable 
+                  style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
+                  onPress={() => onSelectGame('GoNoGo')}
+                >
+                  {({ pressed }) => (
+                    <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
+                  )}
+                </Pressable>
+              </View>
             </Animated.View>
 
             {/* Quebra-Cabeça */}
             <Animated.View style={[styles.cardWrapper, getAnimatedStyle(2)]}>
-              <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={() => onSelectGame('Puzzle')}>
+              <View style={styles.card}>
                 <View style={styles.iconBoxLilas}>
                   <Puzzle color="#FFF" size={32} />
                 </View>
                 <View style={styles.cardTitleBox}>
                   <Text style={styles.cardTitle}>Quebra-Cabeça</Text>
                   <View style={styles.pillBox}>
-                    <Text style={styles.pillText}>Percepção Visuoespacial</Text>
+                        <Text style={styles.pillText}>Percepção Visuoespacial</Text>
                   </View>
                 </View>
                 <Text style={styles.cardDesc}>Organização de peças fragmentadas para formar uma imagem completa.</Text>
-                <View style={styles.buttonYellow}>
-                  <Text style={styles.buttonYellowText}>INICIAR JOGO</Text>
-                </View>
-              </TouchableOpacity>
+                
+                <Pressable 
+                  style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
+                  onPress={() => onSelectGame('Puzzle')}
+                >
+                  {({ pressed }) => (
+                    <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
+                  )}
+                </Pressable>
+              </View>
             </Animated.View>
 
             {/* Locked: Lince */}

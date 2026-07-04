@@ -50,10 +50,10 @@ export default function ValidacaoClinicaPage() {
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-display-lg-mobile md:font-display-lg text-white leading-[1.2] font-black">
               Desafio <br/>
               <span className="text-teko-yellow">da Inibição</span> <br/>
-              <span className="text-white/60 text-3xl">(Go/No-Go)</span>
+              <span className="text-white/60 text-3xl">(Toca Rápido!)</span>
             </h2>
-            <p className="font-body-lg text-text-muted">
-              Nossa adaptação lúdica do paradigma Go/No-Go mede com precisão o controle inibitório e o gerenciamento de impulsos. Ao transformar estímulos estáticos em desafios interativos, capturamos reações naturais que são fundamentais para avaliar a capacidade de autorregulação da criança em cenários do mundo real.
+            <p className="text-xl text-white/80 max-w-3xl leading-relaxed">
+              Nossa adaptação lúdica do paradigma "Toca Rápido!" mede com precisão o controle inibitório e o gerenciamento de impulsos. Ao transformar estímulos estáticos em desafios interativos, capturamos reações naturais que são fundamentais para avaliar a capacidade de autorregulação da criança em cenários do mundo real.
             </p>
             <div className="flex flex-col gap-stack-sm mt-4 border-l-2 border-teko-yellow pl-4">
               <h4 className="font-headline-md font-bold text-on-surface">Métrica Principal</h4>

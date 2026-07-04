@@ -91,6 +91,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onNavi
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={{ flex: 1 }} />
           {/* Efeito Glassmorphism Simulado (Nativo sem crash) */}
           <View style={styles.glassPanel}>
             
@@ -164,6 +165,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onNavi
             </TouchableOpacity>
           </View>
           </View>
+          <View style={{ flex: 1 }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -200,14 +202,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onNavi
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#084D48', // Cor de fundo real do site Teko
+    backgroundColor: '#084D48',
   },
   container: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
     padding: 24,
   },
   glassPanel: {

@@ -18,8 +18,7 @@ fastify.register(multipart, {
 });
 
 const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 fastify.post('/api/bomba/validate', async (request, reply) => {
@@ -43,55 +42,71 @@ fastify.post('/api/bomba/validate', async (request, reply) => {
         .on('error', reject);
     });
 
-    // Converter para base64
-    const audioBuffer = await fs.promises.readFile(tempFilePath);
-    const audioBase64 = audioBuffer.toString('base64');
+    // 1. Transcrição com Whisper
+    const transcriptionResponse = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(tempFilePath),
+      model: 'whisper-1',
+      language: 'pt',
+    });
 
-    // Analisar áudio e texto em uma única chamada multimodal
+    const transcriptionText = transcriptionResponse.text.trim();
+
+    if (!transcriptionText) {
+      console.log("-> Áudio vazio/ininteligível");
+      fs.unlink(tempFilePath, () => {});
+      return reply.send({
+        valid: false,
+        transcription: "",
+        message: "Não consegui ouvir nada! Tente falar um pouquinho mais alto.",
+      });
+    }
+
+    console.log(`-> Whisper Transcreveu: "${transcriptionText}" para a categoria: "${category}"`);
+
+    // 2. Validação Semântica Infantil com GPT-4o-mini
     const completion = await openai.chat.completions.create({
-      model: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+      model: 'gpt-4o-mini',
       messages: [
         {
+          role: 'system',
+          content: `Você é um validador de palavras simpático para um jogo educacional infantil. 
+Você vai receber a palavra dita pela criança e uma categoria.
+Seu trabalho é avaliar se a palavra falada pertence de fato à categoria.
+
+REGRAS:
+1. Seja MUITO tolerante com erros de dicção, onomatopeias e sotaques. (Ex: se a categoria for "Animal", e a criança falar "au au" ou "totó" ou "caçolo", aceite como válido para "Cachorro").
+2. Pense na semântica ampla: "Vaca", "Porco", "Galinha" PERTENCEM a "Bichos da Fazenda". 
+3. Se a palavra não fizer sentido nenhum para a categoria, é inválido.
+4. Se for válido, forneça uma curta mensagem de parabéns amigável.
+5. Se for inválido, forneça uma mensagem amigável e encorajadora dizendo o que você entendeu e que não combina.
+
+Sua resposta DEVE ser um objeto JSON estrito sem formatação markdown:
+{"valid": boolean, "message": "Sua mensagem amigável aqui"}`
+        },
+        {
           role: 'user',
-          // @ts-ignore - OpenAI SDK types might not fully support OpenRouter audio input formatting yet, but it passes through
-          content: [
-            {
-              type: 'text',
-              text: `Transcreva a palavra falada neste áudio e verifique se ela pertence à categoria "${category}".
-Sua resposta deve ser APENAS um objeto JSON válido, sem nenhuma marcação markdown.
-Exemplo:
-{"transcription": "cachorro", "valid": true}`
-            },
-            {
-              type: 'input_audio',
-              input_audio: {
-                data: audioBase64,
-                format: 'm4a'
-              }
-            }
-          ]
+          content: `Palavra dita pela criança: "${transcriptionText}"\nCategoria alvo: "${category}"`
         }
-      ]
+      ],
+      response_format: { type: 'json_object' }
     });
 
     const resultText = completion.choices[0].message.content?.trim() || "{}";
     
-    // Limpar o markdown de código caso o modelo retorne
-    const cleanJson = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
-    
-    let resultData = { transcription: "", valid: false };
+    let resultData = { valid: false, message: "Puxa, acho que não entendi direito. Pode repetir?" };
     try {
-      resultData = JSON.parse(cleanJson);
+      resultData = JSON.parse(resultText);
+      console.log("-> GPT Validou:", resultData);
     } catch (e) {
-      console.error("Falha ao fazer parse do JSON do Nemotron:", cleanJson);
+      console.error("Falha ao fazer parse do JSON do GPT:", resultText);
     }
 
     fs.unlink(tempFilePath, () => {});
 
     return reply.send({
       valid: resultData.valid,
-      transcription: resultData.transcription,
-      resultText: cleanJson
+      transcription: transcriptionText,
+      message: resultData.message
     });
 
   } catch (err: any) {
@@ -102,7 +117,7 @@ Exemplo:
 
 const start = async () => {
   try {
-    const port = Number(process.env.PORT) || 3000;
+    const port = Number(process.env.PORT) || 3001;
     await fastify.listen({ port, host: '0.0.0.0' });
     console.log(`Server listening on http://localhost:${port}`);
   } catch (err) {

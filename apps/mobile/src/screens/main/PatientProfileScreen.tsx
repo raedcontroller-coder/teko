@@ -352,12 +352,12 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.carouselContent}
           >
-            {/* Card Go/No-Go */}
+            {/* Card Toca Rápido */}
             <View style={styles.gameCard}>
               <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(123,97,255,0.1)' }]}>
                 <Target color="#7B61FF" size={32} />
               </View>
-              <Text style={styles.gameTitle}>Go/No-Go</Text>
+              <Text style={styles.gameTitle}>Toca Rápido!</Text>
               <Text style={styles.gameDesc}>Controle inibitório e impulsividade.</Text>
               <View style={styles.gameBadge}>
                 <Text style={styles.gameBadgeText}>Ainda não jogou</Text>

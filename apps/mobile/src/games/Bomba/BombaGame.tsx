@@ -1,46 +1,185 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform, StatusBar, Animated } from 'react-native';
-import { Mic, ArrowLeft, Settings, Bomb, Play } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform, StatusBar, Animated, ActivityIndicator, Pressable, Modal, Vibration } from 'react-native';
+import { Audio } from 'expo-av';
+import * as Haptics from 'expo-haptics';
+import { Mic, ArrowLeft, Bomb, Play, Frown, X, Flame, CheckCircle, AlertCircle, Loader2, Sparkles, Trophy } from 'lucide-react-native';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { getRandomCategory, GameCategory } from '../../data/categories';
 import Svg, { Path, Circle, G, Line, Defs, RadialGradient, Stop, Ellipse } from 'react-native-svg';
 
-type Player = 'Psicólogo' | 'Criança';
-
-interface BombaGameProps {
+export interface BombaGameProps {
   onBack: () => void;
 }
 
 export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
   const [category, setCategory] = useState<GameCategory | null>(null);
-  const [currentPlayer, setCurrentPlayer] = useState<Player>('Psicólogo');
+  const [level, setLevel] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isExploding, setIsExploding] = useState(false);
+  const [soundsLoaded, setSoundsLoaded] = useState(false);
+  
+  const soundsRef = useRef<{ timer: Audio.Sound | null; explosion: Audio.Sound | null; success: Audio.Sound | null }>({
+    timer: null,
+    explosion: null,
+    success: null,
+  });
   
   // Temporizador
-  const INITIAL_TIME = 15000;
+  const INITIAL_TIME = 60000;
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
   const [tickSpeed, setTickSpeed] = useState(100);
   const [gameOver, setGameOver] = useState(false);
+  const [usedWords, setUsedWords] = useState<Record<string, string[]>>({});
+  const isGameOverRef = useRef(false);
+  const lastHapticTimeRef = useRef(0);
   
   // Animações
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const timerScaleAnim = useRef(new Animated.Value(1)).current;
+  const explosionScaleAnim = useRef(new Animated.Value(1)).current;
+  const flashOpacityAnim = useRef(new Animated.Value(0)).current;
   
-  const { isRecording, isValidating, startRecording, stopRecordingAndValidate } = useAudioRecorder();
+  const { isRecording, isValidating, warmUpRecording, startRecording, stopRecordingAndValidate, cancelRecording } = useAudioRecorder();
+
+  const [toastMessage, setToastMessage] = useState<{ title: string; desc: string; type: 'success' | 'error' } | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const toastAnim = useRef(new Animated.Value(0)).current;
+
+  const showToast = (title: string, desc: string, type: 'success' | 'error') => {
+    setToastMessage({ title, desc, type });
+    toastAnim.setValue(0);
+    Animated.sequence([
+      Animated.timing(toastAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2500),
+      Animated.timing(toastAnim, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => {
+      setToastMessage(null);
+    });
+  };
+
+  const [showExitModal, setShowExitModal] = useState(false);
+
+  const confirmExit = () => {
+    setShowExitModal(false);
+    cancelRecording(); // Fecha canal de áudio se sair no meio
+    onBack();
+  };
+
+  const cancelExit = () => {
+    setShowExitModal(false);
+  };
+
+  const handleRequestExit = () => {
+    setShowExitModal(true);
+  };
+
+  const renderExitModal = () => (
+    <Modal visible={showExitModal} transparent animationType="fade">
+      <View style={styles.modalOverlay}>
+        <View style={styles.exitModalCard}>
+          <TouchableOpacity style={styles.closeModalButton} onPress={cancelExit}>
+            <X color="#FFF" size={24} />
+          </TouchableOpacity>
+
+          <View style={styles.frownIconWrapper}>
+            <Frown color="#FFC857" size={48} />
+          </View>
+
+          <Text style={styles.exitModalTitle}>Puxa vida...</Text>
+          <Text style={styles.exitModalText}>
+            Você já vai embora?{'\n'}A bomba estava prestes a estourar!
+          </Text>
+
+          <View style={styles.exitModalButtons}>
+            <Pressable 
+              style={({ pressed }) => [styles.stayButton, pressed && { backgroundColor: '#7B61FF' }]}
+              onPress={cancelExit}
+            >
+              {({ pressed }) => (
+                <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero Ficar!</Text>
+              )}
+            </Pressable>
+
+            <TouchableOpacity style={styles.leaveButton} onPress={confirmExit}>
+              <Text style={styles.leaveButtonText}>Sair do Jogo</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 
   const startGame = () => {
-    setCategory(getRandomCategory());
-    setCurrentPlayer('Psicólogo');
+    setCategory(getRandomCategory(1));
     setTimeLeft(INITIAL_TIME);
     setTickSpeed(100);
+    setLevel(1);
+    setValidationError(null);
+    setToastMessage(null);
+    setUsedWords({});
     setGameOver(false);
+    isGameOverRef.current = false;
     setIsPlaying(true);
     
     shakeAnim.setValue(0);
     pulseAnim.setValue(1);
     timerScaleAnim.setValue(1);
+    explosionScaleAnim.setValue(1);
+    flashOpacityAnim.setValue(0);
+    setIsExploding(false);
+
+    // Garante que o microfone esteja completamente resetado antes de começar
+    cancelRecording();
+    
+    // Aquece o microfone assim que o jogo começa para eliminar delay no primeiro uso
+    warmUpRecording();
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadSounds = async () => {
+      try {
+        const { sound: tSound } = await Audio.Sound.createAsync(require('../../../assets/temporizador.mp3'));
+        await tSound.setIsLoopingAsync(true);
+        await tSound.setVolumeAsync(0.3);
+
+        const { sound: eSound } = await Audio.Sound.createAsync(require('../../../assets/explosao_bomba.mp3'));
+        await eSound.setVolumeAsync(0.5);
+
+        const { sound: sSound } = await Audio.Sound.createAsync(require('../../../assets/proximo-nivel.mp3'));
+        await sSound.setVolumeAsync(0.5);
+
+        if (isMounted) {
+          soundsRef.current = { timer: tSound, explosion: eSound, success: sSound };
+          setSoundsLoaded(true);
+        }
+      } catch (e) {
+        console.error("Erro ao carregar sons da bomba", e);
+        if (isMounted) setSoundsLoaded(true);
+      }
+    };
+    
+    loadSounds();
+
+    return () => {
+      isMounted = false;
+      soundsRef.current.timer?.unloadAsync();
+      soundsRef.current.explosion?.unloadAsync();
+      soundsRef.current.success?.unloadAsync();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (soundsRef.current.timer) {
+      if (isPlaying && !gameOver && !isValidating) {
+        soundsRef.current.timer.playAsync();
+      } else {
+        soundsRef.current.timer.pauseAsync();
+      }
+    }
+  }, [isPlaying, gameOver, isValidating]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -49,18 +188,69 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
       interval = setInterval(() => {
         setTimeLeft((prev) => {
           const next = prev - tickSpeed;
-          if (next <= 0) {
-            setGameOver(true);
-            setIsPlaying(false);
-            return 0;
+
+          // Feedback tátil progressivo nos últimos 10 segundos
+          if (next > 0 && next <= 10000) {
+            const now = Date.now();
+            let threshold = 1000;
+            let style = Haptics.ImpactFeedbackStyle.Light;
+
+            if (next <= 3000) {
+              threshold = 100;
+              style = Haptics.ImpactFeedbackStyle.Heavy;
+            } else if (next <= 6000) {
+              threshold = 400;
+              style = Haptics.ImpactFeedbackStyle.Medium;
+            }
+
+            if (now - lastHapticTimeRef.current >= threshold) {
+              Haptics.impactAsync(style);
+              lastHapticTimeRef.current = now;
+            }
           }
-          return next;
+
+          // O estado de game over agora será verificado num useEffect independente
+          return next <= 0 ? 0 : next;
         });
       }, 100);
     }
 
     return () => clearInterval(interval);
   }, [isPlaying, gameOver, isValidating, tickSpeed]);
+
+  // Efeito independente para lidar com a Explosão e o fim do tempo (GameOver)
+  useEffect(() => {
+    if (isPlaying && timeLeft <= 0 && !isGameOverRef.current) {
+      isGameOverRef.current = true;
+      setIsPlaying(false);
+      setIsExploding(true);
+      
+      cancelRecording(); // Força o fechamento do canal de áudio se o tempo esgotar
+      soundsRef.current.explosion?.replayAsync();
+      Vibration.vibrate(2000); // Vibração contínua única e explosiva no final
+      
+      Animated.parallel([
+        Animated.timing(explosionScaleAnim, {
+          toValue: 20,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(flashOpacityAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        })
+      ]).start(() => {
+        setGameOver(true);
+        setIsExploding(false);
+        Animated.timing(flashOpacityAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      });
+    }
+  }, [timeLeft, isPlaying]);
 
   // Efeitos visuais de Tensão (< 5s)
   useEffect(() => {
@@ -81,23 +271,44 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
     }
   }, [timeLeft, isPlaying, isValidating]);
 
-  const handleRecordPressIn = async () => {
+  const handleMicPress = async () => {
     if (!category || isValidating) return;
-    await startRecording();
-  };
 
-  const handleRecordPressOut = async () => {
-    if (!category || isValidating || !isRecording) return;
-    const response = await stopRecordingAndValidate(category.name);
-    
-    if (response) {
-      if (response.valid) {
-        setTimeLeft((prev) => prev + 5000);
-        setTickSpeed((prev) => prev * 1.25);
-        setCurrentPlayer((prev) => (prev === 'Psicólogo' ? 'Criança' : 'Psicólogo'));
+    if (isRecording) {
+      const categoryUsedWords = usedWords[category.name] || [];
+      const response = await stopRecordingAndValidate(category.name, categoryUsedWords);
+      
+      if (isGameOverRef.current) return;
+
+      if (response) {
+        if (response.valid) {
+          soundsRef.current.success?.replayAsync();
+          setTimeLeft((prev) => prev + 5000);
+          setTickSpeed((prev) => prev * 1.10);
+          
+          setUsedWords(prev => ({
+            ...prev,
+            [category.name]: [...(prev[category.name] || []), response.transcription]
+          }));
+
+          const nextLevel = level + 1;
+          setLevel(nextLevel);
+          const newCategory = getRandomCategory(nextLevel);
+          setCategory(newCategory);
+          
+          showToast('Boa!', '+1 Ponto!', 'success');
+          warmUpRecording();
+        } else {
+          setValidationError(response.message || `Ouvi "${response.transcription}", mas não combina com ${category.name}.`);
+          warmUpRecording();
+        }
       } else {
-        Alert.alert("Inválido!", `A palavra ouvida foi "${response.transcription}", que não pertence à categoria "${category.name}". Tente novamente!`);
+        setValidationError('Algo deu errado. Tenta de novo!');
+        warmUpRecording();
       }
+    } else {
+      setValidationError(null); // Limpa o erro ao tentar de novo
+      await startRecording();
     }
   };
 
@@ -122,9 +333,22 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
   const bombColor = isTense ? '#7f1d1d' : '#1f2937';
 
   // Format Timer
-  const secs = Math.ceil(timeLeft / 1000).toString().padStart(2, '0');
+  const totalSeconds = Math.ceil(timeLeft / 1000);
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
 
-  if (!isPlaying && !gameOver) {
+  if (!soundsLoaded) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.menuContent}>
+          <ActivityIndicator size="large" color="#FFC857" />
+          <Text style={[styles.title, { marginTop: 24, fontSize: 20 }]}>Preparando a Bomba...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!isPlaying && !gameOver && !isExploding) {
     return (
       <View style={styles.container}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
@@ -133,27 +357,37 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
         
         <View style={styles.menuContent}>
           <View style={styles.iconWrapper}>
-            <Bomb color="#E6A800" size={64} />
+            <Bomb color="#FFC857" size={64} />
           </View>
           <Text style={styles.title}>Jogo da Bomba</Text>
           
           <View style={styles.glassPanel}>
             <Text style={styles.instructions}>
-              Pressione e segure o microfone para falar palavras da categoria sorteada. A vez alterna a cada acerto!
+              Fale rápido uma palavra da categoria certa para trocar a categoria e recarregar a bomba antes que ela estoure!
             </Text>
           </View>
 
-          <TouchableOpacity style={styles.startButton} onPress={startGame} activeOpacity={0.8}>
-            <Text style={styles.startButtonText}>Começar a Jogar</Text>
-          </TouchableOpacity>
+          <Pressable 
+            style={({ pressed }) => [
+              styles.startButton,
+              pressed && { backgroundColor: '#7B61FF' }
+            ]} 
+            onPress={startGame}
+          >
+            {({ pressed }) => (
+              <Text style={[styles.startButtonText, pressed && { color: '#FFF' }]}>Começar a Jogar</Text>
+            )}
+          </Pressable>
         </View>
       </View>
     );
   }
 
-  if (gameOver) {
+  if (gameOver && !isExploding) {
     return (
       <View style={styles.container}>
+        <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: '#FFF', opacity: flashOpacityAnim, zIndex: 999, elevation: 999 }]} pointerEvents="none" />
+        
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onBack} style={styles.iconButton}>
@@ -164,23 +398,46 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
         </View>
 
         <View style={styles.kaboomCenter}>
-          <Text style={styles.kaboomText}>KABOOM!</Text>
+          <View style={styles.heroIconWrapperSimple}>
+            <Trophy color="#FFC857" size={80} />
+          </View>
           
-          <View style={[styles.glassPanel, styles.feedbackCard]}>
-            <Text style={styles.feedbackTitle}>A bomba estourou com o(a) {currentPlayer}!</Text>
-            <Text style={styles.feedbackDesc}>O tempo acabou bem na hora do turno dele(a).</Text>
+          <View style={styles.scoreContainerSimple}>
+            <Text style={styles.feedbackTitleSimple}>O tempo acabou!</Text>
+            <Text style={styles.feedbackDescSimple}>Você jogou muito bem, sua pontuação foi:</Text>
+
+            <Text style={styles.finalScoreValueSimple}>{level}</Text>
+            <Text style={styles.finalScoreLabelSimple}>{level === 1 ? 'PONTO' : 'PONTOS'}</Text>
           </View>
         </View>
 
         <View style={styles.gameOverBottomSection}>
-          <TouchableOpacity style={styles.playAgainButton} onPress={startGame} activeOpacity={0.8}>
-            <Play color="#084D48" size={24} fill="#084D48" />
-            <Text style={styles.playAgainText}>Jogar Novamente</Text>
-          </TouchableOpacity>
+          <Pressable 
+            style={({ pressed }) => [
+              styles.playAgainButton,
+              pressed && { backgroundColor: '#7B61FF' }
+            ]} 
+            onPress={startGame}
+          >
+            {({ pressed }) => (
+              <>
+                <Play color={pressed ? "#FFF" : "#084D48"} size={24} fill={pressed ? "#FFF" : "#084D48"} />
+                <Text style={[styles.playAgainTextSimple, pressed && { color: '#FFF' }]}>Jogar Novamente</Text>
+              </>
+            )}
+          </Pressable>
           
-          <TouchableOpacity style={styles.backHomeButton} onPress={onBack} activeOpacity={0.8}>
-            <Text style={styles.backHomeText}>Voltar ao Início</Text>
-          </TouchableOpacity>
+          <Pressable 
+            style={({ pressed }) => [
+              styles.backHomeButton,
+              pressed && { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+            ]} 
+            onPress={onBack}
+          >
+            {({ pressed }) => (
+              <Text style={[styles.backHomeText, pressed && { color: '#FFF' }]}>Voltar ao Início</Text>
+            )}
+          </Pressable>
         </View>
       </View>
     );
@@ -188,39 +445,54 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
 
   return (
     <View style={styles.container}>
+      <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: '#FFF', opacity: flashOpacityAnim, zIndex: 999, elevation: 999 }]} pointerEvents="none" />
+      
+      {toastMessage && (
+        <Animated.View style={[styles.toastContainer, { opacity: toastAnim, transform: [{ translateY: toastAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }] }]}>
+          <View style={[styles.toastIconBox, toastMessage.type === 'error' ? styles.toastIconBoxError : styles.toastIconBoxSuccess]}>
+            {toastMessage.type === 'error' ? <Frown color="#EF4444" size={32} /> : <CheckCircle color="#10B981" size={32} />}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.toastTitle}>{toastMessage.title}</Text>
+            <Text style={styles.toastDesc}>{toastMessage.desc}</Text>
+          </View>
+        </Animated.View>
+      )}
+
+      {renderExitModal()}
       {/* Header Segura */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.iconButton}>
+        <TouchableOpacity onPress={handleRequestExit} style={styles.iconButton}>
           <ArrowLeft color="#fff" size={24} />
         </TouchableOpacity>
         
         <Animated.View style={[styles.timerContainer, { transform: [{ scale: timerScaleAnim }] }]}>
           <Text style={[styles.timerText, isTense && styles.timerTextDanger]}>
-            00:{secs}
+            {minutes}:{seconds}
           </Text>
           <Text style={styles.timerLabel}>Tempo Restante</Text>
         </Animated.View>
 
-        <TouchableOpacity style={styles.iconButton}>
-          <Settings color="#fff" size={24} />
-        </TouchableOpacity>
+        <View style={{ width: 44 }} />
       </View>
 
-      {/* Cards de Categoria e Turno */}
+      {/* Cards de Categoria e Nível */}
       <View style={styles.topSection}>
-        <View style={styles.glassPanel}>
-          <Text style={styles.categoryLabel}>Categoria Semântica</Text>
-          <Text style={styles.categoryValue}>{category?.name}</Text>
-        </View>
-        <View style={styles.turnBadge}>
-          <View style={styles.turnIndicator} />
-          <Text style={styles.turnText}>Vez do(a) {currentPlayer}</Text>
+        <View style={styles.categoryLevelPanel}>
+          <View style={styles.categoryInfo}>
+            <Text style={styles.categoryLabel}>O tema é...</Text>
+            <Text style={styles.categoryValue}>{category?.name}</Text>
+          </View>
+          <View style={styles.levelBadge}>
+            <Text style={styles.levelLabel}>PONTOS</Text>
+            <Text style={styles.levelValue}>{level}</Text>
+          </View>
         </View>
       </View>
 
       {/* Jogo: SVG Bomb */}
       <View style={styles.stage}>
-        <Animated.View style={[styles.bombWrapper, { transform: [{ translateX: shakeAnim }] }]}>
+        <Animated.View style={[styles.bombWrapper, { transform: [{ translateX: shakeAnim }, { scale: explosionScaleAnim }] }]}>
           <Svg width="100%" height="100%" viewBox="0 0 512 512" style={{ overflow: 'visible' }}>
             <Defs>
               <RadialGradient id="bombGradient" cx="40%" cy="40%" r="70%">
@@ -265,24 +537,34 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
       {/* Controles de Voz */}
       <View style={styles.bottomSection}>
         {isValidating ? (
-          <View style={[styles.glassPanel, styles.statusChip]}>
-            <Text style={styles.statusText}>Processando fala...</Text>
+          <View style={[styles.glassPanel, styles.processingChip]}>
+            <ActivityIndicator size="small" color="#FFC857" />
+            <Text style={styles.processingText}>Ouvindo...</Text>
+          </View>
+        ) : validationError ? (
+          <View style={[styles.glassPanel, styles.errorChip]}>
+            <AlertCircle color="#EF4444" size={20} />
+            <Text style={styles.errorText}>{validationError}</Text>
           </View>
         ) : (
           <View style={{ height: 44 }} /> // Placeholder to avoid jumping UI
         )}
 
         <TouchableOpacity 
-          style={[styles.micButton, isRecording && styles.micButtonRecording]}
-          onPressIn={handleRecordPressIn}
-          onPressOut={handleRecordPressOut}
+          style={[
+            styles.micButton, 
+            isRecording && styles.micButtonRecording,
+            isValidating && styles.micButtonProcessing
+          ]}
+          onPress={handleMicPress}
           activeOpacity={0.8}
+          disabled={isValidating}
         >
           <Mic color={isRecording ? "#FFF" : "#084D48"} size={48} />
         </TouchableOpacity>
         
         <Text style={styles.micInstruction}>
-          {isRecording ? 'Solte para validar' : 'Pressione e segure para falar'}
+          {isRecording ? 'Clique para enviar' : 'Clique para falar'}
         </Text>
       </View>
     </View>
@@ -340,14 +622,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
   },
-  glassPanel: {
-    backgroundColor: 'rgba(255, 246, 227, 0.1)',
-    borderRadius: 16,
-    padding: 24,
+  categoryLevelPanel: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 246, 227, 0.1)',
+    borderRadius: 24,
+    padding: 24,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
     width: '100%',
+    justifyContent: 'space-between',
+  },
+  categoryInfo: {
+    flex: 1,
   },
   categoryLabel: {
     fontSize: 12,
@@ -358,9 +645,32 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   categoryValue: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: '800',
-    color: '#E6A800',
+    color: '#FFC857',
+    flexWrap: 'wrap',
+  },
+  levelBadge: {
+    backgroundColor: 'rgba(255, 200, 87, 0.15)',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 200, 87, 0.3)',
+    marginLeft: 16,
+  },
+  levelLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFC857',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  levelValue: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FFF',
   },
   turnBadge: {
     flexDirection: 'row',
@@ -410,25 +720,48 @@ const styles = StyleSheet.create({
     gap: 12, // Gap bem reduzido para aproximar os botões
     width: '100%',
   },
-  statusChip: {
-    padding: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+  processingChip: {
+    padding: 12,
+    paddingHorizontal: 20,
+    borderRadius: 99,
     width: 'auto',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255, 200, 87, 0.15)',
+    borderColor: 'rgba(255, 200, 87, 0.4)',
   },
-  statusText: {
-    color: '#FFF',
+  processingText: {
+    color: '#FFC857',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  errorChip: {
+    padding: 16,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#7f1d1d', // Vermelho mais forte e escuro
+    borderWidth: 2,
+    borderColor: '#EF4444', // Borda vermelha brilhante
+  },
+  errorText: {
+    color: '#FFFFFF', // Texto totalmente branco
+    fontSize: 15,
+    fontWeight: '700',
+    flexShrink: 1,
   },
   micButton: {
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: '#E6A800',
+    backgroundColor: '#FFC857',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#E6A800',
+    shadowColor: '#FFC857',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.5,
     shadowRadius: 40,
@@ -437,6 +770,11 @@ const styles = StyleSheet.create({
   micButtonRecording: {
     backgroundColor: '#5b3cdd',
     shadowColor: '#5b3cdd',
+  },
+  micButtonProcessing: {
+    backgroundColor: 'rgba(255, 200, 87, 0.5)', // Mic opaco e bloqueado visualmente
+    shadowOpacity: 0,
+    elevation: 0,
   },
   micInstruction: {
     fontSize: 14,
@@ -453,12 +791,12 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(230, 168, 0, 0.1)',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(230, 168, 0, 0.3)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 200, 87, 0.4)',
   },
   title: {
     fontSize: 40,
@@ -469,19 +807,19 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   instructions: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: 'center',
     color: 'rgba(255, 255, 255, 0.9)',
-    lineHeight: 24,
+    lineHeight: 28,
   },
   startButton: {
-    backgroundColor: '#E6A800',
+    backgroundColor: '#FFC857',
     paddingHorizontal: 40,
     paddingVertical: 18,
     borderRadius: 16,
     alignSelf: 'center',
     marginTop: 40,
-    shadowColor: '#E6A800',
+    shadowColor: '#FFC857',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 16,
@@ -511,7 +849,7 @@ const styles = StyleSheet.create({
   boomText: {
     fontSize: 48,
     fontWeight: '800',
-    color: '#E6A800', // yellow to match aesthetic
+    color: '#FFC857', // yellow to match aesthetic
     textAlign: 'center',
     marginTop: 100,
     marginBottom: 20,
@@ -534,33 +872,72 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
-  kaboomText: {
-    fontSize: 64,
-    fontWeight: '900',
-    fontStyle: 'italic',
-    color: '#FFC857',
-    textAlign: 'center',
-    letterSpacing: -2,
-    textShadowColor: 'rgba(255, 200, 87, 0.4)',
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 15,
-    marginBottom: 40,
+  heroIconWrapperSimple: {
+    marginBottom: 24,
   },
-  feedbackCard: {
-    padding: 24,
+  scoreContainerSimple: {
+    alignItems: 'center',
     width: '100%',
   },
-  feedbackTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  feedbackTitleSimple: {
+    fontSize: 28,
+    fontWeight: '900',
     color: '#FFF',
     marginBottom: 8,
     textAlign: 'center',
   },
-  feedbackDesc: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
+  feedbackDescSimple: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
+    marginBottom: 24,
+  },
+  finalScoreValueSimple: {
+    fontSize: 80,
+    fontWeight: '900',
+    color: '#FFC857',
+    lineHeight: 80,
+  },
+  finalScoreLabelSimple: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFC857',
+    letterSpacing: 2,
+    marginBottom: 40,
+  },
+  playAgainTextSimple: {
+    color: '#084D48',
+    fontSize: 20,
+    fontWeight: '900',
+  },
+  heroIconWrapper: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 40,
+    borderWidth: 2,
+    borderColor: '#EF4444',
+  },
+  feedbackCardOver: {
+    width: '100%',
+    borderWidth: 2,
+    borderColor: '#FFC857',
+  },
+  feedbackTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#FFC857',
+    marginBottom: 12,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  feedbackDesc: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.85)',
+    textAlign: 'center',
+    lineHeight: 24,
   },
   playAgainButton: {
     backgroundColor: '#FFC857',
@@ -592,5 +969,132 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  exitModalCard: {
+    backgroundColor: '#181c1c',
+    borderRadius: 32,
+    padding: 32,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5,
+    shadowRadius: 30,
+    elevation: 15,
+  },
+  closeModalButton: {
+    position: 'absolute',
+    top: 24,
+    right: 24,
+    padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 20,
+  },
+  frownIconWrapper: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 200, 87, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 200, 87, 0.3)',
+  },
+  exitModalTitle: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FFF',
+    marginBottom: 12,
+  },
+  exitModalText: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+  },
+  exitModalButtons: {
+    width: '100%',
+    gap: 12,
+  },
+  stayButton: {
+    backgroundColor: '#FFC857',
+    paddingVertical: 18,
+    borderRadius: 16,
+    width: '100%',
+    alignItems: 'center',
+  },
+  stayButtonText: {
+    color: '#084D48',
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  leaveButton: {
+    paddingVertical: 18,
+    width: '100%',
+    alignItems: 'center',
+  },
+  leaveButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  toastContainer: {
+    position: 'absolute',
+    top: 100,
+    left: 24,
+    right: 24,
+    backgroundColor: '#181c1c',
+    borderRadius: 24,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    zIndex: 999,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 15,
+  },
+  toastIconBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  toastIconBoxSuccess: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  toastIconBoxError: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+  },
+  toastTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFF',
+    marginBottom: 4,
+  },
+  toastDesc: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    lineHeight: 20,
   },
 });

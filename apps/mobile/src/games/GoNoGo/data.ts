@@ -1,27 +1,26 @@
-import { Dog, Cat } from 'lucide-react-native';
-import { FC } from 'react';
-import { SvgProps } from 'react-native-svg';
-
 export type StimulusType = 'go' | 'nogo';
 
 export interface Stimulus {
   id: string;
   type: StimulusType;
-  Icon: any; // Utilizando any provisoriamente para evitar erros de tipagem estrita com Lucide icons
+  emoji: string;
   color: string;
+  shadowColor: string;
 }
 
 export const STIMULI: Record<StimulusType, Stimulus> = {
   go: {
     id: 'dog_go',
     type: 'go',
-    Icon: Dog,
-    color: '#3B82F6', // Azul - Amigável
+    emoji: '🐶',
+    color: '#E0F2FE', // Fundo azul claro super amigável
+    shadowColor: '#3B82F6', // Sombra azul forte
   },
   nogo: {
     id: 'cat_nogo',
     type: 'nogo',
-    Icon: Cat,
-    color: '#EF4444', // Vermelho - Cuidado
+    emoji: '🐱',
+    color: '#FEE2E2', // Fundo vermelho claro
+    shadowColor: '#EF4444', // Sombra vermelha de alerta
   }
 };

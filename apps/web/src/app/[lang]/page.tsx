@@ -192,7 +192,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                 <span className="material-symbols-outlined text-primary text-sm">grid_view</span> Quebra-Cabeça
               </span>
               <span className="glass-pill text-white px-4 py-2 rounded-full font-label-md text-sm flex items-center gap-2">
-                <span className="material-symbols-outlined text-tertiary-fixed-dim text-sm">sports_esports</span> Go/No-Go
+                <span className="material-symbols-outlined text-tertiary-fixed-dim text-sm">sports_esports</span> Toca Rápido!
               </span>
             </div>
 

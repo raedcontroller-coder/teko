@@ -116,6 +116,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={{ flex: 1 }} />
           {/* Glassmorphism Simulado */}
           <View style={styles.glassPanel}>
             
@@ -240,6 +241,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
             </View>
 
           </View>
+          <View style={{ flex: 1 }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -283,7 +285,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
     padding: 24,
   },
   glassPanel: {

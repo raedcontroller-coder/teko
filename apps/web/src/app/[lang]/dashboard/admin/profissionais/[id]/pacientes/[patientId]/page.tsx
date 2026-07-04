@@ -223,7 +223,7 @@ export default function AdminPacientePerfilPage() {
                 <div className="w-16 h-16 rounded-full bg-[#7B61FF]/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                   <Target size={32} className="text-[#7B61FF]" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Go/No-Go</h3>
+                <h3 className="text-xl font-bold text-white mb-2">Toca Rápido!</h3>
                 <p className="text-sm text-white/70 mb-4">Controle inibitório e impulsividade.</p>
                 <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white/50 group-hover:border-white/20 transition-colors">
                   Ainda não jogou

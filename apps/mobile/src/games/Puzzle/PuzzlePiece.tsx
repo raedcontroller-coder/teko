@@ -71,10 +71,6 @@ export const PuzzlePiece: React.FC<PuzzlePieceProps> = ({
           absoluteY + h/2 > boardY && absoluteY + h/2 < boardY + boardH;
         
         if (distance < 60) { // snap zone 60 pixels
-          Animated.spring(pan, {
-            toValue: { x: targetX, y: targetY },
-            useNativeDriver: false,
-          }).start();
           onAttempt(id, true, distance);
         } else if (isOverBoard) {
           // Errou, mas soltou em cima do tabuleiro -> volta pra origem e conta erro
@@ -112,7 +108,7 @@ export const PuzzlePiece: React.FC<PuzzlePieceProps> = ({
     if (isPlaced) {
       Animated.timing(pan, {
         toValue: { x: targetX, y: targetY },
-        duration: 0,
+        duration: 120, // 120ms para um deslize rápido e perfeitamente sincronizado com o som
         useNativeDriver: false,
       }).start();
     }
