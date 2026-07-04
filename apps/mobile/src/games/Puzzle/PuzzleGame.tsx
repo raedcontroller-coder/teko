@@ -103,6 +103,7 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
   const [metrics, setMetrics] = useState<any>(null);
   const [showExitModal, setShowExitModal] = useState(false);
   const [showExpandedReference, setShowExpandedReference] = useState(false);
+  const [isAnyPieceDragging, setIsAnyPieceDragging] = useState(false);
   const logger = useMemo(() => new TelemetryLogger(), []);
 
   const currentImage = PUZZLE_IMAGES[currentLevel] || PUZZLE_IMAGES[1];
@@ -157,7 +158,7 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
   const startGame = () => {
     setCurrentLevel(1);
     setPieces(generatePuzzleGrid());
-    logger.startSession(TOTAL_PIECES * MAX_LEVELS);
+    logger.startLevel(1);
     setGameState('playing');
     setMetrics(null);
   };
@@ -211,21 +212,12 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
     </Modal>
   );
 
-  const handleAttempt = (id: string, isCorrect: boolean, distance: number) => {
+  const handleAttempt = (id: string, isCorrect: boolean) => {
     setPieces(prev => {
       const newPieces = [...prev];
       const idx = newPieces.findIndex(p => p.id === id);
       if (idx !== -1) {
         const piece = newPieces[idx];
-        const isFirstAttempt = piece.attemptsCount === 0;
-        
-        logger.logAttempt({
-          pieceId: id,
-          isCorrect,
-          isFirstAttempt,
-          distance
-        });
-
         piece.attemptsCount += 1;
         if (isCorrect) {
           piece.isPlaced = true;
@@ -239,11 +231,41 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
         setTimeout(() => {
           if (currentLevel < MAX_LEVELS) {
             sounds.proximo?.replayAsync();
-            logger.pause();
+            
+            // Força a finalização do timer do nível caso a peça tenha acabado de ser solta
+            logger.pause(); 
+            
+            console.log(`\n\n=== MÉTRICAS DO NÍVEL ${currentLevel} ===`);
+            console.log(JSON.stringify(logger.getLevelMetrics(currentLevel), null, 2));
+            console.log("===============================\n\n");
+            
             setGameState('level_transition');
           } else {
             sounds.vitoria?.replayAsync();
-            setMetrics(logger.getMetrics());
+            logger.pause();
+
+            console.log(`\n\n=== MÉTRICAS DO NÍVEL ${currentLevel} ===`);
+            console.log(JSON.stringify(logger.getLevelMetrics(currentLevel), null, 2));
+            console.log("===============================\n\n");
+
+            const finalMetrics = logger.getAllMetrics();
+            const slopeBlocks = logger.getSlopeBlocks();
+
+            console.log("\n\n=== MÉTRICAS PSICOMÉTRICAS GLOBAIS (QUEBRA-CABEÇA) ===");
+            console.log(JSON.stringify(finalMetrics, null, 2));
+            console.log("========================================================\n\n");
+
+            console.log("\n\n=== BLOCOS PARA CÁLCULO DE SLOPE CHANGE ===");
+            console.log(JSON.stringify(slopeBlocks, null, 2));
+            console.log("===========================================\n\n");
+
+            const slopeMetrics = logger.calculateSlopeChange(slopeBlocks);
+            
+            console.log("\n\n=== BETA DO SLOPE CHANGE (CURVA DE APRENDIZADO) ===");
+            console.log(JSON.stringify(slopeMetrics, null, 2));
+            console.log("=====================================================\n\n");
+
+            setMetrics(finalMetrics);
             setGameState('finished');
           }
         }, 800);
@@ -302,9 +324,12 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
   }
 
   const handleNextLevel = () => {
-    setCurrentLevel(prev => prev + 1);
+    setCurrentLevel(prev => {
+      const next = prev + 1;
+      logger.startLevel(next);
+      return next;
+    });
     setPieces(generatePuzzleGrid());
-    logger.resume();
     setGameState('playing');
   };
 
@@ -363,21 +388,8 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
           {metrics && (
             <View style={styles.metricsContainer}>
               <View style={styles.metricGlassCard}>
-                <Text style={styles.metricLabel}>Índice de Encaixe de Primeira (IEP)</Text>
-                <Text style={[styles.metricValue, { color: '#9bf2e8' }]}>{metrics.iep}%</Text>
-                <Text style={styles.metricDesc}>{metrics.correctFirstAttempts} de {metrics.totalPieces} peças perfeitas</Text>
-              </View>
-
-              <View style={styles.metricRow}>
-                <View style={[styles.metricGlassCard, { flex: 1 }]}>
-                  <Text style={styles.metricLabelSmall}>Tempo Total</Text>
-                  <Text style={[styles.metricValueSmall, { color: '#FFC857' }]}>{metrics.totalTimeSec} s</Text>
-                </View>
-
-                <View style={[styles.metricGlassCard, { flex: 1 }]}>
-                  <Text style={styles.metricLabelSmall}>Média de Erros</Text>
-                  <Text style={[styles.metricValueSmall, { color: '#E5DEFF' }]}>{metrics.mtp}</Text>
-                </View>
+                <Text style={styles.metricLabelSmall}>Métricas em Processamento</Text>
+                <Text style={[styles.metricValueSmall, { color: '#9bf2e8', fontSize: 16, marginTop: 8 }]}>Os dados psicométricos detalhados deste teste (Slope Change, Inatividade e Manuseio) foram extraídos por nível e gerados no console do sistema (terminal) para o estudo de caso. Verifique os logs.</Text>
               </View>
             </View>
           )}
@@ -465,8 +477,17 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
           boardY={BOARD_OFFSET_Y}
           boardW={BOARD_WIDTH}
           boardH={BOARD_HEIGHT}
-          isPlaced={p.isPlaced}
           onAttempt={handleAttempt}
+          onDragStart={() => {
+            setIsAnyPieceDragging(true);
+            logger.logDragStart();
+          }}
+          onDragDrop={(isInvalid) => {
+            setIsAnyPieceDragging(false);
+            logger.logDragDrop(isInvalid);
+          }}
+          isAnyPieceDragging={isAnyPieceDragging}
+          isPlaced={p.isPlaced}
         />
       ))}
 

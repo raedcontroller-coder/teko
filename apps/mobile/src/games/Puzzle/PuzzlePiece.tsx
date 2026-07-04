@@ -20,16 +20,20 @@ interface PuzzlePieceProps {
   boardW: number;
   boardH: number;
   isPlaced: boolean;
-  onAttempt: (id: string, isCorrect: boolean, distance: number) => void;
+  onAttempt: (id: string, isCorrect: boolean) => void;
+  onDragStart: () => void;
+  onDragDrop: (isInvalid: boolean) => void;
+  isAnyPieceDragging: boolean;
   fullImageWidth: number;
   fullImageHeight: number;
 }
 
 export const PuzzlePiece: React.FC<PuzzlePieceProps> = ({
-  id, w, h, edges, col, row, imageSource, targetX, targetY, initialX, initialY, boardX, boardY, boardW, boardH, isPlaced, onAttempt, fullImageWidth, fullImageHeight
+  id, w, h, edges, col, row, imageSource, targetX, targetY, initialX, initialY, boardX, boardY, boardW, boardH, isPlaced, onAttempt, onDragStart, onDragDrop, isAnyPieceDragging, fullImageWidth, fullImageHeight
 }) => {
   const pan = useRef(new Animated.ValueXY({ x: initialX, y: initialY })).current;
   const [zIndex, setZIndex] = useState(1);
+  const [isHandling, setIsHandling] = useState(false);
   
   const { path, tabSize } = getPiecePath(w, h, edges);
   
@@ -41,8 +45,10 @@ export const PuzzlePiece: React.FC<PuzzlePieceProps> = ({
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => !isPlaced,
+      onStartShouldSetPanResponder: () => !isPlaced && (!isAnyPieceDragging || isHandling),
       onPanResponderGrant: () => {
+        setIsHandling(true);
+        onDragStart();
         setZIndex(100);
         pan.setOffset({
           x: (pan.x as any)._value,
@@ -61,6 +67,7 @@ export const PuzzlePiece: React.FC<PuzzlePieceProps> = ({
         
         pan.flattenOffset();
         setZIndex(1);
+        setIsHandling(false);
         
         const dx = absoluteX - targetX;
         const dy = absoluteY - targetY;
@@ -71,16 +78,19 @@ export const PuzzlePiece: React.FC<PuzzlePieceProps> = ({
           absoluteY + h/2 > boardY && absoluteY + h/2 < boardY + boardH;
         
         if (distance < 60) { // snap zone 60 pixels
-          onAttempt(id, true, distance);
+          onAttempt(id, true);
+          onDragDrop(false); // Acertou, não é inválido
         } else if (isOverBoard) {
-          // Errou, mas soltou em cima do tabuleiro -> volta pra origem e conta erro
+          // Errou, mas soltou em cima do tabuleiro -> volta pra origem e conta tentativa inválida
           Animated.spring(pan, {
             toValue: { x: initialX, y: initialY },
             useNativeDriver: false,
           }).start();
-          onAttempt(id, false, distance);
+          onAttempt(id, false);
+          onDragDrop(true); // Erro de encaixe no tabuleiro -> tentativa inválida
         } else {
-          // Soltou fora do tabuleiro -> só organizando
+          // Soltou fora do tabuleiro -> só organizando, não conta como tentativa inválida (pedido do usuário)
+          onDragDrop(false);
           const screenW = Dimensions.get('window').width;
           const screenH = Dimensions.get('window').height;
           
