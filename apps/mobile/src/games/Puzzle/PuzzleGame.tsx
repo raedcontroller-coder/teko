@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, Platform, StatusBar, ActivityIndicator, Pressable, Modal } from 'react-native';
 import { Audio } from 'expo-av';
-import { ArrowLeft, CheckCircle, RotateCcw, Frown, X } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle, RotateCcw, Frown, X, Sparkles, Trophy } from 'lucide-react-native';
 import { PuzzlePiece } from './PuzzlePiece';
 import { TelemetryLogger, PuzzleAttempt } from './TelemetryLogger';
 import { EdgeType, PieceEdges } from './JigsawPathGenerator';
@@ -194,12 +194,11 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
           </Text>
 
           <View style={styles.exitModalButtons}>
-            <Pressable 
-              style={({ pressed }) => [styles.stayButton, pressed && { backgroundColor: '#7B61FF' }]}
-              onPress={cancelExit}
-            >
+            <Pressable onPress={cancelExit}>
               {({ pressed }) => (
-                <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero Ficar!</Text>
+                <View style={[styles.stayButton, pressed && { backgroundColor: '#7B61FF' }]}>
+                  <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero Ficar!</Text>
+                </View>
               )}
             </Pressable>
 
@@ -249,24 +248,35 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
             console.log("===============================\n\n");
 
             const finalMetrics = logger.getAllMetrics();
-            const slopeBlocks = logger.getSlopeBlocks();
 
-            console.log("\n\n=== MÉTRICAS PSICOMÉTRICAS GLOBAIS (QUEBRA-CABEÇA) ===");
+            console.log("\n\n=== MATRIZ BRUTA (QUEBRA-CABEÇA) ===");
             console.log(JSON.stringify(finalMetrics, null, 2));
-            console.log("========================================================\n\n");
-
-            console.log("\n\n=== BLOCOS PARA CÁLCULO DE SLOPE CHANGE ===");
-            console.log(JSON.stringify(slopeBlocks, null, 2));
-            console.log("===========================================\n\n");
-
-            const slopeMetrics = logger.calculateSlopeChange(slopeBlocks);
-            
-            console.log("\n\n=== BETA DO SLOPE CHANGE (CURVA DE APRENDIZADO) ===");
-            console.log(JSON.stringify(slopeMetrics, null, 2));
-            console.log("=====================================================\n\n");
+            console.log("=====================================\n\n");
 
             setMetrics(finalMetrics);
             setGameState('finished');
+
+            (async () => {
+              try {
+                const response = await fetch('http://10.246.21.235:3002/api/puzzle/metrics', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(finalMetrics)
+                });
+                const result = await response.json();
+                
+                console.log("\n\n=== REGRESSÃO LINEAR (SLOPE) - PYTHON (QUEBRA-CABEÇA) ===");
+                if (result.error) {
+                  console.log(`Erro/Aviso: ${result.error}`);
+                } else {
+                  console.log(JSON.stringify(result, null, 2));
+                }
+                console.log("=========================================================\n\n");
+                
+              } catch (e) {
+                console.log("Erro ao chamar API de regressão do Puzzle", e);
+              }
+            })();
           }
         }, 800);
       }
@@ -387,41 +397,44 @@ export const PuzzleGame: React.FC<PuzzleGameProps> = ({ onBack }) => {
           
           {metrics && (
             <View style={styles.metricsContainer}>
-              <View style={styles.metricGlassCard}>
-                <Text style={styles.metricLabelSmall}>Métricas em Processamento</Text>
-                <Text style={[styles.metricValueSmall, { color: '#9bf2e8', fontSize: 16, marginTop: 8 }]}>Os dados psicométricos detalhados deste teste (Slope Change, Inatividade e Manuseio) foram extraídos por nível e gerados no console do sistema (terminal) para o estudo de caso. Verifique os logs.</Text>
+              <View style={[styles.metricGlassCard, { backgroundColor: 'rgba(155, 242, 232, 0.15)', borderColor: '#9bf2e8', alignItems: 'center', paddingVertical: 32 }]}>
+                <Sparkles color="#FFC857" size={48} style={{ marginBottom: 16 }} />
+                <Text style={[styles.metricLabelSmall, { color: '#FFC857', fontSize: 24, textAlign: 'center', letterSpacing: 0.5 }]}>Uau, que demais!</Text>
+                <Text style={[styles.metricValueSmall, { color: '#FFF', fontSize: 18, marginTop: 12, textAlign: 'center', lineHeight: 26 }]}>
+                  Você montou o quebra-cabeça direitinho! Sua memória e agilidade estão de parabéns!
+                </Text>
               </View>
             </View>
           )}
 
-          <Pressable 
-            style={({ pressed }) => [
-              styles.playAgainButton,
-              pressed && { backgroundColor: '#7B61FF' }
-            ]} 
-            onPress={startGame}
-          >
-            {({ pressed }) => (
-              <>
-                <RotateCcw color={pressed ? "#FFF" : "#084D48"} size={24} />
-                <Text style={[styles.playAgainText, pressed && { color: '#FFF' }]}>Montar Novamente</Text>
-              </>
-            )}
-          </Pressable>
-        </View>
+          <View style={{ width: '100%', gap: 12, marginTop: 12 }}>
+            <Pressable 
+              style={({ pressed }) => [
+                styles.playAgainButton,
+                pressed && { backgroundColor: '#7B61FF' }
+              ]} 
+              onPress={startGame}
+            >
+              {({ pressed }) => (
+                <>
+                  <RotateCcw color={pressed ? "#FFF" : "#084D48"} size={24} />
+                  <Text style={[styles.playAgainText, pressed && { color: '#FFF' }]}>Montar Novamente</Text>
+                </>
+              )}
+            </Pressable>
 
-        <View style={{ width: '100%', marginTop: 12 }}>
-          <Pressable 
-            style={({ pressed }) => [
-              styles.leaveButton,
-              pressed && { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
-            ]} 
-            onPress={handleRequestExit}
-          >
-            {({ pressed }) => (
-              <Text style={[styles.leaveButtonText, pressed && { color: '#FFF' }]}>Voltar ao Início</Text>
-            )}
-          </Pressable>
+            <Pressable 
+              style={({ pressed }) => [
+                styles.leaveButton,
+                pressed && { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+              ]} 
+              onPress={handleRequestExit}
+            >
+              {({ pressed }) => (
+                <Text style={[styles.leaveButtonText, pressed && { color: '#FFF' }]}>Voltar ao Início</Text>
+              )}
+            </Pressable>
+          </View>
         </View>
         {renderExitModal()}
       </View>
@@ -817,17 +830,16 @@ const styles = StyleSheet.create({
   },
   leaveButton: {
     paddingVertical: 18,
-    borderRadius: 16,
+    borderRadius: 99,
     width: '100%',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
     backgroundColor: 'transparent',
   },
   leaveButtonText: {
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 16,
     fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
   expandedTitle: {
     fontSize: 24,

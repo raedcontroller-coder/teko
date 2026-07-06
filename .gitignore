@@ -41,3 +41,7 @@ homesection_mobile
 jogo_bomba_design
 quebra_cabeca
 go-nogo
+apps/api_two/.venv
+apps/api_two/src/generate_pdf.py
+Psicometria_TEKO.pdf
+Psicometria_TEKO.md

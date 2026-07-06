@@ -8,6 +8,17 @@ export interface TelemetryEvent {
   reactionTime: number | null;
 }
 
+export interface GoNoGoRawMetrics {
+  totalGoStimuli: number;
+  totalNoGoStimuli: number;
+  hits: number;
+  misses: number;
+  falseAlarms: number;
+  correctRejections: number;
+  reactionTimesHits: number[];
+  reactionTimesCommissions: number[];
+}
+
 export class TelemetryLogger {
   private events: TelemetryEvent[] = [];
 
@@ -15,28 +26,33 @@ export class TelemetryLogger {
     this.events.push(event);
   }
 
-  getMetrics() {
+  getRawMetrics(): GoNoGoRawMetrics {
     const noGoTrials = this.events.filter(e => e.stimulusType === 'nogo');
     const goTrials = this.events.filter(e => e.stimulusType === 'go');
 
-    const commissions = noGoTrials.filter(e => e.responseType === 'commission').length;
-    const omissions = goTrials.filter(e => e.responseType === 'miss').length;
+    const rawHits = goTrials.filter(e => e.responseType === 'hit').length;
+    const rawMisses = goTrials.filter(e => e.responseType === 'miss').length;
+    const rawCommissions = noGoTrials.filter(e => e.responseType === 'commission').length;
+    const rawCorrectRejections = noGoTrials.filter(e => e.responseType === 'correct_rejection').length;
     
-    const hits = goTrials.filter(e => e.responseType === 'hit');
-    const avgReactionTime = hits.length > 0 
-      ? hits.reduce((acc, curr) => acc + (curr.reactionTime || 0), 0) / hits.length 
-      : 0;
-
-    const tec = noGoTrials.length > 0 ? (commissions / noGoTrials.length) * 100 : 0;
-    const to = goTrials.length > 0 ? (omissions / goTrials.length) * 100 : 0;
+    // Extraindo e arredondando os tempos de reação
+    const reactionTimesHits = goTrials
+      .filter(e => e.responseType === 'hit' && e.reactionTime !== null)
+      .map(e => Math.round(e.reactionTime as number));
+      
+    const reactionTimesCommissions = noGoTrials
+      .filter(e => e.responseType === 'commission' && e.reactionTime !== null)
+      .map(e => Math.round(e.reactionTime as number));
 
     return {
-      totalTrials: this.events.length,
-      tec: tec.toFixed(1), // Taxa de Erros de Comissão (%) - PRINCIPAL
-      to: to.toFixed(1),   // Taxa de Omissões (%)
-      avgReactionTime: avgReactionTime.toFixed(0), // ms
-      commissions,
-      omissions,
+      totalGoStimuli: goTrials.length,
+      totalNoGoStimuli: noGoTrials.length,
+      hits: rawHits,
+      misses: rawMisses,
+      falseAlarms: rawCommissions,
+      correctRejections: rawCorrectRejections,
+      reactionTimesHits,
+      reactionTimesCommissions
     };
   }
   

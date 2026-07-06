@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { spawn } from 'child_process';
 
 dotenv.config();
 
@@ -52,7 +53,7 @@ const getCategoryPrompt = (category: string) => {
     'Instrumentos Musicais': 'Violão, piano, bateria, flauta, pandeiro, guitarra, teclado, trompete, sanfona.',
     'Profissões': 'Médico, professor, bombeiro, policial, padeiro, dentista, engenheiro, veterinário.',
     'Coisas Verdes': 'Folha, sapo, brócolis, pepino, maçã verde, abacate, grama, ervilha, planta, relva, goiaba, limão.',
-    'Coisas Redondas': 'Bola, laranja, moeda, relógio, pneu, planeta, lua cheia, pizza, roda, melancia.',
+    'Coisas Redondas': 'Bola, laranja, moeda, relógio, pneu, planeta, lua cheia, pizza, roda, melancia.'
   };
   const examples = mapping[category] ?? 'várias palavras que pertencem a essa categoria.';
   return `O áudio a seguir é de uma criança de 5 a 12 anos brincando de um jogo de palavras em português. A criança deve falar uma palavra da categoria "${category}". Exemplos de respostas válidas: ${examples}`;
@@ -93,14 +94,14 @@ fastify.post('/api/bomba/validate', async (request, reply) => {
 
     for await (const part of parts) {
       if (part.type === 'field') {
-        // Campo de texto (category, usedWords, etc.)
+        // Campo de texto (category, etc.)
         if (part.fieldname === 'category') {
           category = String(part.value);
         } else if (part.fieldname === 'usedWords') {
           try {
             usedWords = JSON.parse(String(part.value));
           } catch (e) {
-            console.warn('[V2] Erro ao parsear usedWords:', e);
+            console.error('[V2] Erro ao parsear usedWords:', e);
           }
         }
       } else if (part.type === 'file') {
@@ -156,8 +157,13 @@ fastify.post('/api/bomba/validate', async (request, reply) => {
     const categoryExamples = getCategoryPrompt(category)
       .split('Exemplos de respostas válidas: ')[1] ?? '';
 
+    let usedWordsContext = '';
+    if (usedWords.length > 0) {
+      usedWordsContext = `\n7. PALAVRAS REPETIDAS (PROIBIDO): A criança NÃO PODE repetir palavras. Ela JÁ DISSE as seguintes palavras nesta categoria: ${JSON.stringify(usedWords)}. Se a transcrição corresponder EXATAMENTE ou for UM SINÔNIMO ÓBVIO de alguma dessas palavras, retorne FALSE e diga que ela já disse essa palavra!`;
+    }
+
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -170,8 +176,7 @@ REGRAS DE TOLERÂNCIA FONÉTICA (OBRIGATÓRIAS):
 3. TROCAS CONSONANTAIS: Ex: "Caçolo" = "Cachorro", "Fiolim" = "Violim".
 4. ONOMATOPEIAS: "Au au" = Cachorro, "Miau" = Gato, "Muu" = Vaca.
 5. CRIATURAS FICTÍCIAS E MITOLÓGICAS: Se a categoria descreve uma característica (ex: "Bichos que Voam", "Coisas Verdes"), aceite criaturas fictícias/mitológicas que tenham essa característica no imaginário popular infantil. Ex: "Dragão" voa → TRUE para "Bichos que Voam". "Fênix" voa → TRUE. "Sereia" nada → TRUE para categoria de animais aquáticos.
-${usedWords.length > 0 ? `6. PALAVRAS REPETIDAS: A criança JÁ DISSE as seguintes palavras nesta categoria: ${JSON.stringify(usedWords)}. Se a transcrição for igual, plural, diminutivo ou uma variação fonética direta de ALGUMA DESSAS PALAVRAS já ditas, retorne valid: false com a message "Você já falou essa palavra!".` : ''}
-7. REGRA DE OURO: Se a transcrição soa como poderia ser dita por uma criança tentando falar uma palavra da categoria (e não for repetida), retorne TRUE. Em caso de dúvida, SEMPRE prefira TRUE.
+6. REGRA DE OURO: Se a transcrição soa como poderia ser dita por uma criança tentando falar uma palavra da categoria, retorne TRUE. Em caso de dúvida, SEMPRE prefira TRUE.${usedWordsContext}
 
 Sua resposta DEVE ser um objeto JSON estrito com APENAS 2 chaves:
 - "valid": boolean (true ou false)
@@ -238,6 +243,144 @@ Essa transcrição é uma resposta válida (ou aproximação fonética válida) 
       error: 'Erro interno V2',
       message: 'Algo deu errado aqui. Tenta de novo!',
     });
+  }
+});
+
+fastify.post('/api/bomba/slope-change', async (request, reply) => {
+  try {
+    const { reactionTimes } = request.body as { reactionTimes: number[] };
+    
+    if (!reactionTimes || !Array.isArray(reactionTimes)) {
+      return reply.status(400).send({ error: 'Array reactionTimes inválido ou ausente.' });
+    }
+
+    const pyScript = path.join(__dirname, 'piecewise.py');
+    const pythonProcess = spawn('python', [pyScript, JSON.stringify(reactionTimes)]);
+
+    let dataString = '';
+    let errorString = '';
+
+    for await (const chunk of pythonProcess.stdout) {
+      dataString += chunk.toString();
+    }
+    for await (const chunk of pythonProcess.stderr) {
+      errorString += chunk.toString();
+    }
+
+    const code = await new Promise((resolve) => {
+      pythonProcess.on('close', resolve);
+    });
+
+    if (code !== 0) {
+      fastify.log.error(`Erro no script Python (exit code ${code}): ${errorString}`);
+      return reply.status(500).send({ error: 'Erro ao calcular slope change no Python.' });
+    }
+
+    try {
+      const result = JSON.parse(dataString);
+      if (result.error) {
+        return reply.status(400).send({ error: result.error });
+      }
+      return reply.send(result);
+    } catch (parseErr) {
+      fastify.log.error(`Erro de parse do retorno do Python: ${dataString}`);
+      return reply.status(500).send({ error: 'Retorno inválido do script Python.' });
+    }
+  } catch (err) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: 'Erro interno no servidor ao chamar Python.' });
+  }
+});
+
+fastify.post('/api/gonogo/sdt', async (request, reply) => {
+  try {
+    const data = request.body as any;
+
+    if (!data || typeof data.hits !== 'number') {
+      return reply.status(400).send({ error: 'Payload de matriz de confusão inválido.' });
+    }
+
+    const pyScript = path.join(__dirname, 'sdt.py');
+    const pythonProcess = spawn('python', [pyScript, JSON.stringify(data)]);
+
+    let dataString = '';
+    let errorString = '';
+
+    for await (const chunk of pythonProcess.stdout) {
+      dataString += chunk.toString();
+    }
+    for await (const chunk of pythonProcess.stderr) {
+      errorString += chunk.toString();
+    }
+
+    const code = await new Promise((resolve) => {
+      pythonProcess.on('close', resolve);
+    });
+
+    if (code !== 0) {
+      fastify.log.error(`Erro no script SDT Python (exit code ${code}): ${errorString}`);
+      return reply.status(500).send({ error: 'Erro ao calcular SDT no Python.' });
+    }
+
+    try {
+      const result = JSON.parse(dataString);
+      if (result.error) {
+        return reply.status(400).send({ error: result.error });
+      }
+      return reply.send(result);
+    } catch (parseErr) {
+      fastify.log.error(`Erro de parse do retorno do Python (SDT): ${dataString}`);
+      return reply.status(500).send({ error: 'Retorno inválido do script SDT Python.' });
+    }
+  } catch (err) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: 'Erro interno no servidor ao chamar Python SDT.' });
+  }
+});
+
+fastify.post('/api/puzzle/metrics', async (request, reply) => {
+  try {
+    const levels = request.body as any;
+
+    if (!Array.isArray(levels)) {
+      return reply.status(400).send({ error: 'Payload de níveis inválido.' });
+    }
+
+    const pyScript = path.join(__dirname, 'puzzle.py');
+    const pythonProcess = spawn('python', [pyScript, JSON.stringify(levels)]);
+
+    let dataString = '';
+    let errorString = '';
+
+    for await (const chunk of pythonProcess.stdout) {
+      dataString += chunk.toString();
+    }
+    for await (const chunk of pythonProcess.stderr) {
+      errorString += chunk.toString();
+    }
+
+    const code = await new Promise((resolve) => {
+      pythonProcess.on('close', resolve);
+    });
+
+    if (code !== 0) {
+      fastify.log.error(`Erro no script Puzzle Python (exit code ${code}): ${errorString}`);
+      return reply.status(500).send({ error: 'Erro ao calcular regressões no Python.' });
+    }
+
+    try {
+      const result = JSON.parse(dataString);
+      if (result.error) {
+        return reply.status(400).send({ error: result.error });
+      }
+      return reply.send(result);
+    } catch (parseErr) {
+      fastify.log.error(`Erro de parse do retorno do Python (Puzzle): ${dataString}`);
+      return reply.status(500).send({ error: 'Retorno inválido do script Puzzle Python.' });
+    }
+  } catch (err) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: 'Erro interno no servidor ao chamar Python Puzzle.' });
   }
 });
 

@@ -6,6 +6,7 @@ import { Mic, ArrowLeft, Bomb, Play, Frown, X, Flame, CheckCircle, AlertCircle, 
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { getRandomCategory, GameCategory } from '../../data/categories';
 import Svg, { Path, Circle, G, Line, Defs, RadialGradient, Stop, Ellipse } from 'react-native-svg';
+import { TelemetryLogger } from './TelemetryLogger';
 
 export interface BombaGameProps {
   onBack: () => void;
@@ -60,6 +61,9 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
 
   const [showExitModal, setShowExitModal] = useState(false);
 
+  // Instancia a nova classe de Telemetria (Ex-Gaussiana)
+  const logger = useRef(new TelemetryLogger()).current;
+
   const confirmExit = () => {
     setShowExitModal(false);
     cancelRecording(); // Fecha canal de áudio se sair no meio
@@ -92,12 +96,11 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
           </Text>
 
           <View style={styles.exitModalButtons}>
-            <Pressable 
-              style={({ pressed }) => [styles.stayButton, pressed && { backgroundColor: '#7B61FF' }]}
-              onPress={cancelExit}
-            >
+            <Pressable onPress={cancelExit}>
               {({ pressed }) => (
-                <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero Ficar!</Text>
+                <View style={[styles.stayButton, pressed && { backgroundColor: '#7B61FF' }]}>
+                  <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero Ficar!</Text>
+                </View>
               )}
             </Pressable>
 
@@ -134,6 +137,10 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
     
     // Aquece o microfone assim que o jogo começa para eliminar delay no primeiro uso
     warmUpRecording();
+    
+    // Zera a telemetria antiga e inicia a primeira rodada na telemetria
+    logger.clear();
+    logger.startRound(1);
   };
 
   useEffect(() => {
@@ -240,9 +247,39 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
           duration: 300,
           useNativeDriver: true,
         })
-      ]).start(() => {
+      ]).start(async () => {
         setGameOver(true);
         setIsExploding(false);
+
+        // Imprime os dados brutos no terminal ao morrer
+        // A pontuação final é (level - 1), garantindo que apenas os níveis concluídos sejam processados.
+        const rawTelemetryData = logger.getExGaussianRawData(level - 1);
+        console.log("\n\n=== DADOS BRUTOS: TELEMETRIA (BOMBA) ===");
+        console.log(JSON.stringify(rawTelemetryData, null, 2));
+        console.log("=========================================================\n\n");
+
+        // Calcula a regressão segmentada (Slope Change) via Python de forma assíncrona (não-bloqueante)
+        (async () => {
+          try {
+            const reactionTimes = rawTelemetryData.map(d => d.reactionTime);
+            const response = await fetch('http://10.246.21.235:3002/api/bomba/slope-change', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ reactionTimes })
+            });
+            const result = await response.json();
+            console.log("\n\n=== SLOPE CHANGE (REGRESSÃO SEGMENTADA) ===");
+            if (result.error) {
+              console.log(`Erro/Aviso: ${result.error}`);
+            } else {
+              console.log(JSON.stringify(result, null, 2));
+            }
+            console.log("===========================================\n\n");
+          } catch (e) {
+            console.log("Erro ao chamar API de Slope Change", e);
+          }
+        })();
+
         Animated.timing(flashOpacityAnim, {
           toValue: 0,
           duration: 500,
@@ -275,12 +312,22 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
     if (!category || isValidating) return;
 
     if (isRecording) {
+      // Captura o momento exato que a criança solta o botão/termina de falar
+      // ANTES de enviar para a API, isolando a latência de rede.
+      const actionTime = performance.now();
+      
       const categoryUsedWords = usedWords[category.name] || [];
       const response = await stopRecordingAndValidate(category.name, categoryUsedWords);
       
       if (isGameOverRef.current) return;
 
       if (response) {
+        // Loga o tempo de reação APENAS se tiver havido uma transcrição audível (ou seja, não soltou o mic no silêncio/vazio)
+        if (response.transcription && response.transcription.trim() !== '') {
+          // Injeta o tempo capturado antes do lag da rede
+          logger.logResponse(actionTime);
+        }
+
         if (response.valid) {
           soundsRef.current.success?.replayAsync();
           setTimeLeft((prev) => prev + 5000);
@@ -296,9 +343,25 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
           const newCategory = getRandomCategory(nextLevel);
           setCategory(newCategory);
           
+          // Inicia a nova rodada na telemetria
+          logger.startRound(nextLevel);
+          
+          // Exibe os dados consolidados do nível recém-finalizado no terminal em tempo real
+          const currentData = logger.getExGaussianRawData(level);
+          const justFinishedLevelData = currentData[currentData.length - 1];
+          if (justFinishedLevelData) {
+            console.log(`\n[BOMBA - TEMPO REAL] Dados do Nível ${justFinishedLevelData.level}:`);
+            console.log(`  Tempo de Reação (Latência): ${justFinishedLevelData.reactionTime}ms`);
+            console.log(`  Erros Cometidos (Impulsividade): ${justFinishedLevelData.errors}\n`);
+          }
+          
           showToast('Boa!', '+1 Ponto!', 'success');
           warmUpRecording();
         } else {
+          // Incrementa um erro caso a resposta não seja válida, mas tenha havido transcrição audível
+          if (response.transcription && response.transcription.trim() !== '') {
+            logger.logError();
+          }
           setValidationError(response.message || `Ouvi "${response.transcription}", mas não combina com ${category.name}.`);
           warmUpRecording();
         }
@@ -351,7 +414,7 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
   if (!isPlaying && !gameOver && !isExploding) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+        <TouchableOpacity onPress={handleRequestExit} style={styles.backButton}>
           <ArrowLeft color="#fff" size={24} />
         </TouchableOpacity>
         
@@ -379,6 +442,7 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
             )}
           </Pressable>
         </View>
+        {renderExitModal()}
       </View>
     );
   }
@@ -390,7 +454,7 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
         
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onBack} style={styles.iconButton}>
+          <TouchableOpacity onPress={handleRequestExit} style={styles.iconButton}>
             <ArrowLeft color="#fff" size={24} />
           </TouchableOpacity>
           <Text style={styles.gameOverTitle}>Fim de Jogo</Text>
@@ -398,16 +462,17 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
         </View>
 
         <View style={styles.kaboomCenter}>
-          <View style={styles.heroIconWrapperSimple}>
-            <Trophy color="#FFC857" size={80} />
-          </View>
-          
-          <View style={styles.scoreContainerSimple}>
-            <Text style={styles.feedbackTitleSimple}>O tempo acabou!</Text>
-            <Text style={styles.feedbackDescSimple}>Você jogou muito bem, sua pontuação foi:</Text>
-
-            <Text style={styles.finalScoreValueSimple}>{level}</Text>
-            <Text style={styles.finalScoreLabelSimple}>{level === 1 ? 'PONTO' : 'PONTOS'}</Text>
+          <View style={[styles.feedbackCardOver, { backgroundColor: 'transparent', borderColor: 'transparent', alignItems: 'center', padding: 32, borderRadius: 24 }]}>
+            <View style={{ alignItems: 'center', marginBottom: 24 }}>
+              <Trophy color="#FFC857" size={120} />
+            </View>
+            <Text style={[styles.feedbackTitleSimple, { color: '#FFC857', fontSize: 32 }]}>Uau, que demais!</Text>
+            <Text style={[styles.feedbackDescSimple, { fontSize: 20, color: '#FFF', marginBottom: 24 }]}>Você foi incrível! Sua pontuação foi de:</Text>
+            
+            <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 12 }}>
+              <Text style={[styles.finalScoreValueSimple, { color: '#FFF', textShadowColor: 'rgba(255, 255, 255, 0.3)', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10, fontSize: 100, lineHeight: 100, fontWeight: '900' }]}>{level - 1}</Text>
+              <Text style={[styles.finalScoreLabelSimple, { color: '#FFF', marginTop: 8, fontSize: 24, letterSpacing: 4 }]}>{(level - 1) === 1 ? 'PONTO' : 'PONTOS'}</Text>
+            </View>
           </View>
         </View>
 
@@ -432,13 +497,14 @@ export const BombaGame: React.FC<BombaGameProps> = ({ onBack }) => {
               styles.backHomeButton,
               pressed && { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
             ]} 
-            onPress={onBack}
+            onPress={handleRequestExit}
           >
             {({ pressed }) => (
               <Text style={[styles.backHomeText, pressed && { color: '#FFF' }]}>Voltar ao Início</Text>
             )}
           </Pressable>
         </View>
+        {renderExitModal()}
       </View>
     );
   }
@@ -1042,13 +1108,16 @@ const styles = StyleSheet.create({
   },
   leaveButton: {
     paddingVertical: 18,
+    borderRadius: 99,
     width: '100%',
     alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   leaveButtonText: {
-    color: '#FFF',
+    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
   toastContainer: {
     position: 'absolute',

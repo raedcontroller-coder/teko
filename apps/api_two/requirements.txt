@@ -1,0 +1,4 @@
+numpy
+scipy
+fpdf2
+matplotlib

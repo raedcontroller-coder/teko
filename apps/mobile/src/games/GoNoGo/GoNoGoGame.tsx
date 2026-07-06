@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Platform, StatusBar, Pressable, Animated, Modal, Vibration } from 'react-native';
 import { Audio } from 'expo-av';
-import { ArrowLeft, CheckCircle, RotateCcw, Flame, X, Frown, Play } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle, RotateCcw, Flame, X, Frown, Play, Sparkles } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { STIMULI, StimulusType } from './data';
 import { TelemetryLogger, ResponseType } from './TelemetryLogger';
@@ -149,12 +149,11 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
           </Text>
 
           <View style={styles.exitModalButtons}>
-            <Pressable 
-              style={({ pressed }) => [styles.stayButton, pressed && { backgroundColor: '#7B61FF' }]}
-              onPress={cancelExit}
-            >
+            <Pressable onPress={cancelExit}>
               {({ pressed }) => (
-                <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero Ficar!</Text>
+                <View style={[styles.stayButton, pressed && { backgroundColor: '#7B61FF' }]}>
+                  <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero Ficar!</Text>
+                </View>
               )}
             </Pressable>
 
@@ -173,7 +172,31 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
   const nextTrial = () => {
     if (currentTrialIndex + 1 >= sequence.length) {
       setGameState('finished');
-      setMetrics(logger.getMetrics());
+      const rawMetrics = logger.getRawMetrics();
+      setMetrics(rawMetrics);
+      
+      // Envia os dados puros para o Python calcular o d' e Critério C
+      (async () => {
+        try {
+          const response = await fetch('http://10.246.21.235:3002/api/gonogo/sdt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(rawMetrics)
+          });
+          const result = await response.json();
+          
+          console.log("\n\n=== TEORIA DA DETECÇÃO DOS SINAIS (TDS) - GO/NO-GO (PYTHON) ===");
+          if (result.error) {
+            console.log(`Erro/Aviso: ${result.error}`);
+          } else {
+            console.log(JSON.stringify(result, null, 2));
+          }
+          console.log("========================================================\n\n");
+          
+        } catch (e) {
+          console.log("Erro ao chamar API de SDT", e);
+        }
+      })();
     } else {
       setCurrentTrialIndex(prev => prev + 1);
       setGameState('isi');
@@ -367,24 +390,12 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
           
           {metrics && (
             <View style={styles.metricsContainer}>
-              <View style={styles.metricGlassCard}>
-                <Text style={styles.metricLabel}>Taxa de Erros de Comissão (TEC)</Text>
-                <Text style={[styles.metricValue, { color: '#EF4444' }]}>{metrics.tec}%</Text>
-                <Text style={styles.metricDesc}>Toques incorretos no Gato</Text>
-              </View>
-
-              <View style={styles.metricRow}>
-                <View style={[styles.metricGlassCard, { flex: 1 }]}>
-                  <Text style={styles.metricLabelSmall}>Omissões (TO)</Text>
-                  <Text style={[styles.metricValueSmall, { color: '#FFC857' }]}>{metrics.to}%</Text>
-                  <Text style={styles.metricDescSmall}>Perdeu o cão</Text>
-                </View>
-
-                <View style={[styles.metricGlassCard, { flex: 1 }]}>
-                  <Text style={styles.metricLabelSmall}>Reação (Média)</Text>
-                  <Text style={[styles.metricValueSmall, { color: '#9bf2e8' }]}>{metrics.avgReactionTime}ms</Text>
-                  <Text style={styles.metricDescSmall}>Velocidade</Text>
-                </View>
+              <View style={[styles.metricGlassCard, { backgroundColor: 'rgba(155, 242, 232, 0.15)', borderColor: '#9bf2e8', alignItems: 'center', paddingVertical: 32 }]}>
+                <Sparkles color="#FFC857" size={48} style={{ marginBottom: 16 }} />
+                <Text style={[styles.metricLabelSmall, { color: '#FFC857', fontSize: 24, textAlign: 'center', letterSpacing: 0.5 }]}>Você foi incrível!</Text>
+                <Text style={[styles.metricValueSmall, { color: '#FFF', fontSize: 18, marginTop: 12, textAlign: 'center', lineHeight: 26 }]}>
+                  Sua sessão foi concluída. Seus reflexos estão super rápidos, parecendo um verdadeiro herói!
+                </Text>
               </View>
             </View>
           )}
@@ -431,7 +442,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
   });
 
   return (
-    <TouchableWithoutFeedback onPress={handleScreenTouch}>
+    <TouchableWithoutFeedback onPressIn={handleScreenTouch}>
       <View style={styles.gameArea}>
         {renderExitModal()}
         
@@ -897,12 +908,15 @@ const styles = StyleSheet.create({
   },
   leaveButton: {
     paddingVertical: 18,
+    borderRadius: 99,
     width: '100%',
     alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   leaveButtonText: {
-    color: '#FFF',
+    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
 });
