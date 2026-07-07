@@ -8,9 +8,9 @@ import { DashboardScreen } from './src/screens/main/DashboardScreen';
 import { GamesScreen } from './src/screens/GamesScreen';
 import { PatientsScreen } from './src/screens/main/PatientsScreen';
 import { ProfileScreen } from './src/screens/main/ProfileScreen';
-import { BombaGame } from './src/games/Bomba/BombaGame';
+import { GoleiroGame } from './src/games/Goleiro/GoleiroGame';
 import { GoNoGoGame } from './src/games/GoNoGo/GoNoGoGame';
-import { PuzzleGame } from './src/games/Puzzle/PuzzleGame';
+import { FotografoGame } from './src/games/Fotografo/FotografoGame';
 import { LoginScreen } from './src/screens/auth/LoginScreen';
 import { RegisterScreen } from './src/screens/auth/RegisterScreen';
 
@@ -79,9 +79,9 @@ export default function App() {
     return (
       <View style={{ flex: 1 }}>
         <StatusBar style="auto" />
-        {activeGame === 'Bomba' && <BombaGame onBack={() => setActiveGame(null)} />}
+        {activeGame === 'Goleiro' && <GoleiroGame onBack={() => setActiveGame(null)} />}
         {activeGame === 'GoNoGo' && <GoNoGoGame onBack={() => setActiveGame(null)} />}
-        {activeGame === 'Puzzle' && <PuzzleGame onBack={() => setActiveGame(null)} />}
+        {activeGame === 'Puzzle' && <FotografoGame onBack={() => setActiveGame(null)} />}
       </View>
     );
   }

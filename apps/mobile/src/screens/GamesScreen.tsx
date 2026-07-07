@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar, Pressable } from 'react-native';
-import { Bomb, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock } from 'lucide-react-native';
+import { Shield, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock, Camera } from 'lucide-react-native';
 
 interface GamesScreenProps {
   onSelectGame: (gameId: string) => void;
@@ -45,23 +45,23 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
           </View>
 
           <View style={styles.grid}>
-            {/* Jogo da Bomba */}
+            {/* Goleiro */}
             <Animated.View style={[styles.cardWrapper, getAnimatedStyle(0)]}>
               <View style={styles.card}>
                 <View style={styles.iconBoxLilas}>
-                  <Bomb color="#FFF" size={32} />
+                  <Shield color="#FFF" size={32} />
                 </View>
                 <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitle}>Jogo da Bomba</Text>
+                  <Text style={styles.cardTitle}>Goleiro</Text>
                   <View style={styles.pillBox}>
-                    <Text style={styles.pillText}>Velocidade de Processamento</Text>
+                    <Text style={styles.pillText}>Tempo de Reação</Text>
                   </View>
                 </View>
-                <Text style={styles.cardDesc}>Alternância de turnos com categorias semânticas sob pressão de tempo.</Text>
+                <Text style={styles.cardDesc}>Defenda as bolas chutadas ao gol e teste seus reflexos motores.</Text>
                 
                 <Pressable 
                   style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
-                  onPress={() => onSelectGame('Bomba')}
+                  onPress={() => onSelectGame('Goleiro')}
                 >
                   {({ pressed }) => (
                     <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
@@ -99,15 +99,15 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
             <Animated.View style={[styles.cardWrapper, getAnimatedStyle(2)]}>
               <View style={styles.card}>
                 <View style={styles.iconBoxLilas}>
-                  <Puzzle color="#FFF" size={32} />
+                  <Camera color="#FFF" size={32} />
                 </View>
                 <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitle}>Quebra-Cabeça</Text>
+                  <Text style={styles.cardTitle}>Fotógrafo da Floresta</Text>
                   <View style={styles.pillBox}>
-                        <Text style={styles.pillText}>Percepção Visuoespacial</Text>
+                        <Text style={styles.pillText}>Atenção Sustentada</Text>
                   </View>
                 </View>
-                <Text style={styles.cardDesc}>Organização de peças fragmentadas para formar uma imagem completa.</Text>
+                <Text style={styles.cardDesc}>Tire fotos do pássaro e treine sua atenção inibitória na floresta.</Text>
                 
                 <Pressable 
                   style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}

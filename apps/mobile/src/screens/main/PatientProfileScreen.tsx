@@ -15,7 +15,7 @@ import {
   Modal,
   Alert
 } from 'react-native';
-import { ArrowLeft, Baby, User, Shield, Target, Puzzle, Bomb, Save, Trash2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react-native';
+import { ArrowLeft, Baby, User, Shield, Target, Camera, Bomb, Save, Trash2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react-native';
 import { api } from '../../services/api';
 
 interface PatientProfileScreenProps {
@@ -364,13 +364,13 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
               </View>
             </View>
 
-            {/* Card Quebra-Cabeça */}
+            {/* Card Fotógrafo */}
             <View style={styles.gameCard}>
               <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(230,168,0,0.1)' }]}>
-                <Puzzle color="#FFC857" size={32} />
+                <Camera color="#FFC857" size={32} />
               </View>
-              <Text style={styles.gameTitle}>Quebra-Cabeça</Text>
-              <Text style={styles.gameDesc}>Lógica e percepção espacial.</Text>
+              <Text style={styles.gameTitle}>Fotógrafo da Floresta</Text>
+              <Text style={styles.gameDesc}>Atenção e controle inibitório.</Text>
               <View style={styles.gameBadge}>
                 <Text style={styles.gameBadgeText}>Ainda não jogou</Text>
               </View>
