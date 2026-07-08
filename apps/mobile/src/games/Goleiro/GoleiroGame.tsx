@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, Text, StyleSheet, ImageBackground, TouchableOpacity, 
-  Image, Animated, Pressable, Modal, Easing, Dimensions, LogBox
+  Image, Animated, Pressable, Modal, Easing, Dimensions, LogBox, Platform
 } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Shield, ArrowLeft, Trophy, X, Frown, Settings } from 'lucide-react-native';
@@ -336,15 +336,18 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ onBack }) => {
     // Feedback imediato do impacto inicial (Apenas Som)
     soundsRef.current.defesa?.playFromPositionAsync(0);
     
-    const reactionTime = Date.now() - ballAppearTimeRef.current;
+    const timeSinceSpawn = Date.now() - ballAppearTimeRef.current;
     
     // Penalidade por clique antecipado (Vermelho/Amarelo)
-    if (reactionTime < 2500) {
+    if (timeSinceSpawn < 2500) {
       handleMiss();
       return;
     }
 
     // Sucesso! Clicou no momento exato (Verde)
+    // O cronômetro psicométrico real só começa a contar a partir dos 2500ms (momento em que a bola fica verde e clicável)
+    const reactionTime = timeSinceSpawn - 2500;
+    
     isShotProcessedRef.current = true;
     
     if (shotTimeoutRef.current) clearTimeout(shotTimeoutRef.current);
@@ -432,6 +435,23 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ onBack }) => {
     setGameState('timeout');
     clearAllTimeouts();
     soundsRef.current.win?.replayAsync();
+    
+    // Envia os dados para a API Python (cálculo do VTR)
+    const telemetryPayload = {
+      game: 'goleiro',
+      reaction_times_ms: reactionTimesRef.current
+    };
+    
+    // Forçando o IP real da máquina para que funcione tanto no emulador quanto no device físico via Wi-Fi
+    const apiUrl = 'http://10.246.21.235:3002/api/calculo/goleiro';
+    
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(telemetryPayload)
+    }).then(res => res.json())
+      .then(data => console.log('VTR Python API Success:', data))
+      .catch(err => console.log('Failed to send telemetry:', err));
   };
 
   // Helper to pre-calculate bezier interpolations

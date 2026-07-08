@@ -1,0 +1,15 @@
+Com base na modelagem da equação da Teko e nos métodos de avaliação neuropsicológica detalhados pelos autores nos artigos, as unidades de medida para cada uma das variáveis são:
+
+**1. VTR (Variabilidade do Tempo de Reação)**
+*   **Unidade de medida:** **Milissegundos (ms)**.
+*   **Por quê:** A equação define o VTR como o desvio padrão do tempo que a criança leva para clicar no alvo. Nos testes computadorizados que medem o tempo de reação, como o Teste Psicofísico para Atenção Visual Voluntária (TPAVV) utilizado por Bolfer, o software registra a velocidade motora da criança em milissegundos (frações de segundo). O desvio padrão dessa variação também é expresso em milissegundos.
+
+**2. Erro_NoGo (Impulsividade / Erro de Comissão)**
+*   **Unidade de medida:** **Contagem absoluta / Número inteiro** (Quantidade de vezes).
+*   **Por quê:** A equação define esta variável como a "quantidade de vezes que a criança clicou no obstáculo proibido". Na literatura, como nos testes Continuous Performance Test (CPT) descritos por Vasconcelos, isso é contabilizado por meio do registro do número de "erros por comissão" (quando o sujeito pressiona a tecla diante de um estímulo que deveria ser ignorado). Portanto, a unidade é simplesmente a quantidade (ex: 5 erros, 12 erros).
+
+**3. Queda_Atenção (Atenção Sustentada)**
+*   **Unidade de medida:** **Milissegundos (ms)** OU **Contagem absoluta** (dependendo de qual métrica de "performance" o jogo utilizar).
+*   **Por quê:** A sua equação define a queda de atenção como a "diferença de performance entre os primeiros 2 minutos de jogo e os últimos 2 minutos". Sendo uma diferença (um valor delta $\Delta$), a unidade depende do que você está medindo para representar a performance:
+    *   **Se for por Lentidão:** Se o jogo medir o tempo que a criança leva para agir ao longo da partida, a queda de atenção será identificada por um tempo de reação mais lento. A unidade será a diferença em **milissegundos (ms)** entre as médias do final e do início.
+    *   **Se for por Omissão/Desatenção:** Se o jogo medir quantas vezes a criança "esqueceu" de jogar, a queda de atenção será um aumento no número de erros por omissão, ou na "quantidade de vezes desconcentrado" conforme descrito no estudo de Costa. A unidade será a diferença em **contagem absoluta** (número de omissões no fim menos o número de omissões no início).

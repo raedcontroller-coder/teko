@@ -175,10 +175,11 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
       const rawMetrics = logger.getRawMetrics();
       setMetrics(rawMetrics);
       
-      // Envia os dados puros para o Python calcular o d' e Critério C
+      // Envia os dados puros para o Python calcular o d' e Critério C (SDT antigo)
       (async () => {
         try {
-          const response = await fetch('http://10.246.21.235:3002/api/gonogo/sdt', {
+          const apiUrlSDT = 'http://10.246.21.235:3002/api/gonogo/sdt';
+          const response = await fetch(apiUrlSDT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(rawMetrics)
@@ -195,6 +196,22 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
           
         } catch (e) {
           console.log("Erro ao chamar API de SDT", e);
+        }
+      })();
+
+      // Envia os dados para a nossa nova API de cálculo psicométrico de Impulsividade (Erro_NoGo)
+      (async () => {
+        try {
+          const apiUrlImpulsividade = 'http://10.246.21.235:3002/api/calculo/tocarapido';
+          const response = await fetch(apiUrlImpulsividade, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(rawMetrics)
+          });
+          const result = await response.json();
+          console.log('Impulsividade Python API Success:', result);
+        } catch (e) {
+          console.log("Failed to send Toca Rápido telemetry:", e);
         }
       })();
     } else {

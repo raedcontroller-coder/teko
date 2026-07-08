@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, Text, StyleSheet, ImageBackground, TouchableOpacity, 
-  Image, Animated, Pressable, Modal
+  Image, Animated, Pressable, Modal, Platform
 } from 'react-native';
 import { Camera, ArrowLeft, Trophy, Play, Timer, X, Frown } from 'lucide-react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -157,6 +157,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
   const [feedbackType, setFeedbackType] = useState<'success' | 'warning'>('success');
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
+  const timeLeftRef = useRef(GAME_DURATION);
   const [activeAnimals, setActiveAnimals] = useState<ActiveAnimal[]>([]);
 
   const flashAnim = useRef(new Animated.Value(0)).current;
@@ -165,6 +166,18 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
   const cameraPulseAnim = useRef(new Animated.Value(1)).current;
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Controle exato de pássaros por fase para segurança psicométrica
+  const phase1BirdsLeft = useRef(6);
+  const phase2BirdsLeft = useRef(6);
+  
+  // Telemetry ref para Queda de Atenção
+  const telemetryRef = useRef<{
+    spawnTimeGameSeconds: number;
+    result: 'success' | 'omission';
+    reactionTimeMs: number | null;
+    spawnTimestamp: number;
+  }[]>([]);
   
   const soundsRef = useRef<{ camera: Audio.Sound | null; ambient: Audio.Sound | null; win: Audio.Sound | null }>({
     camera: null,
@@ -225,12 +238,77 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
     let timer: NodeJS.Timeout;
     if (gameState === 'playing' && timeLeft > 0) {
       timer = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
+        setTimeLeft(prev => {
+          const newTime = prev - 1;
+          timeLeftRef.current = newTime;
+          return newTime;
+        });
       }, 1000);
     } else if (timeLeft === 0 && gameState === 'playing') {
       setGameState('timeout');
       clearAllTimeouts();
       soundsRef.current.win?.replayAsync();
+      
+      // COMPUTAR OS 3 DADOS POR RECORTES DE TEMPO NO FRONTEND ANTES DE ENVIAR PARA O PYTHON
+      const tData = telemetryRef.current;
+      
+      const p1_rt: number[] = [];
+      let p1_omissions = 0;
+      let p1_commissions = 0;
+
+      const p2_rt: number[] = [];
+      let p2_omissions = 0;
+      let p2_commissions = 0;
+
+      tData.forEach(t => {
+        // time_sec é o tempo decorrido do jogo (0 a 240)
+        // 4:00 decaindo até 2:01 significa que se passaram menos ou igual a 120 segundos.
+        if (t.spawnTimeGameSeconds <= 120) {
+          if (t.result === 'success' && t.reactionTimeMs) p1_rt.push(t.reactionTimeMs);
+          else if (t.result === 'omission') p1_omissions++;
+          else if (t.result === 'commission') p1_commissions++;
+        } else {
+          if (t.result === 'success' && t.reactionTimeMs) p2_rt.push(t.reactionTimeMs);
+          else if (t.result === 'omission') p2_omissions++;
+          else if (t.result === 'commission') p2_commissions++;
+        }
+      });
+
+      console.log("\n========================================================");
+      console.log(" 📸 COLETADOS: FOTÓGRAFO DA FLORESTA (PRÉ-PYTHON) 📸");
+      console.log("========================================================");
+      console.log("-> 1º RECORTE: Primeiros 2 minutos (4:00 decaindo até 2:01)");
+      console.log(`   [1/3] Array de Tempos de Acertos (RT): [${p1_rt.join(', ')}]`);
+      console.log(`   [2/3] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p1_commissions}`);
+      console.log(`   [3/3] Soma Absoluta de Omissões (Pássaros Perdidos): ${p1_omissions}`);
+      
+      console.log("\n-> 2º RECORTE: Últimos 2 minutos (2:00 decaindo até 0:00)");
+      console.log(`   [1/3] Array de Tempos de Acertos (RT): [${p2_rt.join(', ')}]`);
+      console.log(`   [2/3] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p2_commissions}`);
+      console.log(`   [3/3] Soma Absoluta de Omissões (Pássaros Perdidos): ${p2_omissions}`);
+      console.log("========================================================\n");
+
+      // Envia os dados para a API Python (cálculo de Queda de Atenção pelas médias)
+      const telemetryPayload = {
+        game: 'fotografo',
+        telemetry: tData
+      };
+      
+      const apiUrl = 'http://10.246.21.235:3002/api/calculo/fotografo';
+      
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(telemetryPayload)
+      }).then(res => res.json())
+        .then(data => {
+          console.log("\n========================================================");
+          console.log(" 🧠 LAUDO FINAL DO PYTHON (QUEDA DE ATENÇÃO) 🧠");
+          console.log("========================================================");
+          console.log(JSON.stringify(data, null, 2));
+          console.log("========================================================\n");
+        })
+        .catch(err => console.log('Failed to send Fotografo telemetry:', err));
     }
     return () => clearInterval(timer);
   }, [gameState, timeLeft]);
@@ -334,9 +412,13 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
   const startGame = () => {
     setScore(0);
     setTimeLeft(GAME_DURATION);
+    timeLeftRef.current = GAME_DURATION;
     setGameState('playing');
     setMenuStep(1);
     setActiveAnimals([]);
+    telemetryRef.current = [];
+    phase1BirdsLeft.current = 6;
+    phase2BirdsLeft.current = 6;
     startRound();
   };
 
@@ -346,14 +428,59 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
     cameraPulseAnim.stopAnimation();
     cameraPulseAnim.setValue(1);
     const roundDuration = Math.floor(Math.random() * 5 + 6) * 1000;
-    const numToSpawn = Math.floor(Math.random() * 3) + 1;
-    const availableTypes = [...ALL_ANIMALS];
+    
+    // Corrigido o bug do React Stale Closure usando o Ref mais recente
+    const currentTimeLeft = timeLeftRef.current;
+    
+    const isPhase1 = GAME_DURATION - currentTimeLeft <= 120;
+    let spawnBird = false;
+
+    // Regra rígida: NUNCA aparecer pássaros nos últimos 5 segundos de cada fase
+    // Fase 1 termina em timeLeft = 120 (5s finais: 125 até 121)
+    // Fase 2 termina em timeLeft = 0 (5s finais: 5 até 1)
+    const isForbiddenWindow = (currentTimeLeft > 120 && currentTimeLeft <= 125) || (currentTimeLeft > 0 && currentTimeLeft <= 5);
+
+    // Algoritmo para garantir exatos 6 pássaros em cada fase (antes da janela proibida)
+    if (!isForbiddenWindow) {
+      if (isPhase1) {
+        if (phase1BirdsLeft.current > 0) {
+          // Calcula tempo restante da fase 1 ignorando os últimos 5 segundos (120 + 5 = 125)
+          const timeRemainingInPhase = Math.max(0.1, currentTimeLeft - 125);
+          const roundsLeftAvg = Math.max(0.1, timeRemainingInPhase / 8);
+          if (Math.random() < (phase1BirdsLeft.current / roundsLeftAvg) || roundsLeftAvg <= phase1BirdsLeft.current) {
+            spawnBird = true;
+            phase1BirdsLeft.current -= 1;
+          }
+        }
+      } else {
+        if (phase2BirdsLeft.current > 0) {
+          // Calcula tempo restante da fase 2 ignorando os últimos 5 segundos (0 + 5 = 5)
+          const timeRemainingInPhase = Math.max(0.1, currentTimeLeft - 5);
+          const roundsLeftAvg = Math.max(0.1, timeRemainingInPhase / 8);
+          if (Math.random() < (phase2BirdsLeft.current / roundsLeftAvg) || roundsLeftAvg <= phase2BirdsLeft.current) {
+            spawnBird = true;
+            phase2BirdsLeft.current -= 1;
+          }
+        }
+      }
+    }
+
+    let availableTypes = ALL_ANIMALS.filter(a => a !== TARGET_ANIMAL);
     const typesToSpawn: AnimalType[] = [];
-    for (let i = 0; i < numToSpawn; i++) {
+
+    if (spawnBird) {
+      typesToSpawn.push(TARGET_ANIMAL);
+    }
+
+    const numToSpawn = Math.floor(Math.random() * 3) + 1; // 1 a 3 animais
+    const additionalToSpawn = spawnBird ? numToSpawn - 1 : numToSpawn;
+
+    for (let i = 0; i < additionalToSpawn; i++) {
       const typeIndex = Math.floor(Math.random() * availableTypes.length);
       typesToSpawn.push(availableTypes[typeIndex]);
       availableTypes.splice(typeIndex, 1);
     }
+    
     const newAnimals: ActiveAnimal[] = [];
     typesToSpawn.forEach(type => {
       const validSlots = EDITOR_SLOTS.filter(s => {
@@ -370,6 +497,19 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
       }
     });
     setActiveAnimals(newAnimals);
+    
+    // Registra a aparição de pássaros na telemetria (assume omissão por padrão)
+    newAnimals.forEach(a => {
+      if (a.slot.type === TARGET_ANIMAL) {
+        telemetryRef.current.push({
+          spawnTimeGameSeconds: GAME_DURATION - currentTimeLeft,
+          result: 'omission',
+          reactionTimeMs: null,
+          spawnTimestamp: Date.now()
+        });
+      }
+    });
+
     spawnIntervalRef.current = setTimeout(startRound, roundDuration);
   };
 
@@ -405,6 +545,22 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
     if (activeAnimals.some(a => a.slot.type === TARGET_ANIMAL)) {
       setScore(prev => prev + 1);
       showFeedback('success', 'Que foto linda!');
+      
+      // Encontra a última entrada de telemetria que ainda é 'omission' (do round atual)
+      const lastBirdIndex = telemetryRef.current.map(t => t.result).lastIndexOf('omission');
+      if (lastBirdIndex !== -1) {
+        const t = telemetryRef.current[lastBirdIndex];
+        t.result = 'success';
+        t.reactionTimeMs = Date.now() - t.spawnTimestamp;
+      }
+    } else if (activeAnimals.length > 0) {
+      // Erro de comissão: tirou foto de outro animal
+      telemetryRef.current.push({
+        spawnTimeGameSeconds: GAME_DURATION - timeLeftRef.current,
+        result: 'commission',
+        reactionTimeMs: null,
+        spawnTimestamp: Date.now()
+      });
     }
   };
 
