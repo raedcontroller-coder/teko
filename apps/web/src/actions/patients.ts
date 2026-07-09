@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "../../../../packages/db/db/index";
-import { users } from "../../../../packages/db/db/schema";
-import { eq, and } from "drizzle-orm";
+import { users, gameSessions } from "../../../../packages/db/db/schema";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "./auth";
 

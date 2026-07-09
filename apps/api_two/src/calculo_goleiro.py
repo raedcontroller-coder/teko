@@ -22,17 +22,17 @@ def main():
         print("\n" + "="*50, file=sys.stderr)
         print("⚽ CÁLCULO PSICOMÉTRICO: JOGO DO GOLEIRO ⚽", file=sys.stderr)
         print("="*50, file=sys.stderr)
+        print(f"Foram recebidos {len(reaction_times)} tempos de reação exatos de defesas obrigatórias.", file=sys.stderr)
         print(f"Dados Recebidos (Milissegundos): {reaction_times}", file=sys.stderr)
-        print(f"Total de Chutes Defendidos: {len(reaction_times)}", file=sys.stderr)
         print(f"Média de Tempo de Reação: {mean_rt:.2f} ms", file=sys.stderr)
         print(f"VTR (Desvio Padrão): {vtr:.2f} ms", file=sys.stderr)
         print("="*50 + "\n", file=sys.stderr)
         
         # Return the payload back to the Node app
         result = {
-            "vtr_ms": vtr,
-            "mean_ms": mean_rt,
-            "raw_data": reaction_times
+            "media_reacao_ms": round(mean_rt, 2),
+            "vtr_ms": round(vtr, 2),
+            "total_chutes": len(reaction_times)
         }
         
         print(json.dumps(result))

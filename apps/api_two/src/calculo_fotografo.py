@@ -1,6 +1,12 @@
 import sys
 import json
 import numpy as np
+from scipy.stats import zscore
+
+def safe_zscore(values):
+    if values[0] == values[1]:
+        return [0.0, 0.0]
+    return list(zscore(values))
 
 def main():
     try:
@@ -13,14 +19,6 @@ def main():
             print(json.dumps({"error": "No telemetry data provided"}))
             sys.exit(1)
             
-        # Phase 1: <= 120s (first 2 mins)
-        # Phase 2: > 120s (last 2 mins)
-        # Note: spawnTimeGameSeconds counts from 240 down to 0, or 0 to 240?
-        # In FotografoGame.tsx: spawnTimeGameSeconds = GAME_DURATION - timeLeft
-        # So 0 means start of the game, 240 means end of the game.
-        # Phase 1: <= 120
-        # Phase 2: > 120
-        
         phase1_rt = []
         phase2_rt = []
         
@@ -53,40 +51,50 @@ def main():
         p1_mean_rt = float(np.mean(phase1_rt)) if phase1_rt else 0.0
         p2_mean_rt = float(np.mean(phase2_rt)) if phase2_rt else 0.0
         
-        # Queda_Atenção (Lentidão) = Média Fase 2 - Média Fase 1
-        qa_lentidao_ms = p2_mean_rt - p1_mean_rt if phase1_rt and phase2_rt else 0.0
+        # Estruturando os vetores (Índice 0 = Fase 1, Índice 1 = Fase 2)
+        rt_values = [p1_mean_rt, p2_mean_rt]
+        om_values = [phase1_omissions, phase2_omissions]
+        com_values = [phase1_commissions, phase2_commissions]
         
-        # Queda_Atenção (Omissões) = Omissões Fase 2 - Omissões Fase 1
-        qa_omissao = phase2_omissions - phase1_omissions
+        # Aplicando Z-Score individualmente para cada uma das 3 variáveis
+        z_rt = safe_zscore(rt_values)
+        z_om = safe_zscore(om_values)
+        z_com = safe_zscore(com_values)
         
-        print("\n" + "="*50, file=sys.stderr)
-        print("📸 CÁLCULO PSICOMÉTRICO: FOTÓGRAFO DA FLORESTA 📸", file=sys.stderr)
-        print("="*50, file=sys.stderr)
-        print("=> FASE 1 (Primeiros 2 minutos):", file=sys.stderr)
-        print(f"   - Média de Tempo de Reação: {p1_mean_rt:.2f} ms", file=sys.stderr)
-        print(f"   - Lista (Tempos Corretos): {phase1_rt}", file=sys.stderr)
-        print(f"   - Omissões (Pássaros perdidos): {phase1_omissions}", file=sys.stderr)
-        print(f"   - Fotos Incorretas (Comissão): {phase1_commissions}", file=sys.stderr)
-        print("\n=> FASE 2 (Últimos 2 minutos):", file=sys.stderr)
-        print(f"   - Média de Tempo de Reação: {p2_mean_rt:.2f} ms", file=sys.stderr)
-        print(f"   - Lista (Tempos Corretos): {phase2_rt}", file=sys.stderr)
-        print(f"   - Omissões (Pássaros perdidos): {phase2_omissions}", file=sys.stderr)
-        print(f"   - Fotos Incorretas (Comissão): {phase2_commissions}", file=sys.stderr)
-        print("\n=> LAUDO DE QUEDA DE ATENÇÃO (QA):", file=sys.stderr)
-        print(f"   - QA (Lentidão): {qa_lentidao_ms:+.2f} ms", file=sys.stderr)
-        print(f"   - QA (Omissões): {qa_omissao:+} pássaro(s)", file=sys.stderr)
-        print("="*50 + "\n", file=sys.stderr)
+        # Média dos Z-Scores por fase
+        media_z_fase1 = (z_rt[0] + z_om[0] + z_com[0]) / 3.0
+        media_z_fase2 = (z_rt[1] + z_om[1] + z_com[1]) / 3.0
+        
+        # Queda_Atenção = Média_Z_Fase2 - Média_Z_Fase1
+        qa_score_final = media_z_fase2 - media_z_fase1
+        
+        print("\n" + "="*60, file=sys.stderr)
+        print("📸 CÁLCULO PSICOMÉTRICO: FOTÓGRAFO DA FLORESTA (Z-SCORE) 📸", file=sys.stderr)
+        print("="*60, file=sys.stderr)
+        print("=> DADOS BRUTOS COLETADOS:", file=sys.stderr)
+        print(f"   - FASE 1: RT={p1_mean_rt:.2f}ms | Omissões={phase1_omissions} | Comissões={phase1_commissions}", file=sys.stderr)
+        print(f"   - FASE 2: RT={p2_mean_rt:.2f}ms | Omissões={phase2_omissions} | Comissões={phase2_commissions}", file=sys.stderr)
+        
+        print("\n=> RESULTADOS DO Z-SCORE (Fase1 vs Fase2):", file=sys.stderr)
+        print(f"   - Z-Score RT        : [{z_rt[0]:.2f}, {z_rt[1]:.2f}]", file=sys.stderr)
+        print(f"   - Z-Score Omissão   : [{z_om[0]:.2f}, {z_om[1]:.2f}]", file=sys.stderr)
+        print(f"   - Z-Score Comissão  : [{z_com[0]:.2f}, {z_com[1]:.2f}]", file=sys.stderr)
+        
+        print("\n=> MÉDIAS DOS Z-SCORES E LAUDO FINAL:", file=sys.stderr)
+        print(f"   - Média Z-Score Fase 1: {media_z_fase1:+.2f}", file=sys.stderr)
+        print(f"   - Média Z-Score Fase 2: {media_z_fase2:+.2f}", file=sys.stderr)
+        print(f"   - QA Final (Variação) : {qa_score_final:+.2f}", file=sys.stderr)
+        print("="*60 + "\n", file=sys.stderr)
         
         result = {
-            "media_tempo_fase1": round(p1_mean_rt, 2),
-            "media_tempo_fase2": round(p2_mean_rt, 2),
-            "diferenca_tempo": round(qa_lentidao_ms, 2),
-            "absoluto_omissoes_fase1": phase1_omissions,
-            "absoluto_omissoes_fase2": phase2_omissions,
-            "diferenca_omissoes": phase2_omissions - phase1_omissions,
-            "absoluto_comissoes_fase1": phase1_commissions,
-            "absoluto_comissoes_fase2": phase2_commissions,
-            "diferenca_comissoes": phase2_commissions - phase1_commissions
+            "media_z_score_fase1": round(media_z_fase1, 2),
+            "media_z_score_fase2": round(media_z_fase2, 2),
+            "qa_score_final": round(qa_score_final, 2),
+            "detalhes_brutos": {
+                "rt": [round(p1_mean_rt, 2), round(p2_mean_rt, 2)],
+                "omissoes": om_values,
+                "comissoes": com_values
+            }
         }
         
         print(json.dumps(result))

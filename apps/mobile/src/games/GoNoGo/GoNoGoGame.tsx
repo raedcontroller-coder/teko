@@ -5,8 +5,10 @@ import { ArrowLeft, CheckCircle, RotateCcw, Flame, X, Frown, Play, Sparkles } fr
 import * as Haptics from 'expo-haptics';
 import { STIMULI, StimulusType } from './data';
 import { TelemetryLogger, ResponseType } from './TelemetryLogger';
+import { api } from '../../services/api';
 
 interface GoNoGoGameProps {
+  alunoId: string;
   onBack: () => void;
 }
 
@@ -33,7 +35,7 @@ const generateSequence = () => {
   return seq;
 };
 
-export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
+export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [sequence, setSequence] = useState<StimulusType[]>([]);
   const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
@@ -178,7 +180,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
       // Envia os dados puros para o Python calcular o d' e Critério C (SDT antigo)
       (async () => {
         try {
-          const apiUrlSDT = 'http://10.246.21.235:3002/api/gonogo/sdt';
+          const apiUrlSDT = 'http://192.168.0.13:3002/api/gonogo/sdt';
           const response = await fetch(apiUrlSDT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -202,7 +204,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
       // Envia os dados para a nossa nova API de cálculo psicométrico de Impulsividade (Erro_NoGo)
       (async () => {
         try {
-          const apiUrlImpulsividade = 'http://10.246.21.235:3002/api/calculo/tocarapido';
+          const apiUrlImpulsividade = 'http://192.168.0.13:3002/api/calculo/tocarapido';
           const response = await fetch(apiUrlImpulsividade, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -210,6 +212,17 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ onBack }) => {
           });
           const result = await response.json();
           console.log('Impulsividade Python API Success:', result);
+          
+          try {
+            await api.post('/api/sessions', {
+              alunoId,
+              gameName: 'GoNoGo',
+              behaviorData: result
+            });
+            console.log("✅ Sessão GoNoGo salva no banco de dados com sucesso!");
+          } catch (err) {
+            console.log("❌ Erro ao salvar sessão GoNoGo no banco de dados:", err);
+          }
         } catch (e) {
           console.log("Failed to send Toca Rápido telemetry:", e);
         }

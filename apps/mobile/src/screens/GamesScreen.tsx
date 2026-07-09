@@ -1,13 +1,41 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar, Pressable } from 'react-native';
-import { Shield, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock, Camera } from 'lucide-react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar, Pressable, Modal, FlatList, ActivityIndicator } from 'react-native';
+import { Shield, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock, Camera, X } from 'lucide-react-native';
+import { api } from '../services/api';
 
 interface GamesScreenProps {
-  onSelectGame: (gameId: string) => void;
+  onSelectGame: (gameId: string, alunoId: string) => void;
 }
 
 export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
   const animatedValues = useRef(Array.from({ length: 6 }).map(() => new Animated.Value(0))).current;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+  const [patients, setPatients] = useState<any[]>([]);
+  const [loadingPatients, setLoadingPatients] = useState(false);
+
+  const handleOpenGameModal = async (gameId: string) => {
+    setSelectedGameId(gameId);
+    setModalVisible(true);
+    setLoadingPatients(true);
+    try {
+      const response = await api.get('/api/patients');
+      if (response.data.success) {
+        setPatients(response.data.data);
+      }
+    } catch (err) {
+      console.log('Error fetching patients:', err);
+    } finally {
+      setLoadingPatients(false);
+    }
+  };
+
+  const handleStartGame = (alunoId: string) => {
+    setModalVisible(false);
+    if (selectedGameId) {
+      onSelectGame(selectedGameId, alunoId);
+    }
+  };
 
   useEffect(() => {
     Animated.stagger(100, animatedValues.map(anim => 
@@ -61,7 +89,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
                 
                 <Pressable 
                   style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
-                  onPress={() => onSelectGame('Goleiro')}
+                  onPress={() => handleOpenGameModal('Goleiro')}
                 >
                   {({ pressed }) => (
                     <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
@@ -86,7 +114,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
                 
                 <Pressable 
                   style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
-                  onPress={() => onSelectGame('GoNoGo')}
+                  onPress={() => handleOpenGameModal('GoNoGo')}
                 >
                   {({ pressed }) => (
                     <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
@@ -111,7 +139,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
                 
                 <Pressable 
                   style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
-                  onPress={() => onSelectGame('Puzzle')}
+                  onPress={() => handleOpenGameModal('Puzzle')}
                 >
                   {({ pressed }) => (
                     <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
@@ -164,6 +192,54 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
 
         {/* Removed FAB and Bottom Nav to avoid conflicts */}
       </View>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Quem vai jogar?</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <X color="#111827" size={24} />
+              </TouchableOpacity>
+            </View>
+
+            {loadingPatients ? (
+              <ActivityIndicator size="large" color="#7B61FF" style={{ marginVertical: 40 }} />
+            ) : patients.length > 0 ? (
+              <FlatList
+                data={patients}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.patientList}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.patientCard}
+                    onPress={() => handleStartGame(item.id)}
+                  >
+                    <View style={styles.patientAvatar}>
+                      <Text style={styles.patientAvatarText}>
+                        {item.name.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={styles.patientInfo}>
+                      <Text style={styles.patientName}>{item.name}</Text>
+                      <Text style={styles.patientAge}>{item.age} anos</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+            ) : (
+              <View style={styles.emptyPatients}>
+                <Text style={styles.emptyPatientsText}>Nenhuma criança cadastrada.</Text>
+                <Text style={styles.emptyPatientsSub}>Acesse o painel web para adicionar pacientes.</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -406,5 +482,84 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     marginTop: 2,
-  }
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 20,
+    color: '#111827',
+  },
+  patientList: {
+    paddingBottom: 40,
+  },
+  patientCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 16,
+    marginBottom: 12,
+  },
+  patientAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#7B61FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  patientAvatarText: {
+    color: '#FFF',
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+  },
+  patientInfo: {
+    flex: 1,
+  },
+  patientName: {
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+  },
+  patientAge: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  emptyPatients: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyPatientsText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+    color: '#374151',
+    textAlign: 'center',
+  },
+  emptyPatientsSub: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 8,
+  },
 });

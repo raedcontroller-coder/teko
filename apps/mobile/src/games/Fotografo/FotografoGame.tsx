@@ -7,8 +7,10 @@ import { Camera, ArrowLeft, Trophy, Play, Timer, X, Frown } from 'lucide-react-n
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
+import { api } from '../../services/api';
 
 interface FotografoGameProps {
+  alunoId: string;
   onBack: () => void;
 }
 
@@ -147,7 +149,7 @@ const AnimalSprite: React.FC<{ data: ActiveAnimal; onRemove: (id: string) => voi
   );
 };
 
-export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
+export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack }) => {
   const [gameState, setGameState] = useState<'menu' | 'countdown' | 'playing' | 'photo_taken' | 'timeout'>('menu');
   const [menuStep, setMenuStep] = useState<1 | 2>(1);
   const [countdownValue, setCountdownValue] = useState<number | string>(3);
@@ -294,19 +296,30 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ onBack }) => {
         telemetry: tData
       };
       
-      const apiUrl = 'http://10.246.21.235:3002/api/calculo/fotografo';
+      const apiUrl = 'http://192.168.0.13:3002/api/calculo/fotografo';
       
       fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(telemetryPayload)
       }).then(res => res.json())
-        .then(data => {
+        .then(async data => {
           console.log("\n========================================================");
           console.log(" 🧠 LAUDO FINAL DO PYTHON (QUEDA DE ATENÇÃO) 🧠");
           console.log("========================================================");
           console.log(JSON.stringify(data, null, 2));
           console.log("========================================================\n");
+          
+          try {
+            await api.post('/api/sessions', {
+              alunoId,
+              gameName: 'Fotografo',
+              behaviorData: data
+            });
+            console.log("✅ Sessão Fotógrafo salva no banco de dados com sucesso!");
+          } catch (err) {
+            console.log("❌ Erro ao salvar sessão Fotógrafo no banco de dados:", err);
+          }
         })
         .catch(err => console.log('Failed to send Fotografo telemetry:', err));
     }

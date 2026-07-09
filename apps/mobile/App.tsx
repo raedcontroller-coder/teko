@@ -29,6 +29,7 @@ export default function App() {
   // Roteamento
   const [currentTab, setCurrentTab] = useState<TabName>('Dashboard');
   const [activeGame, setActiveGame] = useState<string | null>(null);
+  const [activeAlunoId, setActiveAlunoId] = useState<string | null>(null);
   
   // Contexto Admin
   const [adminSelectedPsicologo, setAdminSelectedPsicologo] = useState<{ id: string, name: string } | null>(null);
@@ -75,13 +76,13 @@ export default function App() {
   }
 
   // Se houver um jogo ativo, renderiza o jogo em tela cheia (sem TabBar)
-  if (activeGame) {
+  if (activeGame && activeAlunoId) {
     return (
       <View style={{ flex: 1 }}>
         <StatusBar style="auto" />
-        {activeGame === 'Goleiro' && <GoleiroGame onBack={() => setActiveGame(null)} />}
-        {activeGame === 'GoNoGo' && <GoNoGoGame onBack={() => setActiveGame(null)} />}
-        {activeGame === 'Puzzle' && <FotografoGame onBack={() => setActiveGame(null)} />}
+        {activeGame === 'Goleiro' && <GoleiroGame alunoId={activeAlunoId} onBack={() => { setActiveGame(null); setActiveAlunoId(null); }} />}
+        {activeGame === 'GoNoGo' && <GoNoGoGame alunoId={activeAlunoId} onBack={() => { setActiveGame(null); setActiveAlunoId(null); }} />}
+        {activeGame === 'Puzzle' && <FotografoGame alunoId={activeAlunoId} onBack={() => { setActiveGame(null); setActiveAlunoId(null); }} />}
       </View>
     );
   }
@@ -137,7 +138,7 @@ export default function App() {
 
       // Common Tabs
       case 'Games':
-        return <GamesScreen onSelectGame={(gameId) => setActiveGame(gameId)} />;
+        return <GamesScreen onSelectGame={(gameId, alunoId) => { setActiveGame(gameId); setActiveAlunoId(alunoId); }} />;
       case 'Profile':
         return <ProfileScreen 
                  onLogout={handleLogout} 

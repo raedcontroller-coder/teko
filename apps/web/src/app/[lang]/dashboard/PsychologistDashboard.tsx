@@ -7,25 +7,27 @@ import { Card } from "../../../components/ui/Card";
 import { Button } from "../../../components/ui/Button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../components/ui/Table";
 import { UserPlus, FileText, Gamepad2, Loader2 } from "lucide-react";
-import { getPatientsAction } from "@/actions/patients";
+import { getDashboardMetricsAction } from "@/actions/patients";
 
 export default function PsychologistDashboard() {
   const params = useParams();
   const lang = (params?.lang as string) || "pt";
 
   const [patients, setPatients] = React.useState<any[]>([]);
+  const [totalSessions, setTotalSessions] = React.useState<number>(0);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const fetchPatients = async () => {
+    const fetchMetrics = async () => {
       setIsLoading(true);
-      const res = await getPatientsAction();
+      const res = await getDashboardMetricsAction();
       if (res.data) {
-        setPatients(res.data);
+        setPatients(res.data.patients);
+        setTotalSessions(res.data.totalSessions);
       }
       setIsLoading(false);
     };
-    fetchPatients();
+    fetchMetrics();
   }, []);
 
   const recentPatients = patients.slice(0, 3);
@@ -86,7 +88,9 @@ export default function PsychologistDashboard() {
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-white">0</h3>
+            <h3 className="font-headline-md text-[32px] font-bold text-white">
+              {isLoading ? <Loader2 className="w-8 h-8 animate-spin text-white/50" /> : totalSessions}
+            </h3>
             <p className="text-white/70 font-label-md">Sessões Concluídas</p>
           </div>
         </Card>
@@ -118,9 +122,15 @@ export default function PsychologistDashboard() {
                   <TableCell className="font-bold">{patient.name}</TableCell>
                   <TableCell>{patient.age}</TableCell>
                   <TableCell>
-                    <span className="inline-block px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
-                      Em breve
-                    </span>
+                    {patient.lastSessionDate ? (
+                      <span className="text-white/80">
+                        {new Date(patient.lastSessionDate).toLocaleDateString("pt-BR")}
+                      </span>
+                    ) : (
+                      <span className="inline-block px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
+                        Nenhuma
+                      </span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

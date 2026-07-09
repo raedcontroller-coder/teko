@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei/native';
 import { GoleiroCurveEditor, CurveSlot, STORAGE_KEY, GLOBAL_SIZE_KEY } from './GoleiroCurveEditor';
+import { api } from '../../services/api';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -94,7 +95,7 @@ interface GoleiroGameProps {
   onBack: () => void;
 }
 
-const TOTAL_SHOTS = 20;
+const TOTAL_SHOTS = 10;
 
 // Default curves if AsyncStorage is empty
 const DEFAULT_SLOTS: CurveSlot[] = [
@@ -279,8 +280,8 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ onBack }) => {
   };
 
   const spawnBall = () => {
-    currentShotRef.current += 1;
-    setCurrentShot(currentShotRef.current);
+    // A interface mostrará qual chute estamos tentando defender no momento (1 a 10)
+    setCurrentShot(currentShotRef.current + 1);
     isShotProcessedRef.current = false;
     
     // Choose random slot (curve)
@@ -403,6 +404,9 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ onBack }) => {
 
     reactionTimesRef.current.push(reactionTime);
 
+    // O nível de tentativa SÓ avança se a defesa for um sucesso!
+    currentShotRef.current += 1;
+    
     setScore(prev => prev + 1);
     setFlashType('success');
     
@@ -443,14 +447,32 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ onBack }) => {
     };
     
     // Forçando o IP real da máquina para que funcione tanto no emulador quanto no device físico via Wi-Fi
-    const apiUrl = 'http://10.246.21.235:3002/api/calculo/goleiro';
+    const apiUrl = 'http://192.168.0.13:3002/api/calculo/goleiro';
     
     fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(telemetryPayload)
     }).then(res => res.json())
-      .then(data => console.log('VTR Python API Success:', data))
+        .then(async data => {
+          console.log("\n========================================================");
+          console.log(" 🧠 LAUDO FINAL DO PYTHON (VTR) 🧠");
+          console.log("========================================================");
+          console.log(JSON.stringify(data, null, 2));
+          console.log("========================================================\n");
+          
+          // Salva no banco de dados passando pelo Node.js
+          try {
+            await api.post('/api/sessions', {
+              alunoId,
+              gameName: 'Goleiro',
+              behaviorData: data
+            });
+            console.log("✅ Sessão salva no banco de dados com sucesso!");
+          } catch (err) {
+            console.log("❌ Erro ao salvar sessão no banco de dados:", err);
+          }
+        })
       .catch(err => console.log('Failed to send telemetry:', err));
   };
 
@@ -757,7 +779,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ onBack }) => {
               <Trophy color="#FFC857" size={64} style={{ marginBottom: 16 }} />
               <Text style={styles.title}>Fim de Jogo!</Text>
               <Text style={styles.subtitle}>
-                Parabéns pelo seu esforço! Você defendeu <Text style={{ color: '#FFC857', fontWeight: 'bold' }}>{score}</Text> de {TOTAL_SHOTS} chutes.
+                Você é um verdadeiro campeão! Conseguiu defender com sucesso todos os <Text style={{ color: '#FFC857', fontWeight: 'bold' }}>{TOTAL_SHOTS}</Text> chutes.
               </Text>
               <View style={styles.actionButtonsRow}>
                 <Pressable 
