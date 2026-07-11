@@ -2,7 +2,7 @@
 
 import { db } from "../../../../packages/db/db/index";
 import { users, gameSessions } from "../../../../packages/db/db/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "./auth";
 
@@ -111,7 +111,28 @@ export async function getPatientsAction(adminPsicologoId?: string) {
       orderBy: (users, { desc }) => [desc(users.createdAt)],
     });
 
-    return { data: patients };
+    const patientIds = patients.map((p) => p.id);
+    let allSessions: any[] = [];
+    if (patientIds.length > 0) {
+      allSessions = await db.query.gameSessions.findMany({
+        where: inArray(gameSessions.alunoId, patientIds),
+      });
+    }
+
+    const patientsWithDate = patients.map((patient) => {
+      const patientSessions = allSessions.filter((s) => s.alunoId === patient.id);
+      let lastSessionDate = null;
+      if (patientSessions.length > 0) {
+        patientSessions.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+        lastSessionDate = patientSessions[0].startedAt;
+      }
+      return {
+        ...patient,
+        lastSessionDate,
+      };
+    });
+
+    return { data: patientsWithDate };
   } catch (error: any) {
     console.error("Erro ao buscar pacientes:", error);
     return { error: "Erro interno ao buscar pacientes." };
@@ -149,10 +170,26 @@ export async function getPatientByIdAction(patientId: string, adminPsicologoId?:
       });
     }
 
+    const rawSessions = await db.query.gameSessions.findMany({
+      where: eq(gameSessions.alunoId, patientId),
+      orderBy: (gameSessions, { desc }) => [desc(gameSessions.startedAt)],
+    });
+
+    const allGames = await db.query.games.findMany();
+
+    const sessions = rawSessions.map(session => {
+      const game = allGames.find(g => g.id === session.gameId);
+      return {
+        ...session,
+        gameName: game ? game.name : 'Desconhecido'
+      };
+    });
+
     return { 
       data: {
         patient,
-        guardian
+        guardian,
+        sessions
       }
     };
   } catch (error: any) {
@@ -239,5 +276,61 @@ export async function deletePatientAction(patientId: string, adminPsicologoId?: 
   } catch (error) {
     console.error(error);
     return { error: "Erro ao excluir o paciente." };
+  }
+}
+export async function getDashboardMetricsAction(adminPsicologoId?: string) {
+  try {
+    const session = await getSession();
+    if (!session || !session.sub) return { error: "Não autorizado." };
+
+    let psicologoId = session.sub;
+    if (adminPsicologoId && session.role === "GLOBAL_ADMIN") {
+      psicologoId = adminPsicologoId;
+    }
+
+    const patientsList = await db.query.users.findMany({
+      where: and(eq(users.role, "ALUNO"), eq(users.psicologoId, psicologoId)),
+      orderBy: (users, { desc }) => [desc(users.createdAt)],
+    });
+
+    const patientIds = patientsList.map(p => p.id);
+    let allSessions: any[] = [];
+    if (patientIds.length > 0) {
+      allSessions = await db.query.gameSessions.findMany({
+        where: inArray(gameSessions.alunoId, patientIds)
+      });
+    }
+
+    const allGames = await db.query.games.findMany();
+    let totalSessions = 0;
+
+    const patientsWithCount = patientsList.map(p => {
+      const pSess = allSessions.filter(s => s.alunoId === p.id);
+      let tR = 0, f = 0, g = 0;
+      pSess.forEach(s => {
+        const gm = allGames.find(x => x.id === s.gameId);
+        if (gm) {
+          const nm = gm.name.toLowerCase();
+          if (nm.includes("toca rápido") || nm.includes("gonogo") || nm.includes("toca rapido")) tR++;
+          else if (nm.includes("fotógrafo") || nm.includes("fotografo")) f++;
+          else if (nm.includes("goleiro")) g++;
+        }
+      });
+      const sessionCount = Math.min(tR, f, g);
+      totalSessions += sessionCount;
+      
+      let lastSessionDate = null;
+      if (pSess.length > 0) {
+        pSess.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+        lastSessionDate = pSess[0].startedAt;
+      }
+      
+      return { ...p, sessionCount, lastSessionDate };
+    });
+
+    return { data: { patients: patientsWithCount, totalSessions } };
+  } catch (error) {
+    console.error(error);
+    return { error: "Erro interno" };
   }
 }

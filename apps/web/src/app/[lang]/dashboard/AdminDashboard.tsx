@@ -40,15 +40,18 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 hover:bg-[#FFF6E3]/10 transition-all duration-300 rounded-xl p-6 flex flex-col gap-4">
+        <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 opacity-50 transition-all duration-300 rounded-xl p-6 flex flex-col gap-4 select-none relative overflow-hidden" style={{ cursor: 'not-allowed' }}>
           <div className="flex justify-between items-start">
-            <div className="p-3 bg-white/10 text-[#7B61FF] rounded-lg">
+            <div className="p-3 bg-white/10 text-white/40 rounded-lg">
               <FileText size={24} />
             </div>
           </div>
           <div>
-            <h3 className="font-headline-md text-[32px] font-bold text-white">{stats.relatorios}</h3>
-            <p className="text-white/70 font-label-md">Relatórios gerados</p>
+            <h3 className="font-headline-md text-[32px] font-bold text-white/50">0</h3>
+            <p className="text-white/50 font-label-md">Relatórios gerados</p>
+            <span className="inline-block mt-2 px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
+              Em breve...
+            </span>
           </div>
         </div>
 

@@ -95,7 +95,7 @@ interface ActiveAnimal {
   duration: number;
 }
 
-const GAME_DURATION = 240; // 4 minutes
+const GAME_DURATION = 360; // 6 minutes
 const TARGET_ANIMAL: AnimalType = 'passaro'; // A criança deve tirar foto do pássaro
 
 const ALL_ANIMALS: AnimalType[] = ['urso', 'cobra', 'aguia', 'coruja', 'passaro', 'macaco'];
@@ -263,9 +263,9 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
       let p2_commissions = 0;
 
       tData.forEach(t => {
-        // time_sec é o tempo decorrido do jogo (0 a 240)
-        // 4:00 decaindo até 2:01 significa que se passaram menos ou igual a 120 segundos.
-        if (t.spawnTimeGameSeconds <= 120) {
+        // time_sec é o tempo decorrido do jogo (0 a 360)
+        // 6:00 decaindo até 3:01 significa que se passaram menos ou igual a 180 segundos.
+        if (t.spawnTimeGameSeconds <= 180) {
           if (t.result === 'success' && t.reactionTimeMs) p1_rt.push(t.reactionTimeMs);
           else if (t.result === 'omission') p1_omissions++;
           else if (t.result === 'commission') p1_commissions++;
@@ -279,12 +279,12 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
       console.log("\n========================================================");
       console.log(" 📸 COLETADOS: FOTÓGRAFO DA FLORESTA (PRÉ-PYTHON) 📸");
       console.log("========================================================");
-      console.log("-> 1º RECORTE: Primeiros 2 minutos (4:00 decaindo até 2:01)");
+      console.log("-> 1º RECORTE: Primeiros 3 minutos (6:00 decaindo até 3:01)");
       console.log(`   [1/3] Array de Tempos de Acertos (RT): [${p1_rt.join(', ')}]`);
       console.log(`   [2/3] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p1_commissions}`);
       console.log(`   [3/3] Soma Absoluta de Omissões (Pássaros Perdidos): ${p1_omissions}`);
       
-      console.log("\n-> 2º RECORTE: Últimos 2 minutos (2:00 decaindo até 0:00)");
+      console.log("\n-> 2º RECORTE: Últimos 3 minutos (3:00 decaindo até 0:00)");
       console.log(`   [1/3] Array de Tempos de Acertos (RT): [${p2_rt.join(', ')}]`);
       console.log(`   [2/3] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p2_commissions}`);
       console.log(`   [3/3] Soma Absoluta de Omissões (Pássaros Perdidos): ${p2_omissions}`);
@@ -296,7 +296,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         telemetry: tData
       };
       
-      const apiUrl = 'http://192.168.0.13:3002/api/calculo/fotografo';
+      const apiUrl = 'http://10.49.10.133:3002/api/calculo/fotografo';
       
       fetch(apiUrl, {
         method: 'POST',
@@ -445,20 +445,20 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
     // Corrigido o bug do React Stale Closure usando o Ref mais recente
     const currentTimeLeft = timeLeftRef.current;
     
-    const isPhase1 = GAME_DURATION - currentTimeLeft <= 120;
+    const isPhase1 = GAME_DURATION - currentTimeLeft <= 180;
     let spawnBird = false;
 
     // Regra rígida: NUNCA aparecer pássaros nos últimos 5 segundos de cada fase
-    // Fase 1 termina em timeLeft = 120 (5s finais: 125 até 121)
+    // Fase 1 termina em timeLeft = 180 (5s finais: 185 até 181)
     // Fase 2 termina em timeLeft = 0 (5s finais: 5 até 1)
-    const isForbiddenWindow = (currentTimeLeft > 120 && currentTimeLeft <= 125) || (currentTimeLeft > 0 && currentTimeLeft <= 5);
+    const isForbiddenWindow = (currentTimeLeft > 180 && currentTimeLeft <= 185) || (currentTimeLeft > 0 && currentTimeLeft <= 5);
 
     // Algoritmo para garantir exatos 6 pássaros em cada fase (antes da janela proibida)
     if (!isForbiddenWindow) {
       if (isPhase1) {
         if (phase1BirdsLeft.current > 0) {
-          // Calcula tempo restante da fase 1 ignorando os últimos 5 segundos (120 + 5 = 125)
-          const timeRemainingInPhase = Math.max(0.1, currentTimeLeft - 125);
+          // Calcula tempo restante da fase 1 ignorando os últimos 5 segundos (180 + 5 = 185)
+          const timeRemainingInPhase = Math.max(0.1, currentTimeLeft - 185);
           const roundsLeftAvg = Math.max(0.1, timeRemainingInPhase / 8);
           if (Math.random() < (phase1BirdsLeft.current / roundsLeftAvg) || roundsLeftAvg <= phase1BirdsLeft.current) {
             spawnBird = true;

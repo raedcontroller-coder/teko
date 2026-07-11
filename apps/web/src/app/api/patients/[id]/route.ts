@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../../packages/db/db/index';
-import { users } from '../../../../../../../packages/db/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { users, gameSessions } from '../../../../../../../packages/db/db/schema';
+import { eq, and, desc } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
@@ -56,12 +56,27 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       });
     }
 
-    // Adapt to expected return format (separate patient and guardian object if needed)
+    const rawSessions = await db.query.gameSessions.findMany({
+      where: eq(gameSessions.alunoId, patientId),
+      orderBy: (gameSessions, { desc }) => [desc(gameSessions.startedAt)],
+    });
+
+    const allGames = await db.query.games.findMany();
+
+    const sessionsData = rawSessions.map(session => {
+      const game = allGames.find(g => g.id === session.gameId);
+      return {
+        ...session,
+        gameName: game ? game.name : 'Desconhecido'
+      };
+    });
+
     return NextResponse.json({ 
       success: true, 
       data: {
         patient: patientData,
-        guardian: guardianData
+        guardian: guardianData,
+        sessions: sessionsData
       } 
     });
 

@@ -130,7 +130,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToPa
               <Gamepad2 color="#FFC857" size={24} />
             </View>
             <View>
-              <Text style={styles.cardNumber}>0</Text>
+              {loading ? (
+                <ActivityIndicator color="#FFF" style={{ alignSelf: 'flex-start' }} />
+              ) : (
+                <Text style={styles.cardNumber}>{patients.reduce((acc, p) => acc + (p.sessionCount || 0), 0)}</Text>
+              )}
               <Text style={styles.cardLabel}>Sessões Concluídas</Text>
             </View>
           </View>
@@ -169,7 +173,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToPa
                   <Text style={[styles.tableCellText, { flex: 1, textAlign: 'center' }]}>{patient.age}</Text>
                   <View style={{ flex: 1, alignItems: 'flex-end' }}>
                     <View style={styles.badge}>
-                      <Text style={styles.badgeText}>EM BREVE</Text>
+                      <Text style={styles.badgeText}>
+                        {patient.lastSessionDate 
+                          ? new Date(patient.lastSessionDate).toLocaleDateString('pt-BR') 
+                          : 'NENHUMA'
+                        }
+                      </Text>
                     </View>
                   </View>
                 </View>

@@ -99,9 +99,15 @@ export default function MeusPacientesPage() {
                   <TableCell className="font-bold">{patient.name}</TableCell>
                   <TableCell>{patient.age}</TableCell>
                   <TableCell>
-                    <span className="inline-block px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
-                      Em breve
-                    </span>
+                    {patient.lastSessionDate ? (
+                      <span className="text-white/80">
+                        {new Date(patient.lastSessionDate).toLocaleDateString("pt-BR")}
+                      </span>
+                    ) : (
+                      <span className="inline-block px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
+                        Nenhuma
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     <Link href={`/${lang}/dashboard/pacientes/${patient.id}`}>

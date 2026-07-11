@@ -1,30 +1,83 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar, Pressable, Modal, FlatList, ActivityIndicator } from 'react-native';
-import { Shield, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock, Camera, X } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar, Pressable, Modal, FlatList, ActivityIndicator, TextInput } from 'react-native';
+import { Shield, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock, Camera, X, Search } from 'lucide-react-native';
 import { api } from '../services/api';
 
 interface GamesScreenProps {
+  userRole?: string;
   onSelectGame: (gameId: string, alunoId: string) => void;
 }
 
-export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
+export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame }) => {
   const animatedValues = useRef(Array.from({ length: 6 }).map(() => new Animated.Value(0))).current;
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalStep, setModalStep] = useState<'OPTIONS' | 'SELECT_PSI' | 'SELECT_CHILD'>('SELECT_CHILD');
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+  
+  const [psychologists, setPsychologists] = useState<any[]>([]);
+  const [loadingPsi, setLoadingPsi] = useState(false);
+  
   const [patients, setPatients] = useState<any[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleOpenGameModal = async (gameId: string) => {
     setSelectedGameId(gameId);
-    setModalVisible(true);
-    setLoadingPatients(true);
+    setSearchQuery('');
+    
+    if (userRole === 'GLOBAL_ADMIN') {
+      setModalStep('OPTIONS');
+      setModalVisible(true);
+    } else {
+      setModalStep('SELECT_CHILD');
+      setModalVisible(true);
+      setLoadingPatients(true);
+      try {
+        const response = await api.get('/api/patients');
+        if (response.data.success) {
+          setPatients(response.data.data);
+        }
+      } catch (err) {
+        console.log('Error fetching patients:', err);
+      } finally {
+        setLoadingPatients(false);
+      }
+    }
+  };
+
+  const handlePlayAnonymous = () => {
+    setModalVisible(false);
+    if (selectedGameId) {
+      onSelectGame(selectedGameId, "anonymous");
+    }
+  };
+
+  const handleSelectPsiForChild = async () => {
+    setModalStep('SELECT_PSI');
+    setLoadingPsi(true);
     try {
-      const response = await api.get('/api/patients');
+      const response = await api.get('/api/admin/psychologists');
+      if (response.data.success) {
+        setPsychologists(response.data.data);
+      }
+    } catch (err) {
+      console.log('Error fetching psychologists:', err);
+    } finally {
+      setLoadingPsi(false);
+    }
+  };
+
+  const handlePsiSelected = async (psiId: string) => {
+    setModalStep('SELECT_CHILD');
+    setLoadingPatients(true);
+    setSearchQuery('');
+    try {
+      const response = await api.get(`/api/patients?psicologoId=${psiId}`);
       if (response.data.success) {
         setPatients(response.data.data);
       }
     } catch (err) {
-      console.log('Error fetching patients:', err);
+      console.log('Error fetching patients for psi:', err);
     } finally {
       setLoadingPatients(false);
     }
@@ -36,6 +89,13 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
       onSelectGame(selectedGameId, alunoId);
     }
   };
+
+  const filteredPatients = patients.filter(p => {
+    const query = searchQuery.toLowerCase();
+    const matchName = p.name?.toLowerCase().includes(query);
+    const matchGuardian = p.guardianName?.toLowerCase().includes(query);
+    return matchName || matchGuardian;
+  });
 
   useEffect(() => {
     Animated.stagger(100, animatedValues.map(anim => 
@@ -61,8 +121,9 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
         {/* Removed Header as per Dashboard alignment */}
 
         {/* Main Scroll */}
@@ -147,100 +208,156 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ onSelectGame }) => {
                 </Pressable>
               </View>
             </Animated.View>
-
-            {/* Locked: Lince */}
-            <Animated.View style={[styles.cardWrapper, getAnimatedStyle(3)]}>
-              <View style={styles.cardLocked}>
-                <View style={styles.lockIconBox}><Lock color="#FFF6E3" size={16} /></View>
-                <View style={styles.iconBoxWhite}><Eye color="rgba(255,255,255,0.5)" size={32} /></View>
-                <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitleLocked}>Lince</Text>
-                  <View style={styles.pillBoxLocked}><Text style={styles.pillTextLocked}>Atenção Visual</Text></View>
-                </View>
-                <Text style={styles.cardDescLocked}>Disponível em breve nas próximas atualizações.</Text>
-              </View>
-            </Animated.View>
-
-            {/* Locked: Uno */}
-            <Animated.View style={[styles.cardWrapper, getAnimatedStyle(4)]}>
-              <View style={styles.cardLocked}>
-                <View style={styles.lockIconBox}><Lock color="#FFF6E3" size={16} /></View>
-                <View style={styles.iconBoxWhite}><Layers color="rgba(255,255,255,0.5)" size={32} /></View>
-                <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitleLocked}>Uno</Text>
-                  <View style={styles.pillBoxLocked}><Text style={styles.pillTextLocked}>Flexibilidade Cognitiva</Text></View>
-                </View>
-                <Text style={styles.cardDescLocked}>Aguardando validação clínica do protocolo.</Text>
-              </View>
-            </Animated.View>
-
-            {/* Locked: Stop */}
-            <Animated.View style={[styles.cardWrapper, getAnimatedStyle(5)]}>
-              <View style={styles.cardLocked}>
-                <View style={styles.lockIconBox}><Lock color="#FFF6E3" size={16} /></View>
-                <View style={styles.iconBoxWhite}><Hand color="rgba(255,255,255,0.5)" size={32} /></View>
-                <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitleLocked}>Stop</Text>
-                  <View style={styles.pillBoxLocked}><Text style={styles.pillTextLocked}>Fluência Verbal</Text></View>
-                </View>
-                <Text style={styles.cardDescLocked}>Em fase de desenvolvimento técnico.</Text>
-              </View>
-            </Animated.View>
-
           </View>
         </ScrollView>
 
         {/* Removed FAB and Bottom Nav to avoid conflicts */}
       </View>
+    </SafeAreaView>
       <Modal
         visible={modalVisible}
         transparent={true}
         animationType="slide"
+        statusBarTranslucent={true}
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Quem vai jogar?</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <X color="#111827" size={24} />
-              </TouchableOpacity>
-            </View>
-
-            {loadingPatients ? (
-              <ActivityIndicator size="large" color="#7B61FF" style={{ marginVertical: 40 }} />
-            ) : patients.length > 0 ? (
-              <FlatList
-                data={patients}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.patientList}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.patientCard}
-                    onPress={() => handleStartGame(item.id)}
-                  >
-                    <View style={styles.patientAvatar}>
-                      <Text style={styles.patientAvatarText}>
-                        {item.name.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                    <View style={styles.patientInfo}>
-                      <Text style={styles.patientName}>{item.name}</Text>
-                      <Text style={styles.patientAge}>{item.age} anos</Text>
-                    </View>
-                  </TouchableOpacity>
-                )}
-              />
-            ) : (
-              <View style={styles.emptyPatients}>
-                <Text style={styles.emptyPatientsText}>Nenhuma criança cadastrada.</Text>
-                <Text style={styles.emptyPatientsSub}>Acesse o painel web para adicionar pacientes.</Text>
+          <View style={styles.modalSafeArea}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  {modalStep === 'OPTIONS' ? 'Como deseja jogar?' : 
+                   modalStep === 'SELECT_PSI' ? 'Selecione o Psicólogo' : 
+                   'Quem vai jogar?'}
+                </Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <X color="#FFF" size={24} />
+                </TouchableOpacity>
               </View>
-            )}
+
+              {modalStep === 'OPTIONS' && (
+                <View style={styles.optionsContainer}>
+                  <Pressable 
+                    style={({ pressed }) => [styles.optionCard, pressed && { borderColor: '#FFC857' }]} 
+                    onPress={handlePlayAnonymous}
+                  >
+                    {({ pressed }) => (
+                      <>
+                        <View style={[styles.iconBoxLilas, { marginBottom: 0, marginRight: 16, width: 48, height: 48 }, pressed && { backgroundColor: '#FFC857' }]}>
+                          <Eye color={pressed ? "#181c1c" : "#FFF"} size={24} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.optionTitle}>Jogar sem gerar dados</Text>
+                          <Text style={styles.optionDesc}>A partida será anônima e as métricas não serão salvas.</Text>
+                        </View>
+                      </>
+                    )}
+                  </Pressable>
+
+                  <Pressable 
+                    style={({ pressed }) => [styles.optionCard, pressed && { borderColor: '#FFC857' }]} 
+                    onPress={handleSelectPsiForChild}
+                  >
+                    {({ pressed }) => (
+                      <>
+                        <View style={[styles.iconBoxLilas, { marginBottom: 0, marginRight: 16, width: 48, height: 48 }, pressed && { backgroundColor: '#FFC857' }]}>
+                          <User color={pressed ? "#181c1c" : "#FFF"} size={24} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.optionTitle}>Jogar para uma criança</Text>
+                          <Text style={styles.optionDesc}>Selecione o psicólogo e a criança para salvar as métricas.</Text>
+                        </View>
+                      </>
+                    )}
+                  </Pressable>
+                </View>
+              )}
+
+              {modalStep === 'SELECT_PSI' && (
+                loadingPsi ? (
+                  <ActivityIndicator size="large" color="#7B61FF" style={{ marginVertical: 40 }} />
+                ) : (
+                  <FlatList
+                    data={psychologists.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.patientList}
+                    ListHeaderComponent={
+                      <View style={styles.searchContainer}>
+                        <Search color="#9CA3AF" size={20} />
+                        <TextInput
+                          style={styles.searchInput}
+                          placeholder="Buscar psicólogo..."
+                          placeholderTextColor="#9CA3AF"
+                          value={searchQuery}
+                          onChangeText={setSearchQuery}
+                        />
+                      </View>
+                    }
+                    renderItem={({ item }) => (
+                      <TouchableOpacity style={styles.patientCard} onPress={() => handlePsiSelected(item.id)}>
+                        <View style={styles.patientAvatar}>
+                          <Text style={styles.patientAvatarText}>{item.name.charAt(0).toUpperCase()}</Text>
+                        </View>
+                        <View style={styles.patientInfo}>
+                          <Text style={styles.patientName}>{item.name}</Text>
+                          <Text style={styles.patientAge}>{item.clinicName || 'Sem clínica'} • {item.crp || 'Sem CRP'}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+                )
+              )}
+
+              {modalStep === 'SELECT_CHILD' && (
+                loadingPatients ? (
+                  <ActivityIndicator size="large" color="#7B61FF" style={{ marginVertical: 40 }} />
+                ) : (
+                  <>
+                    <View style={styles.searchContainer}>
+                      <Search color="#9CA3AF" size={20} />
+                      <TextInput
+                        style={styles.searchInput}
+                        placeholder="Buscar por criança ou responsável..."
+                        placeholderTextColor="#9CA3AF"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                      />
+                    </View>
+                    {filteredPatients.length > 0 ? (
+                      <FlatList
+                        data={filteredPatients}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={styles.patientList}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            style={styles.patientCard}
+                            onPress={() => handleStartGame(item.id)}
+                          >
+                            <View style={styles.patientAvatar}>
+                              <Text style={styles.patientAvatarText}>
+                                {item.name.charAt(0).toUpperCase()}
+                              </Text>
+                            </View>
+                            <View style={styles.patientInfo}>
+                              <Text style={styles.patientName}>{item.name}</Text>
+                              <Text style={styles.patientAge}>{item.age} anos • Resp: {item.guardianName || 'Não informado'}</Text>
+                            </View>
+                          </TouchableOpacity>
+                        )}
+                      />
+                    ) : (
+                      <View style={styles.emptyPatients}>
+                        <Text style={styles.emptyPatientsText}>Nenhuma criança encontrada.</Text>
+                      </View>
+                    )}
+                  </>
+                )
+              )}
+            </View>
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </>
   );
 };
 
@@ -485,15 +602,27 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'flex-end',
   },
-  modalContent: {
-    backgroundColor: '#FFF',
+  modalSafeArea: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    width: '100%',
+    backgroundColor: '#064b46',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 24,
-    maxHeight: '80%',
+  },
+  modalContent: {
+    backgroundColor: '#064b46',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 24,
+    paddingHorizontal: 24,
+    paddingBottom: Platform.OS === 'android' ? 24 : 20,
+    maxHeight: '85%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -503,8 +632,24 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontFamily: 'Inter-Bold',
-    fontSize: 20,
-    color: '#111827',
+    fontSize: 22,
+    color: '#FFF',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    marginBottom: 20,
+    height: 48,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
+    color: '#FFF',
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
   },
   patientList: {
     paddingBottom: 40,
@@ -513,7 +658,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
     borderRadius: 16,
     marginBottom: 12,
   },
@@ -535,15 +682,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   patientName: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: 'Inter-Bold',
-    color: '#111827',
+    color: '#EAB308', // Teko Yellow
   },
   patientAge: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter-Regular',
-    color: '#6B7280',
-    marginTop: 2,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 4,
   },
   emptyPatients: {
     padding: 40,
@@ -552,14 +699,39 @@ const styles = StyleSheet.create({
   emptyPatientsText: {
     fontSize: 16,
     fontFamily: 'Inter-Bold',
-    color: '#374151',
+    color: '#EAB308',
     textAlign: 'center',
   },
   emptyPatientsSub: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.7)',
     textAlign: 'center',
     marginTop: 8,
+  },
+  optionsContainer: {
+    paddingBottom: 24,
+    gap: 16,
+  },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  optionTitle: {
+    color: '#FFF',
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+    marginBottom: 4,
+  },
+  optionDesc: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    lineHeight: 20,
   },
 });

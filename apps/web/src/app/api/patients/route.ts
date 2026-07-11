@@ -1,22 +1,19 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../packages/db/db/index';
-import { users } from '../../../../../../packages/db/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { users, gameSessions } from '../../../../../../packages/db/db/schema';
+import { eq, and, inArray } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
 
 export async function GET(request: Request) {
   try {
-    // 1. Extrair token do header
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
     }
 
     const token = authHeader.split(' ')[1];
-
-    // 2. Verificar token
     let payload;
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
@@ -39,7 +36,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "ID do usuário não encontrado no token." }, { status: 400 });
     }
 
-    // 3. Buscar pacientes vinculados a este psicólogo
     const patients = await db.query.users.findMany({
       where: and(
         eq(users.role, "ALUNO"),
@@ -48,7 +44,55 @@ export async function GET(request: Request) {
       orderBy: (users, { desc }) => [desc(users.createdAt)],
     });
 
-    return NextResponse.json({ success: true, data: patients });
+    const allGuardians = await db.query.users.findMany({
+      where: eq(users.role, "FAMILIAR")
+    });
+
+    const patientIds = patients.map(p => p.id);
+    let allSessions: any[] = [];
+    if (patientIds.length > 0) {
+      allSessions = await db.query.gameSessions.findMany({
+        where: inArray(gameSessions.alunoId, patientIds)
+      });
+    }
+
+    const allGames = await db.query.games.findMany();
+
+    const patientsWithData = patients.map((p) => {
+      const guardian = allGuardians.find(g => g.id === p.guardianId);
+      const pSessions = allSessions.filter(s => s.alunoId === p.id);
+      
+      let tocaRapido = 0;
+      let fotografo = 0;
+      let goleiro = 0;
+      
+      pSessions.forEach(s => {
+        const game = allGames.find(g => g.id === s.gameId);
+        if (game) {
+          const nm = game.name.toLowerCase();
+          if (nm.includes("toca rápido") || nm.includes("gonogo") || nm.includes("toca rapido")) tocaRapido++;
+          else if (nm.includes("fotógrafo") || nm.includes("fotografo")) fotografo++;
+          else if (nm.includes("goleiro")) goleiro++;
+        }
+      });
+      
+      const sessionCount = Math.min(tocaRapido, fotografo, goleiro);
+      
+      let lastSessionDate = null;
+      if (pSessions.length > 0) {
+        pSessions.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+        lastSessionDate = pSessions[0].startedAt;
+      }
+      
+      return {
+        ...p,
+        guardianName: guardian ? guardian.name : null,
+        lastSessionDate,
+        sessionCount
+      };
+    });
+
+    return NextResponse.json({ success: true, data: patientsWithData });
 
   } catch (error) {
     console.error("API Patients GET Error:", error);

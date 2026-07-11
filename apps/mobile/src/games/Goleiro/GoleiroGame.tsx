@@ -104,7 +104,7 @@ const DEFAULT_SLOTS: CurveSlot[] = [
   { id: '3', p0: { x: 50, y: 90 }, p1: { x: 50, y: 40 }, p2: { x: 50, y: 30 } }, // Foguete central
 ];
 
-export const GoleiroGame: React.FC<GoleiroGameProps> = ({ onBack }) => {
+export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => {
   const [gameState, setGameState] = useState<'menu' | 'countdown' | 'playing' | 'timeout' | 'editor'>('menu');
   const [menuStep, setMenuStep] = useState<1 | 2>(1);
   const [countdownValue, setCountdownValue] = useState<number | string>(3);
@@ -447,7 +447,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ onBack }) => {
     };
     
     // Forçando o IP real da máquina para que funcione tanto no emulador quanto no device físico via Wi-Fi
-    const apiUrl = 'http://192.168.0.13:3002/api/calculo/goleiro';
+    const apiUrl = 'http://10.49.10.133:3002/api/calculo/goleiro';
     
     fetch(apiUrl, {
       method: 'POST',

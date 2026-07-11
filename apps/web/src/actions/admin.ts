@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "../../../../packages/db/db/index";
-import { users, gameSessions } from "../../../../packages/db/db/schema";
+import { users, gameSessions, games } from "../../../../packages/db/db/schema";
 import { eq, isNull, and, count } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getSession } from "./auth";
@@ -281,14 +281,40 @@ export async function getAdminDadosGeradosAction(skipAuth: boolean = false) {
 
     const alunoIds = alunos.map(a => a.id);
     const sessions = alunoIds.length > 0 ? await db.select().from(gameSessions).where(inArray(gameSessions.alunoId, alunoIds)) : [];
+    
+    const allGames = await db.select().from(games);
+    const gameMap = new Map(allGames.map(g => [g.id, g.name.toLowerCase()]));
 
     const psiMap = new Map(psicologosAtivos.map(p => [p.id, p]));
     const guardMap = new Map(guardians.map(g => [g.id, g]));
 
+    // Para pegar a última sessão de cada métrica por aluno
     const metricsMap = new Map();
+    
+    // Sort sessions descending by startedAt so the first one we find for a game is the latest
+    sessions.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+    
     sessions.forEach(s => {
       if (!metricsMap.has(s.alunoId)) {
         metricsMap.set(s.alunoId, { vtri: "N/A", qa: "N/A", imp: "N/A" });
+      }
+      const m = metricsMap.get(s.alunoId);
+      const gameName = gameMap.get(s.gameId);
+      const behavior = (s.behaviorData as any) || {};
+      
+      if (gameName) {
+        // Goleiro -> VTRI (vtr_ms)
+        if (m.vtri === "N/A" && gameName.includes("goleiro") && behavior.vtr_ms !== undefined) {
+          m.vtri = behavior.vtr_ms.toFixed(2);
+        }
+        // Fotógrafo -> QA (variacao)
+        if (m.qa === "N/A" && (gameName.includes("fotógrafo") || gameName.includes("fotografo")) && behavior.variacao !== undefined) {
+          m.qa = behavior.variacao.toFixed(2);
+        }
+        // Toca Rápido -> IMP (erro_nogo)
+        if (m.imp === "N/A" && (gameName.includes("toca rápido") || gameName.includes("gonogo") || gameName.includes("toca rapido")) && behavior.erro_nogo !== undefined) {
+          m.imp = behavior.erro_nogo.toString();
+        }
       }
     });
 

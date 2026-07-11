@@ -31,6 +31,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
   const [savingGuardian, setSavingGuardian] = useState(false);
   
   const [guardianId, setGuardianId] = useState('');
+  const [sessions, setSessions] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -58,43 +59,36 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
     setShowSuccessToast(true);
     Animated.timing(slideAnim, {
       toValue: Platform.OS === 'ios' ? 70 : 50,
-      duration: 600,
+      duration: 300,
       useNativeDriver: true,
-      easing: Easing.out(Easing.back(1.5)),
+      easing: Easing.out(Easing.ease),
     }).start();
 
     setTimeout(() => {
       Animated.timing(slideAnim, {
-        toValue: -150,
-        duration: 500,
+        toValue: -100,
+        duration: 300,
         useNativeDriver: true,
-        easing: Easing.in(Easing.ease),
-      }).start(() => {
-        setShowSuccessToast(false);
-      });
+      }).start(() => setShowSuccessToast(false));
     }, 3000);
   };
 
   const showError = (msg: string) => {
     setErrorMessage(msg);
     setShowErrorToast(true);
-    
     Animated.timing(errorSlideAnim, {
       toValue: Platform.OS === 'ios' ? 70 : 50,
-      duration: 600,
+      duration: 300,
       useNativeDriver: true,
-      easing: Easing.out(Easing.back(1.5)),
+      easing: Easing.out(Easing.ease),
     }).start();
 
     setTimeout(() => {
       Animated.timing(errorSlideAnim, {
-        toValue: -150,
-        duration: 500,
+        toValue: -100,
+        duration: 300,
         useNativeDriver: true,
-        easing: Easing.in(Easing.ease),
-      }).start(() => {
-        setShowErrorToast(false);
-      });
+      }).start(() => setShowErrorToast(false));
     }, 4000);
   };
 
@@ -105,7 +99,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
         const url = adminPsicologoId ? `/api/patients/${patientId}?psicologoId=${adminPsicologoId}` : `/api/patients/${patientId}`;
         const response = await api.get(url);
         if (response.data.success && response.data.data) {
-          const { patient, guardian } = response.data.data;
+          const { patient, guardian, sessions: patientSessions } = response.data.data;
           setFormData({
             name: patient.name || '',
             age: patient.age ? String(patient.age) : '',
@@ -116,6 +110,9 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
           });
           if (guardian) {
             setGuardianId(guardian.id);
+          }
+          if (patientSessions) {
+            setSessions(patientSessions);
           }
         }
       } catch (error) {
@@ -353,40 +350,67 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             contentContainerStyle={styles.carouselContent}
           >
             {/* Card Toca Rápido */}
-            <View style={styles.gameCard}>
-              <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(123,97,255,0.1)' }]}>
-                <Target color="#7B61FF" size={32} />
-              </View>
-              <Text style={styles.gameTitle}>Toca Rápido!</Text>
-              <Text style={styles.gameDesc}>Controle inibitório e impulsividade.</Text>
-              <View style={styles.gameBadge}>
-                <Text style={styles.gameBadgeText}>Ainda não jogou</Text>
-              </View>
-            </View>
+            {(() => {
+              const session = sessions.find((s: any) => s.gameName === 'GoNoGo' || s.gameName === 'Toca Rápido');
+              const played = !!session;
+              const score = session?.behaviorData?.erro_nogo !== undefined ? `${session.behaviorData.erro_nogo} erro(s)` : null;
+              return (
+                <View style={styles.gameCard}>
+                  <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(123,97,255,0.1)' }]}>
+                    <Target color="#7B61FF" size={32} />
+                  </View>
+                  <Text style={styles.gameTitle}>Toca Rápido!</Text>
+                  <Text style={styles.gameDesc}>Controle inibitório e impulsividade.</Text>
+                  <View style={[styles.gameBadge, played && { backgroundColor: 'rgba(52,211,153,0.2)', borderColor: 'rgba(52,211,153,0.3)' }]}>
+                    <Text style={[styles.gameBadgeText, played && { color: '#34D399' }]}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })()}
 
             {/* Card Fotógrafo */}
-            <View style={styles.gameCard}>
-              <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(230,168,0,0.1)' }]}>
-                <Camera color="#FFC857" size={32} />
-              </View>
-              <Text style={styles.gameTitle}>Fotógrafo da Floresta</Text>
-              <Text style={styles.gameDesc}>Atenção e controle inibitório.</Text>
-              <View style={styles.gameBadge}>
-                <Text style={styles.gameBadgeText}>Ainda não jogou</Text>
-              </View>
-            </View>
+            {(() => {
+              const session = sessions.find((s: any) => s.gameName === 'Fotografo' || s.gameName === 'Fotógrafo');
+              const played = !!session;
+              const score = session?.behaviorData?.variacao !== undefined ? `Variação: ${session.behaviorData.variacao.toFixed(2)} ms` : null;
+              return (
+                <View style={styles.gameCard}>
+                  <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(230,168,0,0.1)' }]}>
+                    <Camera color="#FFC857" size={32} />
+                  </View>
+                  <Text style={styles.gameTitle}>Fotógrafo da Floresta</Text>
+                  <Text style={styles.gameDesc}>Atenção e velocidade motora.</Text>
+                  <View style={[styles.gameBadge, played && { backgroundColor: 'rgba(52,211,153,0.2)', borderColor: 'rgba(52,211,153,0.3)' }]}>
+                    <Text style={[styles.gameBadgeText, played && { color: '#34D399' }]}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })()}
 
-            {/* Card Bomba */}
-            <View style={styles.gameCard}>
-              <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(248,113,113,0.1)' }]}>
-                <Bomb color="#F87171" size={32} />
-              </View>
-              <Text style={styles.gameTitle}>Jogo da Bomba</Text>
-              <Text style={styles.gameDesc}>Tomada de decisão sob pressão.</Text>
-              <View style={styles.gameBadge}>
-                <Text style={styles.gameBadgeText}>Ainda não jogou</Text>
-              </View>
-            </View>
+            {/* Card Goleiro */}
+            {(() => {
+              const session = sessions.find((s: any) => s.gameName === 'Goleiro');
+              const played = !!session;
+              const score = session?.behaviorData?.vtr_ms !== undefined ? `VTR: ${session.behaviorData.vtr_ms.toFixed(2)} ms` : null;
+              return (
+                <View style={styles.gameCard}>
+                  <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(96,165,250,0.1)' }]}>
+                    <Shield color="#60A5FA" size={32} />
+                  </View>
+                  <Text style={styles.gameTitle}>Jogo do Goleiro</Text>
+                  <Text style={styles.gameDesc}>Tempo de Reação Visual (VTR).</Text>
+                  <View style={[styles.gameBadge, played && { backgroundColor: 'rgba(52,211,153,0.2)', borderColor: 'rgba(52,211,153,0.3)' }]}>
+                    <Text style={[styles.gameBadgeText, played && { color: '#34D399' }]}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })()}
           </ScrollView>
         </View>
 

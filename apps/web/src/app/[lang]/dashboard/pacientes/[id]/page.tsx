@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, User, Shield, Target, Puzzle, Bomb, Save, Baby, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, User, Shield, Target, Puzzle, Bomb, Save, Baby, Loader2, CheckCircle2, Camera } from "lucide-react";
 import { getPatientByIdAction, updatePatientAction, updateGuardianAction, deletePatientAction } from "@/actions/patients";
 
 export default function PacientePerfilPage() {
@@ -22,6 +22,7 @@ export default function PacientePerfilPage() {
   const [toastType, setToastType] = useState<"success" | "delete">("success");
   
   const [guardianId, setGuardianId] = useState("");
+  const [sessions, setSessions] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -41,7 +42,7 @@ export default function PacientePerfilPage() {
         if (res.error) {
           setErrorMsg(res.error);
         } else if (res.data) {
-          const { patient, guardian } = res.data;
+          const { patient, guardian, sessions: patientSessions } = res.data;
           setFormData({
             name: patient.name || "",
             age: patient.age || "",
@@ -52,6 +53,9 @@ export default function PacientePerfilPage() {
           });
           if (guardian) {
             setGuardianId(guardian.id);
+          }
+          if (patientSessions) {
+            setSessions(patientSessions);
           }
         }
       } catch (err) {
@@ -285,38 +289,62 @@ export default function PacientePerfilPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
-                <div className="w-16 h-16 rounded-full bg-[#7B61FF]/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <Target size={32} className="text-[#7B61FF]" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Toca Rápido!</h3>
-                <p className="text-sm text-white/70 mb-4">Controle inibitório e impulsividade.</p>
-                <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white/50 group-hover:border-white/20 transition-colors">
-                  Ainda não jogou
-                </div>
-              </div>
+              {/* TOCA RÁPIDO */}
+              {(() => {
+                const session = sessions.find((s: any) => s.gameName === 'GoNoGo' || s.gameName === 'Toca Rápido');
+                const played = !!session;
+                const score = session?.behaviorData?.erro_nogo !== undefined ? `${session.behaviorData.erro_nogo} erro(s)` : null;
+                return (
+                  <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-full bg-[#7B61FF]/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                      <Target size={32} className="text-[#7B61FF]" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Toca Rápido!</h3>
+                    <p className="text-sm text-white/70 mb-4">Controle inibitório e impulsividade.</p>
+                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold transition-colors ${played ? 'bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/30' : 'bg-white/5 border border-white/10 text-white/50'}`}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* FOTÓGRAFO */}
+              {(() => {
+                const session = sessions.find((s: any) => s.gameName === 'Fotografo' || s.gameName === 'Fotógrafo');
+                const played = !!session;
+                const score = session?.behaviorData?.variacao !== undefined ? `Variação: ${session.behaviorData.variacao.toFixed(2)} ms` : null;
+                return (
+                  <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-full bg-teko-yellow/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                      <Camera size={32} className="text-teko-yellow" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Fotógrafo</h3>
+                    <p className="text-sm text-white/70 mb-4 whitespace-nowrap">Atenção e velocidade motora.</p>
+                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold transition-colors ${played ? 'bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/30' : 'bg-white/5 border border-white/10 text-white/50'}`}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </div>
+                  </div>
+                );
+              })()}
               
-              <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
-                <div className="w-16 h-16 rounded-full bg-teko-yellow/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <Puzzle size={32} className="text-teko-yellow" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Quebra-Cabeça</h3>
-                <p className="text-sm text-white/70 mb-4 whitespace-nowrap">Lógica e percepção espacial.</p>
-                <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white/50 group-hover:border-white/20 transition-colors">
-                  Ainda não jogou
-                </div>
-              </div>
-              
-              <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
-                <div className="w-16 h-16 rounded-full bg-red-400/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <Bomb size={32} className="text-red-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Jogo da Bomba</h3>
-                <p className="text-sm text-white/70 mb-4">Tomada de decisão sob pressão.</p>
-                <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white/50 group-hover:border-white/20 transition-colors">
-                  Ainda não jogou
-                </div>
-              </div>
+              {/* GOLEIRO */}
+              {(() => {
+                const session = sessions.find((s: any) => s.gameName === 'Goleiro');
+                const played = !!session;
+                const score = session?.behaviorData?.vtr_ms !== undefined ? `VTR: ${session.behaviorData.vtr_ms.toFixed(2)} ms` : null;
+                return (
+                  <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-full bg-blue-400/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                      <Shield size={32} className="text-blue-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Jogo do Goleiro</h3>
+                    <p className="text-sm text-white/70 mb-4">Tempo de Reação Visual (VTR).</p>
+                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold transition-colors ${played ? 'bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/30' : 'bg-white/5 border border-white/10 text-white/50'}`}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </section>

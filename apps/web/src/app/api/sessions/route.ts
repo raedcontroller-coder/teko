@@ -37,12 +37,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "alunoId, gameName e behaviorData são obrigatórios." }, { status: 400 });
     }
 
-    // 3. Validar se a criança existe e se pertence a este psicólogo
+    // 3. Validação Especial: Se for "anonymous", não salvamos no banco
+    if (alunoId === "anonymous") {
+      return NextResponse.json({ success: true, data: { id: "anonymous", message: "Anonymous session ignored by database" } });
+    }
+
+    // 4. Validar se a criança existe e (se não for admin) se pertence a este psicólogo
+    const isAdmin = payload.role === 'GLOBAL_ADMIN';
     const child = await db.query.users.findFirst({
       where: and(
         eq(users.id, alunoId),
         eq(users.role, "ALUNO"),
-        eq(users.psicologoId, psicologoId)
+        isAdmin ? undefined : eq(users.psicologoId, psicologoId)
       )
     });
 

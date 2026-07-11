@@ -88,7 +88,12 @@ export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId
           <Text style={styles.patientAge}>{item.age} anos</Text>
         </View>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>Em breve</Text>
+          <Text style={styles.badgeText}>
+            {item.lastSessionDate 
+              ? new Date(item.lastSessionDate).toLocaleDateString('pt-BR') 
+              : 'Nenhuma'
+            }
+          </Text>
         </View>
       </View>
       <View style={styles.cardFooter}>
