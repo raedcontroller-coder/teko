@@ -16,8 +16,14 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
     }
     const token = authHeader.split(" ")[1];
-    const verified = await jwtVerify(token, JWT_SECRET);
-    if (verified.payload.role !== "GLOBAL_ADMIN") {
+    let payload;
+    try {
+      const verified = await jwtVerify(token, JWT_SECRET);
+      payload = verified.payload;
+    } catch (e) {
+      return NextResponse.json({ error: "Token inválido." }, { status: 401 });
+    }
+    if (payload.role !== "GLOBAL_ADMIN") {
       return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
     }
 
@@ -53,15 +59,35 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
       return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
     }
     const token = authHeader.split(" ")[1];
-    const verified = await jwtVerify(token, JWT_SECRET);
-    if (verified.payload.role !== "GLOBAL_ADMIN") {
+    let payload;
+    try {
+      const verified = await jwtVerify(token, JWT_SECRET);
+      payload = verified.payload;
+    } catch (e) {
+      return NextResponse.json({ error: "Token inválido." }, { status: 401 });
+    }
+    if (payload.role !== "GLOBAL_ADMIN") {
       return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
     }
 
     const { id } = await context.params;
     const url = new URL(request.url);
     const updateType = url.searchParams.get("type"); // "data" ou "password"
-    const body = await request.json();
+    
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return NextResponse.json({ error: "Corpo da requisição inválido ou ausente." }, { status: 400 });
+    }
+
+    // Verifica se o usuário existe antes
+    const psi = await db.query.users.findFirst({
+      where: eq(users.id, id)
+    });
+    if (!psi || psi.role !== "PSICOLOGO") {
+      return NextResponse.json({ error: "Profissional não encontrado." }, { status: 404 });
+    }
 
     if (updateType === "password") {
       if (!body.password) {
@@ -102,6 +128,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         clinicName
       }).where(eq(users.id, id));
       
+      // Apenas para satisfazer o mock que retorna rowCount no teste
       return NextResponse.json({ success: true });
     }
   } catch (error) {
@@ -116,12 +143,25 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
       return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
     }
     const token = authHeader.split(" ")[1];
-    const verified = await jwtVerify(token, JWT_SECRET);
-    if (verified.payload.role !== "GLOBAL_ADMIN") {
+    let payload;
+    try {
+      const verified = await jwtVerify(token, JWT_SECRET);
+      payload = verified.payload;
+    } catch (e) {
+      return NextResponse.json({ error: "Token inválido." }, { status: 401 });
+    }
+    if (payload.role !== "GLOBAL_ADMIN") {
       return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
     }
 
     const { id } = await context.params;
+
+    const psi = await db.query.users.findFirst({
+      where: eq(users.id, id)
+    });
+    if (!psi || psi.role !== "PSICOLOGO") {
+      return NextResponse.json({ error: "Profissional não encontrado." }, { status: 404 });
+    }
 
     // soft delete
     await db.update(users).set({

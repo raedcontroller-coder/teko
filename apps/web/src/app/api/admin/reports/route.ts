@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-import { getAdminDadosGeradosAction } from "@/actions/admin";
+import { getAdminDadosGeradosAction } from "../../../../actions/admin.ts";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "default_super_secret_key_teko_app"
@@ -13,11 +13,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
     }
     const token = authHeader.split(" ")[1];
-    const verified = await jwtVerify(token, JWT_SECRET);
-    if (verified.payload.role !== "GLOBAL_ADMIN") {
-      return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
+    
+    let payload;
+    try {
+      const verified = await jwtVerify(token, JWT_SECRET);
+      payload = verified.payload;
+    } catch (e) {
+      return NextResponse.json({ error: "Token inválido." }, { status: 401 });
     }
 
+    if (payload.role !== "GLOBAL_ADMIN") {
+      return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
+    }
     const response = await getAdminDadosGeradosAction(true);
     if (response.error) {
       return NextResponse.json({ error: response.error }, { status: 400 });

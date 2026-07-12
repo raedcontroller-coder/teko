@@ -103,11 +103,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Acesso negado. Requer permissão de administrador." }, { status: 403 });
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return NextResponse.json({ error: "Corpo da requisição inválido ou ausente." }, { status: 400 });
+    }
+
     const { name, email, password, crp, clinicName } = body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !crp) {
       return NextResponse.json({ error: "Preencha todos os campos obrigatórios." }, { status: 400 });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "E-mail inválido." }, { status: 400 });
     }
 
     const existingUser = await db.query.users.findFirst({
