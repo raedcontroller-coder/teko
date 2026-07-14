@@ -2,7 +2,7 @@
 
 import { db } from "../../../../packages/db/db/index";
 import { users, gameSessions } from "../../../../packages/db/db/schema";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "./auth";
 
@@ -84,7 +84,7 @@ export async function createPatientAction(formData: FormData, adminPsicologoId?:
     revalidatePath("/[lang]/dashboard/pacientes", "page");
     return { success: true };
     
-  } catch (error: any) {
+  } catch (error) {
     console.error("Erro ao criar paciente:", error);
     return { error: "Erro interno ao salvar paciente. Tente novamente." };
   }
@@ -112,7 +112,7 @@ export async function getPatientsAction(adminPsicologoId?: string) {
     });
 
     const patientIds = patients.map((p) => p.id);
-    let allSessions: any[] = [];
+    let allSessions: Record<string, unknown>[] = [];
     if (patientIds.length > 0) {
       allSessions = await db.query.gameSessions.findMany({
         where: inArray(gameSessions.alunoId, patientIds),
@@ -123,8 +123,8 @@ export async function getPatientsAction(adminPsicologoId?: string) {
       const patientSessions = allSessions.filter((s) => s.alunoId === patient.id);
       let lastSessionDate = null;
       if (patientSessions.length > 0) {
-        patientSessions.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
-        lastSessionDate = patientSessions[0].startedAt;
+        patientSessions.sort((a, b) => new Date(b.startedAt as string).getTime() - new Date(a.startedAt as string).getTime());
+        lastSessionDate = patientSessions[0].startedAt as string | Date;
       }
       return {
         ...patient,
@@ -133,7 +133,7 @@ export async function getPatientsAction(adminPsicologoId?: string) {
     });
 
     return { data: patientsWithDate };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Erro ao buscar pacientes:", error);
     return { error: "Erro interno ao buscar pacientes." };
   }
@@ -192,7 +192,7 @@ export async function getPatientByIdAction(patientId: string, adminPsicologoId?:
         sessions
       }
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Erro ao buscar detalhes do paciente:", error);
     return { error: "Erro interno ao buscar detalhes do paciente." };
   }
@@ -237,6 +237,7 @@ export async function updateGuardianAction(guardianId: string, data: { name: str
     
     revalidatePath("/[lang]/dashboard/pacientes/[id]", "page");
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     const pgError = error.cause || error;
     
@@ -281,7 +282,7 @@ export async function deletePatientAction(patientId: string, adminPsicologoId?: 
 export async function getDashboardMetricsAction(adminPsicologoId?: string) {
   try {
     const session = await getSession();
-    if (!session || !session.sub) return { error: "Não autorizado." };
+    if (!session || !session.sub) return { error: "Nï¿½o autorizado." };
 
     let psicologoId = session.sub;
     if (adminPsicologoId && session.role === "GLOBAL_ADMIN") {
@@ -294,7 +295,7 @@ export async function getDashboardMetricsAction(adminPsicologoId?: string) {
     });
 
     const patientIds = patientsList.map(p => p.id);
-    let allSessions: any[] = [];
+    let allSessions: Record<string, unknown>[] = [];
     if (patientIds.length > 0) {
       allSessions = await db.query.gameSessions.findMany({
         where: inArray(gameSessions.alunoId, patientIds)
@@ -311,8 +312,8 @@ export async function getDashboardMetricsAction(adminPsicologoId?: string) {
         const gm = allGames.find(x => x.id === s.gameId);
         if (gm) {
           const nm = gm.name.toLowerCase();
-          if (nm.includes("toca rápido") || nm.includes("gonogo") || nm.includes("toca rapido")) tR++;
-          else if (nm.includes("fotógrafo") || nm.includes("fotografo")) f++;
+          if (nm.includes("toca") || nm.includes("gonogo")) tR++;
+          else if (nm.includes("fot")) f++;
           else if (nm.includes("goleiro")) g++;
         }
       });
@@ -321,8 +322,8 @@ export async function getDashboardMetricsAction(adminPsicologoId?: string) {
       
       let lastSessionDate = null;
       if (pSess.length > 0) {
-        pSess.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
-        lastSessionDate = pSess[0].startedAt;
+        pSess.sort((a, b) => new Date(b.startedAt as string).getTime() - new Date(a.startedAt as string).getTime());
+        lastSessionDate = pSess[0].startedAt as string | Date;
       }
       
       return { ...p, sessionCount, lastSessionDate };

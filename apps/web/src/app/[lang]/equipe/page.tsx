@@ -19,78 +19,81 @@ export default function EquipePage() {
       </section>
       
       <div className="flex flex-col gap-section-gap">
-        <section className="flex flex-col md:flex-row items-center gap-gutter fade-in-up group">
-          <div className="w-full md:w-1/2 aspect-square md:aspect-[4/3] rounded-[2rem] border-[6px] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group">
+        <section className="flex flex-col md:flex-row items-stretch gap-gutter fade-in-up group">
+          <div className="w-full sm:w-3/4 md:w-2/5 lg:w-1/3 rounded-[2rem] border-[6px] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group shrink-0 mx-auto flex">
             <Image 
-              src="/images/equipe-maria.webp" 
+              src="/images/mavi.jpeg" 
               alt="Maria Victoria" 
-              fill
-              className="object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500" 
+              width={1066}
+              height={1600}
+              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500" 
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-[#161308]/40 to-transparent pointer-events-none"></div>
           </div>
-          <div className="w-full md:w-1/2 flex flex-col gap-stack-md glass-panel p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
-              <span className="font-label-md text-sm text-teko-yellow font-bold">Product Owner &amp; UI/UX Designer</span>
+          <div className="w-full md:flex-1 flex flex-col justify-center gap-stack-lg glass-panel p-10 md:p-12 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="inline-flex self-start items-center gap-2 glass-pill px-5 py-2 rounded-full mb-2">
+              <span className="font-label-md text-base text-teko-yellow font-bold">Product Owner &amp; UI/UX Designer</span>
             </div>
-            <h2 className="text-3xl font-black text-white">Maria Victoria Batista Oliveira</h2>
-            <p className="font-body-md text-text-muted">Liderando a visão de produto e a experiência do usuário, Maria Victoria garante que a Teko seja intuitiva e acolhedora para crianças e psicólogos. Seu foco em maximizar o valor do produto e mapear jornadas empáticas é fundamental para a identidade da marca, traduzindo complexidade clínica em interações lúdicas e engajadoras.</p>
-            <div className="flex gap-2 flex-wrap mt-2">
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">UX/UI Design</span>
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">Product Strategy</span>
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">Brand Identity</span>
+            <h2 className="text-4xl md:text-5xl font-black text-white">Maria Victoria Batista Oliveira</h2>
+            <p className="font-body-lg text-lg text-text-muted leading-relaxed">Liderando a visão de produto e a experiência do usuário, Maria Victoria garante que a Teko seja intuitiva e acolhedora para crianças e psicólogos. Seu foco em maximizar o valor do produto e mapear jornadas empáticas é fundamental para a identidade da marca, traduzindo complexidade clínica em interações lúdicas e engajadoras.</p>
+            <div className="flex gap-3 flex-wrap mt-4">
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">UX/UI Design</span>
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Product Strategy</span>
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Brand Identity</span>
             </div>
           </div>
         </section>
         
         <div className="w-full h-px bg-gradient-to-r from-transparent via-glass-border to-transparent opacity-50 fade-in-up"></div>
         
-        <section className="flex flex-col md:flex-row-reverse items-center gap-gutter fade-in-up group">
-          <div className="w-full md:w-1/2 aspect-square md:aspect-[4/3] rounded-[2rem] border-[6px] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group">
+        <section className="flex flex-col md:flex-row-reverse items-stretch gap-gutter fade-in-up group">
+          <div className="w-full sm:w-3/4 md:w-2/5 lg:w-1/3 rounded-[2rem] border-[6px] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group shrink-0 mx-auto flex">
             <Image 
-              src="/images/equipe-carlos.webp" 
+              src="/images/carlos.jpeg" 
               alt="Carlos Eduardo" 
-              fill
-              className="object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500" 
+              width={1032}
+              height={1548}
+              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500" 
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-[#161308]/40 to-transparent pointer-events-none"></div>
           </div>
-          <div className="w-full md:w-1/2 flex flex-col gap-stack-md glass-panel p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
-              <span className="font-label-md text-sm text-[#7B61FF] font-bold">Tech Lead &amp; Fullstack Developer</span>
+          <div className="w-full md:flex-1 flex flex-col justify-center gap-stack-lg glass-panel p-10 md:p-12 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="inline-flex self-start items-center gap-2 glass-pill px-5 py-2 rounded-full mb-2">
+              <span className="font-label-md text-base text-teko-yellow font-bold">Tech Lead &amp; Fullstack Developer</span>
             </div>
-            <h2 className="text-3xl font-black text-white">Carlos Eduardo de Lima</h2>
-            <p className="font-body-md text-text-muted">Como arquiteto do sistema, Carlos lidera o desenvolvimento fullstack e a implementação dos pipelines de inteligência artificial. Ele é responsável pelas decisões críticas de engenharia, garantindo que a plataforma seja robusta, escalável e rigorosamente alinhada aos padrões de segurança e conformidade (LGPD), protegendo os dados sensíveis dos pacientes.</p>
-            <div className="flex gap-2 flex-wrap mt-2">
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">System Architecture</span>
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">AI Pipeline</span>
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">Security &amp; LGPD</span>
+            <h2 className="text-4xl md:text-5xl font-black text-white">Carlos Eduardo de Lima</h2>
+            <p className="font-body-lg text-lg text-text-muted leading-relaxed">Como arquiteto do sistema, Carlos lidera o desenvolvimento fullstack e a implementação dos pipelines de inteligência artificial. Ele é responsável pelas decisões críticas de engenharia, garantindo que a plataforma seja robusta, escalável e rigorosamente alinhada aos padrões de segurança e conformidade (LGPD), protegendo os dados sensíveis dos pacientes.</p>
+            <div className="flex gap-3 flex-wrap mt-4">
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">System Architecture</span>
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">AI Pipeline</span>
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Security &amp; LGPD</span>
             </div>
           </div>
         </section>
         
         <div className="w-full h-px bg-gradient-to-r from-transparent via-glass-border to-transparent opacity-50 fade-in-up"></div>
         
-        <section className="flex flex-col md:flex-row items-center gap-gutter fade-in-up group">
-          <div className="w-full md:w-1/2 aspect-square md:aspect-[4/3] rounded-[2rem] border-[6px] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group">
+        <section className="flex flex-col md:flex-row items-stretch gap-gutter fade-in-up group">
+          <div className="w-full sm:w-3/4 md:w-2/5 lg:w-1/3 rounded-[2rem] border-[6px] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group shrink-0 mx-auto flex">
             <Image 
-              src="/images/equipe-miguel.webp" 
+              src="/images/miguel.jpeg" 
               alt="Miguel Rodrigues" 
-              fill
-              className="object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500" 
+              width={1032}
+              height={1548}
+              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500" 
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-[#161308]/40 to-transparent pointer-events-none"></div>
           </div>
-          <div className="w-full md:w-1/2 flex flex-col gap-stack-md glass-panel p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
-              <span className="font-label-md text-sm text-teko-yellow font-bold">Business &amp; Data Lead</span>
+          <div className="w-full md:flex-1 flex flex-col justify-center gap-stack-lg glass-panel p-10 md:p-12 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="inline-flex self-start items-center gap-2 glass-pill px-5 py-2 rounded-full mb-2">
+              <span className="font-label-md text-base text-teko-yellow font-bold">Business &amp; Data Lead</span>
             </div>
-            <h2 className="text-3xl font-black text-white">Miguel Rodrigues Pereira Francisco</h2>
-            <p className="font-body-md text-text-muted">Miguel une estratégia financeira e análise de dados para impulsionar o crescimento sustentável da Teko. Especialista em KPIs e validação de algoritmos, ele traduz métricas complexas em insights acionáveis de negócios. Sua visão analítica é complementada por contribuições no desenvolvimento frontend, assegurando que os dados sejam apresentados com clareza clínica.</p>
-            <div className="flex gap-2 flex-wrap mt-2">
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">Financial Strategy</span>
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">Data Analytics</span>
-              <span className="inline-flex items-center glass-pill px-3 py-1 rounded-full text-xs text-white/80 border border-white/10">Algorithm Validation</span>
+            <h2 className="text-4xl md:text-5xl font-black text-white">Miguel Rodrigues Pereira Francisco</h2>
+            <p className="font-body-lg text-lg text-text-muted leading-relaxed">Miguel une estratégia financeira e análise de dados para impulsionar o crescimento sustentável da Teko. Especialista em KPIs e validação de algoritmos, ele traduz métricas complexas em insights acionáveis de negócios. Sua visão analítica é complementada por contribuições no desenvolvimento frontend, assegurando que os dados sejam apresentados com clareza clínica.</p>
+            <div className="flex gap-3 flex-wrap mt-4">
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Financial Strategy</span>
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Data Analytics</span>
+              <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Algorithm Validation</span>
             </div>
           </div>
         </section>

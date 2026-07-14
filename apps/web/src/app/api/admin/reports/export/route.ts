@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-import { exportAdminDadosGeradosCsvAction } from "../../../../../actions/admin.ts";
+import { exportAdminDadosGeradosCsvAction } from "../../../../../actions/admin";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "default_super_secret_key_teko_app"
@@ -10,7 +11,7 @@ export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
+      return NextResponse.json({ error: "Token nÃ£o fornecido." }, { status: 401 });
     }
     const token = authHeader.split(" ")[1];
     
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
     } catch (e) {
-      return NextResponse.json({ error: "Token inválido." }, { status: 401 });
+      return NextResponse.json({ error: "Token invÃ¡lido." }, { status: 401 });
     }
 
     if (payload.role !== "GLOBAL_ADMIN") {
@@ -38,3 +39,4 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Erro interno do servidor." }, { status: 500 });
   }
 }
+

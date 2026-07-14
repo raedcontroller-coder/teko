@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { createPatientAction, getPatientsAction, getPatientByIdAction, deletePatientAction, updatePatientAction } from './patients';
 import { publicRegisterAction } from './auth';

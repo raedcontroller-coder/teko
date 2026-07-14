@@ -3,6 +3,7 @@ import { jwtVerify } from 'jose';
 import { db } from '../../../../../../../packages/db/db/index';
 import { users, gameSessions } from '../../../../../../../packages/db/db/schema';
 import { eq, isNull, and, count } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
 
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Token inválido." }, { status: 401 });
     }
 
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Token inválido." }, { status: 401 });
     }
 
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
     let body;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Corpo da requisição inválido ou ausente." }, { status: 400 });
     }
 
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const bcrypt = require('bcryptjs');
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     await db.insert(users).values({

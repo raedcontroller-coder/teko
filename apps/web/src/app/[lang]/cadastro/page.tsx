@@ -99,7 +99,7 @@ export default function CadastroPage() {
             <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full bg-teko-yellow w-full origin-left animate-[scale-x_4s_linear_forwards]" style={{ animationName: 'scaleX' }}></div>
             </div>
-            <style jsx>{`
+            <style>{`
               @keyframes scaleX {
                 from { transform: scaleX(0); }
                 to { transform: scaleX(1); }

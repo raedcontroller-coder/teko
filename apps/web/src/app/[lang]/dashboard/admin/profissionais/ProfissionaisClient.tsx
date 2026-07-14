@@ -79,7 +79,7 @@ export default function ProfissionaisClient({ initialData }: { initialData: Psic
             {filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center text-white/50 italic py-8">
-                  Nenhum profissional encontrado para "{searchTerm}".
+                  Nenhum profissional encontrado para &quot;{searchTerm}&quot;.
                 </TableCell>
               </TableRow>
             ) : (

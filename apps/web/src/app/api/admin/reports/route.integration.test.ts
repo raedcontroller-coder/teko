@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { GET } from './route';
 import { db } from '../../../../../../../packages/db/db/index';
@@ -9,7 +10,7 @@ vi.mock('jose', () => ({
   jwtVerify: vi.fn()
 }));
 
-describe('Integração - Admin Reports API (/api/admin/reports)', () => {
+describe('IntegraÃ§Ã£o - Admin Reports API (/api/admin/reports)', () => {
   const cleanupAdminLixo = async () => {
     const lixos = await db.select().from(users).where(like(users.email, '%INTEG_API_REPORTS%'));
     if (lixos.length > 0) {
@@ -66,7 +67,7 @@ describe('Integração - Admin Reports API (/api/admin/reports)', () => {
 
   describe('GET', () => {
     describe('Caminhos de Sucesso', () => {
-      it('deve extrair a árvore inteira de relacionamentos via API (Action real, BD real)', async () => {
+      it('deve extrair a Ã¡rvore inteira de relacionamentos via API (Action real, BD real)', async () => {
         (jose.jwtVerify as any).mockResolvedValue({ payload: { sub: 'admin-123', role: 'GLOBAL_ADMIN' } });
         
         const request = new Request('http://localhost/api/admin/reports', {
@@ -84,13 +85,13 @@ describe('Integração - Admin Reports API (/api/admin/reports)', () => {
         expect(foundAluno.psicologoName).toBe('Psi API Reports');
         expect(foundAluno.guardianName).toBe('Guard API Reports');
         
-        // As métricas devem ser extraídas, pois foram injetadas
+        // As mÃ©tricas devem ser extraÃ­das, pois foram injetadas
         expect(foundAluno.vtri === '888.88' || foundAluno.qa === '25.00').toBeTruthy(); 
       });
     });
 
     describe('Caminhos Negativos', () => {
-      it('deve retornar 401 Unauthorized se tentar acessar relatórios reais sem token', async () => {
+      it('deve retornar 401 Unauthorized se tentar acessar relatÃ³rios reais sem token', async () => {
         const request = new Request('http://localhost/api/admin/reports');
         const response = await GET(request);
         expect(response.status).toBe(401);
@@ -105,7 +106,7 @@ describe('Integração - Admin Reports API (/api/admin/reports)', () => {
         expect(response.status).toBe(401);
       });
 
-      it('deve retornar 403 Forbidden se tentar acessar relatórios com token de PSICOLOGO', async () => {
+      it('deve retornar 403 Forbidden se tentar acessar relatÃ³rios com token de PSICOLOGO', async () => {
         (jose.jwtVerify as any).mockResolvedValueOnce({ payload: { sub: 'psi-123', role: 'PSICOLOGO' } });
         const request = new Request('http://localhost/api/admin/reports', {
           headers: { 'Authorization': 'Bearer valid_psicologo_token' }
@@ -116,3 +117,4 @@ describe('Integração - Admin Reports API (/api/admin/reports)', () => {
     });
   });
 });
+

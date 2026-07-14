@@ -8,9 +8,17 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getPatientsAction } from "@/actions/patients";
 
+type PatientData = {
+  id: string;
+  name: string;
+  age: string | number | null;
+  lastSessionDate?: Date | string | null;
+  [key: string]: unknown;
+};
+
 export default function AdminProfissionalPacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [patients, setPatients] = useState<any[]>([]);
+  const [patients, setPatients] = useState<PatientData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const params = useParams();
@@ -93,7 +101,17 @@ export default function AdminProfissionalPacientesPage() {
                 <TableRow key={patient.id}>
                   <TableCell className="font-bold">{patient.name}</TableCell>
                   <TableCell>{patient.age} anos</TableCell>
-                  <TableCell>-</TableCell>
+                  <TableCell>
+                    {patient.lastSessionDate ? (
+                      <span className="text-white/80">
+                        {new Date(patient.lastSessionDate).toLocaleDateString("pt-BR")}
+                      </span>
+                    ) : (
+                      <span className="inline-block px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
+                        Nenhuma
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Link href={`/${lang}/dashboard/admin/profissionais/${psicologoId}/pacientes/${patient.id}`}>
                       <Button variant="secondary" size="sm">Acessar Perfil</Button>

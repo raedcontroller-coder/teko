@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../../packages/db/db/index';
 import { users, gameSessions } from '../../../../../../../packages/db/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
@@ -18,7 +18,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (err) {
+    } catch {
       return NextResponse.json({ error: "Token inválido ou expirado." }, { status: 401 });
     }
 
@@ -98,7 +98,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (err) {
+    } catch {
       return NextResponse.json({ error: "Token inválido ou expirado." }, { status: 401 });
     }
 
@@ -165,6 +165,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
       return NextResponse.json({ error: "Tipo de atualização não especificado (?type=patient ou ?type=guardian)." }, { status: 400 });
     }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("API Patient [id] PUT Error:", error);
 
@@ -197,7 +198,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (err) {
+    } catch {
       return NextResponse.json({ error: "Token inválido ou expirado." }, { status: 401 });
     }
 

@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
 
-export async function loginAction(prevState: any, formData: FormData) {
+export async function loginAction(prevState: unknown, formData: FormData) {
   const rawEmail = formData.get("email") as string || "";
   const rawPassword = formData.get("password") as string || "";
 
@@ -92,7 +92,7 @@ export async function getSession() {
     }
     
     return payload;
-  } catch (err) {
+  } catch {
     return null;
   }
 }
@@ -178,7 +178,7 @@ export async function publicRegisterAction(formData: FormData) {
     });
 
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Erro no cadastro público:", err);
     return { error: "Erro interno no servidor ao tentar cadastrar." };
   }

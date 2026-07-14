@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Bell } from "lucide-react";
+
 import { getSession } from "../../actions/auth";
 import { db } from "../../../../../packages/db/db/index";
 import { users } from "../../../../../packages/db/db/schema";

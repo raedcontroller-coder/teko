@@ -66,7 +66,8 @@ export default function AdminProfissionalDadosPage() {
   }, [psicologoId]);
 
   const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let { name, value } = e.target;
+    const name = e.target.name;
+    let value = e.target.value;
     
     if (name === "crp") {
       value = value.replace(/\D/g, "");

@@ -3,10 +3,23 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, User, Shield, Target, Puzzle, Bomb, Save, Baby, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, User, Shield, Target, Save, Baby, Loader2, CheckCircle2, AlertTriangle, Camera } from "lucide-react";
 import { getPatientByIdAction, updatePatientAction, updateGuardianAction, deletePatientAction } from "@/actions/patients";
 
+const SoccerBallIcon = ({ size = 24, className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M12 16.5l-3-2V10l3-2.5 3 2.5v4.5l-3 2z"></path>
+    <path d="M12 7.5V2"></path>
+    <path d="M9 10L3.5 7"></path>
+    <path d="M15 10l5.5-3"></path>
+    <path d="M9 14.5L4 18"></path>
+    <path d="M15 14.5l5 3.5"></path>
+  </svg>
+);
+
 export default function AdminPacientePerfilPage() {
+
   const params = useParams();
   const router = useRouter();
   const lang = (params?.lang as string) || "pt";
@@ -24,8 +37,16 @@ export default function AdminPacientePerfilPage() {
 
   const [guardianId, setGuardianId] = useState<string>("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  type GameSessionExt = Record<string, unknown> & {
+    gameName?: string;
+    behaviorData?: {
+      erro_nogo?: number;
+      variacao?: number;
+      vtr_ms?: number;
+    };
+  };
+  const [sessions, setSessions] = useState<GameSessionExt[]>([]);
   
-  const [isLoading, setIsLoading] = useState(true);
   const [isSavingPatient, setIsSavingPatient] = useState(false);
   const [isSavingGuardian, setIsSavingGuardian] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -59,8 +80,8 @@ export default function AdminPacientePerfilPage() {
         if (res.data.guardian?.id) {
           setGuardianId(res.data.guardian.id);
         }
+        setSessions((res.data.sessions || []) as GameSessionExt[]);
       }
-      setIsLoading(false);
     };
     fetchPatient();
   }, [patientId, id]);
@@ -219,38 +240,62 @@ export default function AdminPacientePerfilPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
-                <div className="w-16 h-16 rounded-full bg-[#7B61FF]/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <Target size={32} className="text-[#7B61FF]" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Toca Rápido!</h3>
-                <p className="text-sm text-white/70 mb-4">Controle inibitório e impulsividade.</p>
-                <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white/50 group-hover:border-white/20 transition-colors">
-                  Ainda não jogou
-                </div>
-              </div>
+              {/* TOCA RÁPIDO */}
+              {(() => {
+                const session = sessions.find((s: GameSessionExt) => s.gameName === 'GoNoGo' || s.gameName === 'Toca Rápido');
+                const played = !!session;
+                const score = session?.behaviorData?.erro_nogo !== undefined ? `${session.behaviorData.erro_nogo} erro(s)` : null;
+                return (
+                  <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-full bg-[#7B61FF]/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                      <Target size={32} className="text-[#7B61FF]" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Toca Rápido!</h3>
+                    <p className="text-sm text-white/70 mb-4">Controle inibitório e impulsividade.</p>
+                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold transition-colors ${played ? 'bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/30' : 'bg-white/5 border border-white/10 text-white/50'}`}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* FOTÓGRAFO */}
+              {(() => {
+                const session = sessions.find((s: GameSessionExt) => s.gameName === 'Fotografo' || s.gameName === 'Fotógrafo');
+                const played = !!session;
+                const score = session?.behaviorData?.variacao !== undefined ? `Variação: ${session.behaviorData.variacao.toFixed(2)} ms` : null;
+                return (
+                  <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-full bg-teko-yellow/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                      <Camera size={32} className="text-teko-yellow" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Fotógrafo da Floresta</h3>
+                    <p className="text-sm text-white/70 mb-4 whitespace-nowrap">Lógica e percepção espacial.</p>
+                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold transition-colors ${played ? 'bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/30' : 'bg-white/5 border border-white/10 text-white/50'}`}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </div>
+                  </div>
+                );
+              })()}
               
-              <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
-                <div className="w-16 h-16 rounded-full bg-teko-yellow/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <Puzzle size={32} className="text-teko-yellow" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Quebra-Cabeça</h3>
-                <p className="text-sm text-white/70 mb-4 whitespace-nowrap">Lógica e percepção espacial.</p>
-                <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white/50 group-hover:border-white/20 transition-colors">
-                  Ainda não jogou
-                </div>
-              </div>
-              
-              <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
-                <div className="w-16 h-16 rounded-full bg-red-400/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <Bomb size={32} className="text-red-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Jogo da Bomba</h3>
-                <p className="text-sm text-white/70 mb-4">Tomada de decisão sob pressão.</p>
-                <div className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white/50 group-hover:border-white/20 transition-colors">
-                  Ainda não jogou
-                </div>
-              </div>
+              {/* GOLEIRO */}
+              {(() => {
+                const session = sessions.find((s: GameSessionExt) => s.gameName === 'Goleiro');
+                const played = !!session;
+                const score = session?.behaviorData?.vtr_ms !== undefined ? `VTR: ${session.behaviorData.vtr_ms.toFixed(2)} ms` : null;
+                return (
+                  <div className="bg-[#FFF6E3]/5 backdrop-blur-md border border-white/15 hover:border-white/25 rounded-xl p-8 text-center group cursor-pointer hover:-translate-y-2 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-full bg-red-400/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                      <SoccerBallIcon size={32} className="text-red-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Goleiro</h3>
+                    <p className="text-sm text-white/70 mb-4">Tomada de decisão sob pressão.</p>
+                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold transition-colors ${played ? 'bg-[#34D399]/20 text-[#34D399] border border-[#34D399]/30' : 'bg-white/5 border border-white/10 text-white/50'}`}>
+                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </section>

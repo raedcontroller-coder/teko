@@ -1,4 +1,4 @@
-import Link from "next/link";
+
 
 export default function PlanosPage() {
   return (
@@ -18,7 +18,7 @@ export default function PlanosPage() {
             <h3 className="font-headline-md text-2xl text-white mb-2">Essencial</h3>
             <p className="font-body-md text-white/70 mb-6 min-h-[48px]">Para psicólogos independentes iniciando com tecnologia.</p>
             <div className="mb-8">
-              <span className="font-display-lg-mobile text-white font-black">R$149</span><span className="text-white/50 text-sm">/mês</span>
+              <span className="font-display-lg-mobile text-white font-black">R$50</span><span className="text-white/50 text-sm">/mês</span>
             </div>
             <ul className="space-y-4 mb-8">
               <li className="flex items-start gap-3"><span className="material-symbols-outlined text-primary text-sm mt-1">check_circle</span> <span className="font-body-md text-white/90">Acesso a 1 perfil de Psicólogo</span></li>
@@ -34,7 +34,7 @@ export default function PlanosPage() {
             <h3 className="font-headline-md text-3xl text-white mb-2 mt-2">Profissional</h3>
             <p className="font-body-md text-white/80 mb-6 min-h-[48px]">Poder total de telemetria para diagnósticos precisos.</p>
             <div className="mb-8 flex items-baseline gap-1">
-              <span className="font-display-lg text-teko-yellow font-black leading-none">R$299</span><span className="text-white/50 text-sm">/mês</span>
+              <span className="font-display-lg text-teko-yellow font-black leading-none">R$100</span><span className="text-white/50 text-sm">/mês</span>
             </div>
             <ul className="space-y-4 mb-8">
               <li className="flex items-start gap-3"><span className="material-symbols-outlined text-teko-yellow text-lg">verified</span> <span className="font-body-md text-white font-medium">Pacientes ilimitados</span></li>

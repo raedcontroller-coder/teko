@@ -2,7 +2,7 @@
 
 import { db } from "../../../../packages/db/db";
 import { users } from "../../../../packages/db/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getSession } from "./auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";

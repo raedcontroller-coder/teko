@@ -34,6 +34,7 @@ export default async function RootLayout({
       className={`${inter.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
       <head>
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body-md overflow-x-hidden selection:bg-teko-yellow/30 selection:text-white relative min-h-screen flex flex-col">

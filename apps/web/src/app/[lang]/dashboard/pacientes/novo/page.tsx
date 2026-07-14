@@ -2,13 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft, User, Shield, Save, Baby, Loader2, CheckCircle2 } from "lucide-react";
 import { createPatientAction } from "@/actions/patients";
 
 export default function NovoPacientePage() {
   const params = useParams();
-  const router = useRouter();
   const lang = (params?.lang as string) || "pt";
 
   const [isLoading, setIsLoading] = useState(false);
@@ -114,7 +113,7 @@ export default function NovoPacientePage() {
           setIsSuccessModalOpen(false);
         }, 4000);
       }
-    } catch (err) {
+    } catch {
       setErrorMsg("Erro de comunicação com o servidor.");
       setIsLoading(false);
     }

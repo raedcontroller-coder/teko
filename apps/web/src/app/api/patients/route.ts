@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../packages/db/db/index';
 import { users, gameSessions } from '../../../../../../packages/db/db/schema';
@@ -10,7 +11,7 @@ export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
+      return NextResponse.json({ error: "Token nÃ£o fornecido." }, { status: 401 });
     }
 
     const token = authHeader.split(' ')[1];
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
     } catch (err) {
-      return NextResponse.json({ error: "Token inválido ou expirado." }, { status: 401 });
+      return NextResponse.json({ error: "Token invÃ¡lido ou expirado." }, { status: 401 });
     }
 
     const url = new URL(request.url);
@@ -29,11 +30,11 @@ export async function GET(request: Request) {
     
     if (payload.role === 'GLOBAL_ADMIN') {
       if (!adminPsiId) {
-        return NextResponse.json({ error: "psicologoId obrigatório para administradores." }, { status: 400 });
+        return NextResponse.json({ error: "psicologoId obrigatÃ³rio para administradores." }, { status: 400 });
       }
       psicologoId = adminPsiId;
     } else if (!psicologoId) {
-      return NextResponse.json({ error: "ID do usuário não encontrado no token." }, { status: 400 });
+      return NextResponse.json({ error: "ID do usuÃ¡rio nÃ£o encontrado no token." }, { status: 400 });
     }
 
     const patients = await db.query.users.findMany({
@@ -70,8 +71,8 @@ export async function GET(request: Request) {
         const game = allGames.find(g => g.id === s.gameId);
         if (game) {
           const nm = game.name.toLowerCase();
-          if (nm.includes("toca rápido") || nm.includes("gonogo") || nm.includes("toca rapido")) tocaRapido++;
-          else if (nm.includes("fotógrafo") || nm.includes("fotografo")) fotografo++;
+          if (nm.includes("toca rÃ¡pido") || nm.includes("gonogo") || nm.includes("toca rapido")) tocaRapido++;
+          else if (nm.includes("fotÃ³grafo") || nm.includes("fotografo")) fotografo++;
           else if (nm.includes("goleiro")) goleiro++;
         }
       });
@@ -105,7 +106,7 @@ export async function POST(request: Request) {
     // 1. Extrair token do header
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
+      return NextResponse.json({ error: "Token nÃ£o fornecido." }, { status: 401 });
     }
 
     const token = authHeader.split(' ')[1];
@@ -116,7 +117,7 @@ export async function POST(request: Request) {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
     } catch (err) {
-      return NextResponse.json({ error: "Token inválido ou expirado." }, { status: 401 });
+      return NextResponse.json({ error: "Token invÃ¡lido ou expirado." }, { status: 401 });
     }
 
     const body = await request.json();
@@ -125,20 +126,20 @@ export async function POST(request: Request) {
     let psicologoId = payload.sub as string;
     if (payload.role === 'GLOBAL_ADMIN') {
       if (!adminPsiId) {
-        return NextResponse.json({ error: "psicologoId obrigatório para administradores." }, { status: 400 });
+        return NextResponse.json({ error: "psicologoId obrigatÃ³rio para administradores." }, { status: 400 });
       }
       psicologoId = adminPsiId;
     } else if (!psicologoId) {
-      return NextResponse.json({ error: "ID do usuário não encontrado no token." }, { status: 400 });
+      return NextResponse.json({ error: "ID do usuÃ¡rio nÃ£o encontrado no token." }, { status: 400 });
     }
 
     const { name, age, gender, guardianName, guardianEmail, guardianPhone } = body;
 
     if (!name || !age || !gender || !guardianName || !guardianEmail || !guardianPhone) {
-      return NextResponse.json({ error: "Todos os campos são obrigatórios." }, { status: 400 });
+      return NextResponse.json({ error: "Todos os campos sÃ£o obrigatÃ³rios." }, { status: 400 });
     }
 
-    // 4. Procurar se o responsável já existe
+    // 4. Procurar se o responsÃ¡vel jÃ¡ existe
     const [existingGuardianByEmail] = await db.select().from(users).where(eq(users.email, guardianEmail));
     const [existingGuardianByPhone] = await db.select().from(users).where(eq(users.phone, guardianPhone));
     
@@ -146,20 +147,20 @@ export async function POST(request: Request) {
 
     if (existingGuardianByEmail || existingGuardianByPhone) {
       if (existingGuardianByEmail && existingGuardianByEmail.phone !== guardianPhone) {
-        return NextResponse.json({ error: "Este e-mail já está cadastrado com outro número de telefone." }, { status: 400 });
+        return NextResponse.json({ error: "Este e-mail jÃ¡ estÃ¡ cadastrado com outro nÃºmero de telefone." }, { status: 400 });
       }
       if (existingGuardianByPhone && existingGuardianByPhone.email !== guardianEmail) {
-        return NextResponse.json({ error: "Este telefone já está cadastrado com outro e-mail." }, { status: 400 });
+        return NextResponse.json({ error: "Este telefone jÃ¡ estÃ¡ cadastrado com outro e-mail." }, { status: 400 });
       }
       
       const existingGuardian = existingGuardianByEmail || existingGuardianByPhone;
       
       if (existingGuardian.role !== "FAMILIAR") {
-        return NextResponse.json({ error: "Os dados de contato fornecidos já pertencem a outro tipo de conta." }, { status: 400 });
+        return NextResponse.json({ error: "Os dados de contato fornecidos jÃ¡ pertencem a outro tipo de conta." }, { status: 400 });
       }
       guardianId = existingGuardian.id;
     } else {
-      // Criar o novo responsável
+      // Criar o novo responsÃ¡vel
       const [newGuardian] = await db.insert(users).values({
         role: "FAMILIAR",
         name: guardianName,
@@ -189,19 +190,20 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("API Patients POST Error:", error);
 
-    // Tratamento específico para campos únicos (email, telefone) duplicados (Drizzle joga o erro real em error.cause)
+    // Tratamento especÃ­fico para campos Ãºnicos (email, telefone) duplicados (Drizzle joga o erro real em error.cause)
     const dbError = error?.cause || error;
 
     if (dbError?.code === '23505' || (dbError?.message && dbError.message.includes('unique constraint')) || (error?.message && error.message.includes('unique constraint'))) {
       if (dbError?.detail?.includes('phone') || (error?.message && error.message.includes('users_phone_unique'))) {
-        return NextResponse.json({ error: "Este telefone já está cadastrado para outro usuário." }, { status: 400 });
+        return NextResponse.json({ error: "Este telefone jÃ¡ estÃ¡ cadastrado para outro usuÃ¡rio." }, { status: 400 });
       }
       if (dbError?.detail?.includes('email') || (error?.message && error.message.includes('users_email_unique'))) {
-        return NextResponse.json({ error: "Este e-mail já está cadastrado para outro usuário." }, { status: 400 });
+        return NextResponse.json({ error: "Este e-mail jÃ¡ estÃ¡ cadastrado para outro usuÃ¡rio." }, { status: 400 });
       }
-      return NextResponse.json({ error: "E-mail ou telefone já estão em uso por outra conta." }, { status: 400 });
+      return NextResponse.json({ error: "E-mail ou telefone jÃ¡ estÃ£o em uso por outra conta." }, { status: 400 });
     }
 
     return NextResponse.json({ error: "Erro interno do servidor." }, { status: 500 });
   }
 }
+

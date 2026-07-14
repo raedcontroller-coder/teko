@@ -51,7 +51,7 @@ export async function registerPsicologoAction(formData: FormData) {
       passwordHash,
     });
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Erro ao inserir:", err);
     return { error: "Erro interno ao cadastrar psicólogo. Verifique os dados." };
   }
@@ -76,6 +76,8 @@ export async function listPsicologosAction() {
     orderBy: (users, { desc }) => [desc(users.createdAt)]
   });
 
+  const allGames = await db.query.games.findMany();
+
   const psicologosWithCounts = await Promise.all(
     psicologos.map(async (psi) => {
       const resultChildren = await db
@@ -89,22 +91,41 @@ export async function listPsicologosAction() {
           )
         );
         
-      const resultSessions = await db
-        .select({ value: count(gameSessions.id) })
-        .from(gameSessions)
-        .innerJoin(users, eq(gameSessions.alunoId, users.id))
-        .where(
-          and(
-            eq(users.psicologoId, psi.id),
-            isNull(users.deletedAt)
-          )
-        );
+      const patientsOfPsi = await db.query.users.findMany({
+        where: and(eq(users.role, "ALUNO"), eq(users.psicologoId, psi.id), isNull(users.deletedAt)),
+        columns: { id: true }
+      });
+      const patientIds = patientsOfPsi.map(p => p.id);
+      
+      let psiSessions: Record<string, unknown>[] = [];
+      if (patientIds.length > 0) {
+        const { inArray } = await import("drizzle-orm");
+        psiSessions = await db.query.gameSessions.findMany({
+          where: inArray(gameSessions.alunoId, patientIds)
+        });
+      }
+
+      let sessionsCount = 0;
+      patientIds.forEach(pid => {
+         const s = psiSessions.filter(x => x.alunoId === pid);
+         let tR = 0, f = 0, g = 0;
+         s.forEach(sess => {
+           const gm = allGames.find(x => x.id === sess.gameId);
+           if (gm) {
+             const nm = gm.name.toLowerCase();
+             if (nm.includes("toca") || nm.includes("gonogo")) tR++;
+             else if (nm.includes("fot")) f++;
+             else if (nm.includes("goleiro")) g++;
+           }
+         });
+         sessionsCount += Math.min(tR, f, g);
+      });
 
       return {
         ...psi,
         childrenCount: resultChildren[0]?.value || 0,
         reportsCount: 0,
-        sessionsCount: resultSessions[0]?.value || 0,
+        sessionsCount: sessionsCount,
       };
     })
   );
@@ -195,6 +216,7 @@ export async function updatePsicologoAction(id: string, data: { name: string; em
     const { revalidatePath } = await import("next/cache");
     revalidatePath("/[lang]/dashboard/admin/profissionais/[id]/dados", "page");
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error(error);
     if (error.code === '23505') {
@@ -300,6 +322,7 @@ export async function getAdminDadosGeradosAction(skipAuth: boolean = false) {
       }
       const m = metricsMap.get(s.alunoId);
       const gameName = gameMap.get(s.gameId);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const behavior = (s.behaviorData as any) || {};
       
       if (gameName) {

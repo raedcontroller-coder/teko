@@ -186,10 +186,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
             <div className="flex flex-wrap gap-3 py-4">
               <span className="glass-pill text-white px-4 py-2 rounded-full font-label-md text-sm flex items-center gap-2">
-                <span className="material-symbols-outlined text-teko-yellow text-sm">extension</span> Jogo da Bomba
+                <span className="material-symbols-outlined text-teko-yellow text-sm">sports_soccer</span> Goleiro
               </span>
               <span className="glass-pill text-white px-4 py-2 rounded-full font-label-md text-sm flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-sm">grid_view</span> Quebra-Cabeça
+                <span className="material-symbols-outlined text-primary text-sm">photo_camera</span> Fotógrafo da Floresta
               </span>
               <span className="glass-pill text-white px-4 py-2 rounded-full font-label-md text-sm flex items-center gap-2">
                 <span className="material-symbols-outlined text-tertiary-fixed-dim text-sm">sports_esports</span> Toca Rápido!
@@ -246,7 +246,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                     <div className="w-12 h-12 bg-teko-yellow rounded-xl flex items-center justify-center"><span className="material-symbols-outlined text-on-secondary-fixed">play_arrow</span></div>
                     <div>
                       <div className="font-headline-md text-white text-sm">Continuar Missão</div>
-                      <div className="text-xs text-white/60">Quebra-Cabeça</div>
+                      <div className="text-xs text-white/60">Fotógrafo da Floresta</div>
                     </div>
                   </div>
                   <div className="w-full bg-white/5 p-4 rounded-2xl backdrop-blur-sm border border-white/5 flex items-center justify-between">
@@ -278,7 +278,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             <h3 className="font-headline-md text-2xl text-white mb-2">Essencial</h3>
             <p className="font-body-md text-white/70 mb-6 min-h-[48px]">Para psicólogos independentes iniciando com tecnologia.</p>
             <div className="mb-8">
-              <span className="font-display-lg-mobile text-white font-black">R$149</span><span className="text-white/50 text-sm">/mês</span>
+              <span className="font-display-lg-mobile text-white font-black">R$50</span><span className="text-white/50 text-sm">/mês</span>
             </div>
             <ul className="space-y-4 mb-8">
               <li className="flex items-start gap-3"><span className="material-symbols-outlined text-primary text-sm mt-1">check_circle</span> <span className="font-body-md text-white/90">Acesso a 1 perfil de Psicólogo</span></li>
@@ -294,7 +294,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             <h3 className="font-headline-md text-3xl text-white mb-2 mt-2">Profissional</h3>
             <p className="font-body-md text-white/80 mb-6 min-h-[48px]">Poder total de telemetria para diagnósticos precisos.</p>
             <div className="mb-8 flex items-baseline gap-1">
-              <span className="font-display-lg text-teko-yellow font-black leading-none">R$299</span><span className="text-white/50 text-sm">/mês</span>
+              <span className="font-display-lg text-teko-yellow font-black leading-none">R$100</span><span className="text-white/50 text-sm">/mês</span>
             </div>
             <ul className="space-y-4 mb-8">
               <li className="flex items-start gap-3"><span className="material-symbols-outlined text-teko-yellow text-lg">verified</span> <span className="font-body-md text-white font-medium">Pacientes ilimitados</span></li>

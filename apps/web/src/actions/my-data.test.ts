@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getMyDataAction, updateMyDataAction, verifyCurrentPasswordAction, updatePasswordAction, softDeleteAccountAction } from './my-data';
 import { db } from '../../../../packages/db/db';

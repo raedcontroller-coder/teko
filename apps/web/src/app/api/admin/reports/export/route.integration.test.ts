@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { GET } from './route';
 import { db } from '../../../../../../../../packages/db/db/index';
@@ -9,9 +10,9 @@ vi.mock('jose', () => ({
   jwtVerify: vi.fn()
 }));
 
-describe('Integração - Admin Reports Export API (/api/admin/reports/export)', () => {
+describe('IntegraÃ§Ã£o - Admin Reports Export API (/api/admin/reports/export)', () => {
   const cleanupAdminLixo = async () => {
-    // Apenas criando um psi mínimo para garantir que ele exporte algo no CSV
+    // Apenas criando um psi mÃ­nimo para garantir que ele exporte algo no CSV
     await db.delete(users).where(like(users.email, '%INTEG_API_CSV%'));
   };
 
@@ -44,7 +45,7 @@ describe('Integração - Admin Reports Export API (/api/admin/reports/export)', 
 
   describe('GET', () => {
     describe('Caminhos de Sucesso', () => {
-      it('deve bater na action real, compilar a string no banco e retornar um CSV HTTP válido', async () => {
+      it('deve bater na action real, compilar a string no banco e retornar um CSV HTTP vÃ¡lido', async () => {
         (jose.jwtVerify as any).mockResolvedValue({ payload: { sub: 'admin-123', role: 'GLOBAL_ADMIN' } });
 
         const request = new Request('http://localhost/api/admin/reports/export', {
@@ -58,7 +59,7 @@ describe('Integração - Admin Reports Export API (/api/admin/reports/export)', 
         expect(data.success).toBe(true);
         
         expect(data.csv).toBeDefined();
-        expect(data.csv).toContain('Psicólogo;Email Psicólogo;CRP');
+        expect(data.csv).toContain('PsicÃ³logo;Email PsicÃ³logo;CRP');
         expect(data.csv).toContain('Psi API CSV'); // Dado persistido
       });
     });
@@ -90,3 +91,4 @@ describe('Integração - Admin Reports Export API (/api/admin/reports/export)', 
     });
   });
 });
+

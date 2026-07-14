@@ -2,13 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft, User, Shield, Save, Baby, Loader2, CheckCircle2 } from "lucide-react";
 import { createPatientAction } from "@/actions/patients";
 
 export default function AdminNovoPacientePage() {
   const params = useParams();
-  const router = useRouter();
   const lang = (params?.lang as string) || "pt";
   const id = params?.id as string; // psychologist ID
 

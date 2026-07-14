@@ -4,7 +4,7 @@ import { Topbar } from "../../../components/layout/Topbar";
 import { getSession } from "../../../actions/auth";
 import { redirect } from "next/navigation";
 
-export default async function DashboardLayout({ children, params }: { children: React.ReactNode, params: any }) {
+export default async function DashboardLayout({ children, params }: { children: React.ReactNode, params: Promise<{ lang: string }> }) {
   const session = await getSession();
   
   if (!session) {

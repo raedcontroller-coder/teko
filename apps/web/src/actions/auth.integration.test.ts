@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { publicRegisterAction, loginAction, getSession } from './auth';
 import { db } from '../../../../packages/db/db/index';

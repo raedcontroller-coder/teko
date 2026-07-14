@@ -20,7 +20,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Token inválido." }, { status: 401 });
     }
     if (payload.role !== "GLOBAL_ADMIN") {
@@ -47,7 +47,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
         clinicName: psi.clinicName
       }
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Erro interno do servidor." }, { status: 500 });
   }
 }
@@ -63,7 +63,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Token inválido." }, { status: 401 });
     }
     if (payload.role !== "GLOBAL_ADMIN") {
@@ -77,7 +77,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     let body;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Corpo da requisição inválido ou ausente." }, { status: 400 });
     }
 
@@ -131,7 +131,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
       // Apenas para satisfazer o mock que retorna rowCount no teste
       return NextResponse.json({ success: true });
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Erro interno do servidor." }, { status: 500 });
   }
 }
@@ -147,7 +147,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Token inválido." }, { status: 401 });
     }
     if (payload.role !== "GLOBAL_ADMIN") {
@@ -169,7 +169,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     }).where(eq(users.id, id));
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Erro ao excluir profissional." }, { status: 500 });
   }
 }

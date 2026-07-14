@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { db } from '../../../../../../../packages/db/db/index';
-import { users, gameSessions } from '../../../../../../../packages/db/db/schema';
+import { users } from '../../../../../../../packages/db/db/schema';
 import { eq, isNull, and, count, inArray } from 'drizzle-orm';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Token inválido." }, { status: 401 });
     }
 

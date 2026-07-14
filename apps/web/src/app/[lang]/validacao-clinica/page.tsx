@@ -52,8 +52,8 @@ export default function ValidacaoClinicaPage() {
               <span className="text-teko-yellow">da Inibição</span> <br/>
               <span className="text-white/60 text-3xl">(Toca Rápido!)</span>
             </h2>
-            <p className="text-xl text-white/80 max-w-3xl leading-relaxed">
-              Nossa adaptação lúdica do paradigma "Toca Rápido!" mede com precisão o controle inibitório e o gerenciamento de impulsos. Ao transformar estímulos estáticos em desafios interativos, capturamos reações naturais que são fundamentais para avaliar a capacidade de autorregulação da criança em cenários do mundo real.
+            <p className="font-body-lg text-text-muted">
+              Nossa adaptação lúdica do paradigma &quot;Toca Rápido!&quot; mede com precisão o controle inibitório e o gerenciamento de impulsos. Ao transformar estímulos estáticos em desafios interativos, capturamos reações naturais que são fundamentais para avaliar a capacidade de autorregulação da criança em cenários do mundo real.
             </p>
             <div className="flex flex-col gap-stack-sm mt-4 border-l-2 border-teko-yellow pl-4">
               <h4 className="font-headline-md font-bold text-on-surface">Métrica Principal</h4>
@@ -88,16 +88,16 @@ export default function ValidacaoClinicaPage() {
           </div>
           <div className="flex-1 flex flex-col gap-stack-md order-2">
             <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
-              <span className="material-symbols-outlined text-[#7B61FF] text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>extension</span>
+              <span className="material-symbols-outlined text-[#7B61FF] text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>sports_soccer</span>
               <span className="font-label-md text-sm text-white">Velocidade de Processamento</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-display-lg-mobile md:font-display-lg text-white leading-[1.2] font-black">
               Metrificando o <br/>
               <span className="text-[#7B61FF]">tempo de resposta.</span> <br/>
-              <span className="text-white/60 text-3xl">(Jogo da Bomba)</span>
+              <span className="text-white/60 text-3xl">(Goleiro)</span>
             </h2>
             <p className="font-body-lg text-text-muted">
-              Por meio de uma dinâmica baseada em pressão temporal, o jogo da bomba avalia a velocidade de processamento e o tempo de resposta da criança diante de estímulos cognitivos. Ao exigir que ela pense, decida e verbalize soluções dentro de um intervalo limitado, a atividade promove a mensuração da agilidade cognitiva, do controle da pressão temporal e da eficiência na recuperação de informações, enquanto o caráter lúdico reduz a ansiedade e favorece a obtenção de dados comportamentais mais naturais.
+              Avalia a velocidade de processamento e a tomada de decisão sob pressão temporal. O Goleiro exige que a criança reaja rapidamente para interceptar chutes ao gol. Os dados coletados rastreiam, com precisão de milissegundos, o tempo de reação em cada defesa e a taxa de sucesso motora, mensurando a agilidade cognitiva de forma direta.
             </p>
             <div className="flex flex-col gap-stack-sm mt-4 border-l-2 border-[#7B61FF] pl-4">
               <h4 className="font-headline-md font-bold text-on-surface">Métrica Principal</h4>
@@ -110,16 +110,16 @@ export default function ValidacaoClinicaPage() {
         <section className="flex flex-col md:flex-row items-center gap-stack-lg md:gap-gutter fade-in-up">
           <div className="flex-1 flex flex-col gap-stack-md order-2 md:order-1">
             <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
-              <span className="material-symbols-outlined text-teko-yellow text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>visibility</span>
+              <span className="material-symbols-outlined text-teko-yellow text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>photo_camera</span>
               <span className="font-label-md text-sm text-white">Atenção Sustentada</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-display-lg-mobile md:font-display-lg text-white leading-[1.2] font-black">
               Foco <br/>
               <span className="text-teko-yellow">Sustentado.</span> <br/>
-              <span className="text-white/60 text-3xl">(Quebra-Cabeça)</span>
+              <span className="text-white/60 text-3xl">(Fotógrafo da Floresta)</span>
             </h2>
             <p className="font-body-lg text-text-muted">
-              Por meio de um ambiente virtual interativo, esta dinâmica avalia a atenção sustentada e a capacidade de resolução de problemas da criança durante a montagem de um quebra-cabeça. A análise de indicadores como tempo de conclusão, quantidade de tentativas, correções realizadas e padrão de interação permite identificar possíveis quedas de atenção ao longo da atividade, enquanto o formato lúdico mantém o engajamento e favorece a coleta de dados cognitivos e comportamentais de forma natural.
+              Avalia a atenção sustentada e a capacidade de rastreamento visual. No Fotógrafo da Floresta, a criança explora um cenário interativo para localizar e &quot;fotografar&quot; animais específicos em meio a distratores. O sistema coleta dados precisos sobre a velocidade de descoberta, a quantidade de fotografias corretas e os falsos positivos (fotos incorretas), mapeando perfeitamente a capacidade de manter o foco prolongado e ignorar distrações.
             </p>
             <div className="flex flex-col gap-stack-sm mt-4 border-l-2 border-teko-yellow pl-4">
               <h4 className="font-headline-md font-bold text-on-surface">Métrica Principal</h4>

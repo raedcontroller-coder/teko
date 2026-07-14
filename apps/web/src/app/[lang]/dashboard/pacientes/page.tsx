@@ -8,6 +8,14 @@ import { getPatientsAction } from "@/actions/patients";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 
+type PatientData = {
+  id: string;
+  name: string;
+  age: string | number | null;
+  lastSessionDate?: Date | string | null;
+  [key: string]: unknown;
+};
+
 export default function MeusPacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const params = useParams();
@@ -16,7 +24,7 @@ export default function MeusPacientesPage() {
   const lang = (params?.lang as string) || "pt";
   const [showDeletedToast, setShowDeletedToast] = useState(false);
 
-  const [patients, setPatients] = useState<any[]>([]);
+  const [patients, setPatients] = useState<PatientData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,7 +41,7 @@ export default function MeusPacientesPage() {
 
   useEffect(() => {
     if (searchParams?.get("deleted") === "true") {
-      setShowDeletedToast(true);
+      setTimeout(() => setShowDeletedToast(true), 0);
       // Limpa a URL depois de um tempo para não ficar com o query string ali
       setTimeout(() => {
         setShowDeletedToast(false);
