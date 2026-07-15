@@ -180,7 +180,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
       // Envia os dados puros para o Python calcular o d' e Critério C (SDT antigo)
       (async () => {
         try {
-          const apiUrlSDT = 'http://10.161.127.80:3002/api/gonogo/sdt';
+          const apiUrlSDT = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io/api/gonogo/sdt';
           const response = await fetch(apiUrlSDT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -204,7 +204,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
       // Envia os dados para a nossa nova API de cálculo psicométrico de Impulsividade (Erro_NoGo)
       (async () => {
         try {
-          const apiUrlImpulsividade = 'http://10.161.127.80:3002/api/calculo/tocarapido';
+          const apiUrlImpulsividade = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io/api/calculo/tocarapido';
           const response = await fetch(apiUrlImpulsividade, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

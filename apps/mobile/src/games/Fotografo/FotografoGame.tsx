@@ -331,7 +331,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         telemetry: tData
       };
       
-      const apiUrl = 'http://10.161.127.80:3002/api/calculo/fotografo';
+      const apiUrl = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io/api/calculo/fotografo';
       
       fetch(apiUrl, {
         method: 'POST',

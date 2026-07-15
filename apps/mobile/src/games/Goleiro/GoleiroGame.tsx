@@ -447,7 +447,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
     };
     
     // Forçando o IP real da máquina para que funcione tanto no emulador quanto no device físico via Wi-Fi
-    const apiUrl = 'http://10.161.127.80:3002/api/calculo/goleiro';
+    const apiUrl = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io/api/calculo/goleiro';
     
     fetch(apiUrl, {
       method: 'POST',
