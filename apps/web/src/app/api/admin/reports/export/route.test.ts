@@ -42,13 +42,13 @@ describe('Admin Export CSV API (/api/admin/reports/export)', () => {
     });
 
     describe('Caminhos Negativos', () => {
-      it('deve retornar 401 Unauthorized se nÃ£o enviar token', async () => {
+      it('deve retornar 401 Unauthorized se não enviar token', async () => {
         const request = new Request('http://localhost/api/admin/reports/export');
         const response = await GET(request);
         expect(response.status).toBe(401);
       });
 
-      it('deve retornar 401 Unauthorized se o token for invÃ¡lido', async () => {
+      it('deve retornar 401 Unauthorized se o token for inválido', async () => {
         (jose.jwtVerify as any).mockRejectedValue(new Error('Invalid token'));
         const request = new Request('http://localhost/api/admin/reports/export', {
           headers: { 'Authorization': 'Bearer invalid_token' }
@@ -57,7 +57,7 @@ describe('Admin Export CSV API (/api/admin/reports/export)', () => {
         expect(response.status).toBe(401);
       });
 
-      it('deve retornar 403 Forbidden se o usuÃ¡rio nÃ£o for ADMIN', async () => {
+      it('deve retornar 403 Forbidden se o usuário não for ADMIN', async () => {
         (jose.jwtVerify as any).mockResolvedValue({
           payload: { sub: 'user-123', role: 'PSICOLOGO' }
         });

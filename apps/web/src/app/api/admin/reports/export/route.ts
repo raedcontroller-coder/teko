@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Token nÃ£o fornecido." }, { status: 401 });
+      return NextResponse.json({ error: "Token não fornecido." }, { status: 401 });
     }
     const token = authHeader.split(" ")[1];
     
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload;
     } catch (e) {
-      return NextResponse.json({ error: "Token invÃ¡lido." }, { status: 401 });
+      return NextResponse.json({ error: "Token inválido." }, { status: 401 });
     }
 
     if (payload.role !== "GLOBAL_ADMIN") {

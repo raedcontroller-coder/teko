@@ -3,7 +3,7 @@ import { Audio } from 'expo-av';
 import axios from 'axios';
 
 // Para dispositivo físico, use o IP local da máquina.
-const API_URL = 'http://10.49.10.133:3002';
+const API_URL = 'http://10.161.127.80:3002';
 
 export interface ValidationResponse {
   valid: boolean;

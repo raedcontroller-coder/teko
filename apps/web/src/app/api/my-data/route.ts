@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../packages/db/db/index';
 import { users } from '../../../../../../packages/db/db/schema';
@@ -11,14 +11,14 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_s
 async function authenticate(request: Request) {
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new Error("Token nÃ£o fornecido.");
+    throw new Error("Token não fornecido.");
   }
 
   const token = authHeader.split(' ')[1];
   const verified = await jwtVerify(token, JWT_SECRET);
   const psicologoId = verified.payload.sub as string;
   if (!psicologoId) {
-    throw new Error("ID do usuÃ¡rio nÃ£o encontrado no token.");
+    throw new Error("ID do usuário não encontrado no token.");
   }
   return psicologoId;
 }
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     }).from(users).where(eq(users.id, psicologoId));
 
     if (!user) {
-      return NextResponse.json({ error: "UsuÃ¡rio nÃ£o encontrado." }, { status: 404 });
+      return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, data: user });
@@ -57,7 +57,7 @@ export async function PUT(request: Request) {
       
       const [existing] = await db.select().from(users).where(eq(users.email, email));
       if (existing && existing.id !== psicologoId) {
-        return NextResponse.json({ error: "Este email jÃ¡ estÃ¡ em uso por outro usuÃ¡rio." }, { status: 400 });
+        return NextResponse.json({ error: "Este email já está em uso por outro usuário." }, { status: 400 });
       }
 
       await db.update(users)
@@ -71,12 +71,12 @@ export async function PUT(request: Request) {
 
       const [user] = await db.select().from(users).where(eq(users.id, psicologoId));
       if (!user || !user.passwordHash) {
-        return NextResponse.json({ error: "UsuÃ¡rio nÃ£o encontrado." }, { status: 404 });
+        return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
       }
 
       const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
       if (!isMatch) {
-        return NextResponse.json({ error: "A senha atual estÃ¡ incorreta." }, { status: 400 });
+        return NextResponse.json({ error: "A senha atual está incorreta." }, { status: 400 });
       }
 
       const passwordHash = await bcrypt.hash(newPassword, 10);
@@ -87,7 +87,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: true, message: "Senha atualizada com sucesso." });
 
     } else {
-      return NextResponse.json({ error: "Tipo de atualizaÃ§Ã£o invÃ¡lido." }, { status: 400 });
+      return NextResponse.json({ error: "Tipo de atualização inválido." }, { status: 400 });
     }
 
   } catch (error: any) {
@@ -104,7 +104,7 @@ export async function DELETE(request: Request) {
       .set({ deletedAt: new Date(), updatedAt: new Date() })
       .where(eq(users.id, psicologoId));
 
-    return NextResponse.json({ success: true, message: "Conta excluÃ­da com sucesso." });
+    return NextResponse.json({ success: true, message: "Conta excluída com sucesso." });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Erro interno." }, { status: 500 });
   }

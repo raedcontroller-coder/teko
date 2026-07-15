@@ -100,8 +100,14 @@ const TARGET_ANIMAL: AnimalType = 'passaro'; // A criança deve tirar foto do p�
 
 const ALL_ANIMALS: AnimalType[] = ['urso', 'cobra', 'aguia', 'coruja', 'passaro', 'macaco'];
 
-const AnimalSprite: React.FC<{ data: ActiveAnimal; onRemove: (id: string) => void }> = ({ data, onRemove }) => {
+const AnimalSprite: React.FC<{ 
+  data: ActiveAnimal; 
+  onRemove: (id: string) => void; 
+  hasTarget: boolean;
+  photographedStatus: 'none' | 'early' | 'late';
+}> = ({ data, onRemove, hasTarget, photographedStatus }) => {
   const opacity = useRef(new Animated.Value(0)).current;
+  const mountTime = useRef(Date.now());
 
   useEffect(() => {
     // Fade in
@@ -110,21 +116,44 @@ const AnimalSprite: React.FC<{ data: ActiveAnimal; onRemove: (id: string) => voi
       duration: 500,
       useNativeDriver: true,
     }).start();
+  }, []);
 
-    // Schedule fade out
-    const fadeOutDelay = data.duration - 500;
-    const timeout = setTimeout(() => {
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    
+    if (photographedStatus === 'late') {
       Animated.timing(opacity, {
         toValue: 0,
-        duration: 500,
+        duration: 300,
         useNativeDriver: true,
-      }).start(() => {
-        onRemove(data.id);
-      });
-    }, fadeOutDelay > 0 ? fadeOutDelay : 0);
+      }).start();
+    } else if (!hasTarget || photographedStatus === 'early') {
+      const elapsed = Date.now() - mountTime.current;
+      const fadeOutDelay = data.duration - 500 - elapsed;
+      
+      if (fadeOutDelay > 0) {
+        timeout = setTimeout(() => {
+          Animated.timing(opacity, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }).start(() => {
+            onRemove(data.id);
+          });
+        }, fadeOutDelay);
+      } else {
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start(() => {
+          onRemove(data.id);
+        });
+      }
+    }
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, [hasTarget, photographedStatus]);
 
   return (
     <Animated.View 
@@ -161,6 +190,15 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const timeLeftRef = useRef(GAME_DURATION);
   const [activeAnimals, setActiveAnimals] = useState<ActiveAnimal[]>([]);
+  const [isTimerPaused, setIsTimerPaused] = useState(false);
+  
+  const [photographedStatus, _setPhotographedStatus] = useState<'none' | 'early' | 'late'>('none');
+  const photographedStatusRef = useRef<'none' | 'early' | 'late'>('none');
+  
+  const setPhotographedStatus = (status: 'none' | 'early' | 'late') => {
+    photographedStatusRef.current = status;
+    _setPhotographedStatus(status);
+  };
 
   const flashAnim = useRef(new Animated.Value(0)).current;
   const feedbackAnim = useRef(new Animated.Value(0)).current;
@@ -193,9 +231,10 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
     
     const loadSounds = async () => {
       try {
-        const { sound: ambient } = await Audio.Sound.createAsync(require('../../../assets/som_ambiente_floresta.mp3'));
-        await ambient.setIsLoopingAsync(true);
-        await ambient.setVolumeAsync(0.2);
+        const { sound: ambient } = await Audio.Sound.createAsync(
+          require('../../../assets/som_ambiente_floresta.mp3'),
+          { isLooping: true, volume: 0.2 }
+        );
 
         const { sound: camera } = await Audio.Sound.createAsync(require('../../../assets/barulho_camera.mp3'));
         await camera.setVolumeAsync(1.0);
@@ -238,7 +277,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (gameState === 'playing' && timeLeft > 0) {
+    if (gameState === 'playing' && timeLeft > 0 && !isTimerPaused) {
       timer = setInterval(() => {
         setTimeLeft(prev => {
           const newTime = prev - 1;
@@ -246,7 +285,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
           return newTime;
         });
       }, 1000);
-    } else if (timeLeft === 0 && gameState === 'playing') {
+    } else if (timeLeft === 0 && gameState === 'playing' && !isTimerPaused) {
       setGameState('timeout');
       clearAllTimeouts();
       soundsRef.current.win?.replayAsync();
@@ -267,11 +306,9 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         // 6:00 decaindo até 3:01 significa que se passaram menos ou igual a 180 segundos.
         if (t.spawnTimeGameSeconds <= 180) {
           if (t.result === 'success' && t.reactionTimeMs) p1_rt.push(t.reactionTimeMs);
-          else if (t.result === 'omission') p1_omissions++;
           else if (t.result === 'commission') p1_commissions++;
         } else {
           if (t.result === 'success' && t.reactionTimeMs) p2_rt.push(t.reactionTimeMs);
-          else if (t.result === 'omission') p2_omissions++;
           else if (t.result === 'commission') p2_commissions++;
         }
       });
@@ -280,14 +317,12 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
       console.log(" 📸 COLETADOS: FOTÓGRAFO DA FLORESTA (PRÉ-PYTHON) 📸");
       console.log("========================================================");
       console.log("-> 1º RECORTE: Primeiros 3 minutos (6:00 decaindo até 3:01)");
-      console.log(`   [1/3] Array de Tempos de Acertos (RT): [${p1_rt.join(', ')}]`);
-      console.log(`   [2/3] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p1_commissions}`);
-      console.log(`   [3/3] Soma Absoluta de Omissões (Pássaros Perdidos): ${p1_omissions}`);
+      console.log(`   [1/2] Array de Tempos de Acertos (RT): [${p1_rt.join(', ')}]`);
+      console.log(`   [2/2] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p1_commissions}`);
       
       console.log("\n-> 2º RECORTE: Últimos 3 minutos (3:00 decaindo até 0:00)");
-      console.log(`   [1/3] Array de Tempos de Acertos (RT): [${p2_rt.join(', ')}]`);
-      console.log(`   [2/3] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p2_commissions}`);
-      console.log(`   [3/3] Soma Absoluta de Omissões (Pássaros Perdidos): ${p2_omissions}`);
+      console.log(`   [1/2] Array de Tempos de Acertos (RT): [${p2_rt.join(', ')}]`);
+      console.log(`   [2/2] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p2_commissions}`);
       console.log("========================================================\n");
 
       // Envia os dados para a API Python (cálculo de Queda de Atenção pelas médias)
@@ -296,7 +331,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         telemetry: tData
       };
       
-      const apiUrl = 'http://10.49.10.133:3002/api/calculo/fotografo';
+      const apiUrl = 'http://10.161.127.80:3002/api/calculo/fotografo';
       
       fetch(apiUrl, {
         method: 'POST',
@@ -324,7 +359,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         .catch(err => console.log('Failed to send Fotografo telemetry:', err));
     }
     return () => clearInterval(timer);
-  }, [gameState, timeLeft]);
+  }, [gameState, timeLeft, isTimerPaused]);
 
   // Fade out ambient sound in the last 5 seconds
   useEffect(() => {
@@ -440,6 +475,11 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
     setIsCameraReady(true);
     cameraPulseAnim.stopAnimation();
     cameraPulseAnim.setValue(1);
+    
+    // Evita loop duplo se já pausou
+    setIsTimerPaused(false);
+    setPhotographedStatus('none');
+    
     const roundDuration = Math.floor(Math.random() * 5 + 6) * 1000;
     
     // Corrigido o bug do React Stale Closure usando o Ref mais recente
@@ -523,7 +563,17 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
       }
     });
 
-    spawnIntervalRef.current = setTimeout(startRound, roundDuration);
+    if (spawnBird) {
+      spawnIntervalRef.current = setTimeout(() => {
+        if (photographedStatusRef.current === 'none') {
+          setIsTimerPaused(true);
+        } else {
+          startRound();
+        }
+      }, roundDuration);
+    } else {
+      spawnIntervalRef.current = setTimeout(startRound, roundDuration);
+    }
   };
 
   const showFeedback = (type: 'success' | 'warning', text: string) => {
@@ -559,13 +609,26 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
       setScore(prev => prev + 1);
       showFeedback('success', 'Que foto linda!');
       
-      // Encontra a última entrada de telemetria que ainda é 'omission' (do round atual)
       const lastBirdIndex = telemetryRef.current.map(t => t.result).lastIndexOf('omission');
       if (lastBirdIndex !== -1) {
         const t = telemetryRef.current[lastBirdIndex];
         t.result = 'success';
         t.reactionTimeMs = Date.now() - t.spawnTimestamp;
       }
+      
+      if (isTimerPaused) {
+        // Estourou o tempo: Fade out rápido e próxima rodada
+        setPhotographedStatus('late');
+        setTimeout(() => {
+          setActiveAnimals([]);
+          setIsTimerPaused(false);
+          startRound();
+        }, 300);
+      } else {
+        // Clicou rápido: Fade out natural no tempo original
+        setPhotographedStatus('early');
+      }
+
     } else if (activeAnimals.length > 0) {
       // Erro de comissão: tirou foto de outro animal
       telemetryRef.current.push({
@@ -701,7 +764,13 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         {gameState === 'playing' && (
           <>
             {activeAnimals.map((active) => (
-              <AnimalSprite key={active.id} data={active} onRemove={removeAnimal} />
+              <AnimalSprite 
+                key={active.id} 
+                data={active} 
+                onRemove={removeAnimal} 
+                hasTarget={activeAnimals.some(a => a.slot.type === TARGET_ANIMAL)} 
+                photographedStatus={photographedStatus}
+              />
             ))}
 
             <Pressable 

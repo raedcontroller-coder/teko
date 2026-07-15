@@ -32,7 +32,9 @@ vi.mock('jose', () => ({
 
 // Mock bcryptjs internally used in the route
 vi.mock('bcryptjs', () => ({
-  hash: vi.fn(() => Promise.resolve('hashed_password_123')),
+  default: {
+    hash: vi.fn(() => Promise.resolve('hashed_password_123')),
+  }
 }));
 
 describe('Admin Psychologists API (/api/admin/psychologists)', () => {
