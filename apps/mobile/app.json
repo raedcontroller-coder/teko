@@ -4,7 +4,7 @@
     "slug": "teko-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/teko_icone.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
@@ -13,9 +13,7 @@
       "package": "com.teko.mobile",
       "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png",
+        "foregroundImage": "./assets/teko_icone.png",
         "backgroundColor": "#FFFFFF"
       }
     },
@@ -28,7 +26,15 @@
       }
     },
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ]
   }
 }
