@@ -12,6 +12,11 @@
     "android": {
       "package": "com.teko.mobile",
       "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "INTERNET",
+        "VIBRATE",
+        "MODIFY_AUDIO_SETTINGS"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/teko_icone.png",
         "backgroundColor": "#FFFFFF"
