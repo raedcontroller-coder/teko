@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, pgEnum, jsonb, AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, pgEnum, jsonb, AnyPgColumn, boolean } from 'drizzle-orm/pg-core';
 
 // 1. Roles Definition
 export const roleEnum = pgEnum('role', ['GLOBAL_ADMIN', 'PSICOLOGO', 'ALUNO', 'FAMILIAR']);
@@ -31,6 +31,7 @@ export const users = pgTable('users', {
   // For ALUNO, specific child details
   age: text('age'),
   gender: text('gender'),
+  hasTdah: boolean('has_tdah').default(false),
   guardianId: uuid('guardian_id').references((): AnyPgColumn => users.id),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),

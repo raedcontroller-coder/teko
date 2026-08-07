@@ -28,6 +28,7 @@ interface DadosRow {
   alunoName: string;
   alunoAge: string;
   alunoGender: string;
+  alunoTdah: string;
   vtri: string;
   qa: string;
   imp: string;
@@ -137,6 +138,10 @@ export const AdminReportsScreen: React.FC = () => {
       </View>
 
       <View style={styles.cardFooter}>
+        <View style={styles.metricBadge}>
+          <Text style={styles.metricLabel}>TDAH</Text>
+          <Text style={[styles.metricValue, item.alunoTdah === 'Sim' && { color: '#FFC857' }]}>{item.alunoTdah}</Text>
+        </View>
         <View style={styles.metricBadge}>
           <Text style={styles.metricLabel}>VTRI</Text>
           <Text style={styles.metricValue}>{item.vtri}</Text>

@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 24,
-    paddingBottom: 100, // padding extra pro bottom tab bar
+    paddingBottom: 24, // padding normal
     gap: 16,
   },
   card: {

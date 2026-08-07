@@ -27,6 +27,7 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
     name: '',
     age: '',
     gender: '',
+    hasTdah: false,
     guardianName: '',
     guardianEmail: '',
     guardianPhone: '',
@@ -205,6 +206,24 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
               })}
             </View>
           </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.labelYellow}>Paciente possui diagnóstico de TDAH?</Text>
+            <View style={styles.pillsContainer}>
+              {[true, false].map((val) => {
+                const isSelected = formData.hasTdah === val;
+                return (
+                  <TouchableOpacity
+                    key={val ? 'Sim' : 'Não'}
+                    style={[styles.pill, isSelected && styles.pillSelected]}
+                    onPress={() => setFormData(prev => ({ ...prev, hasTdah: val }))}
+                  >
+                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]}>{val ? 'Sim' : 'Não'}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
         </View>
 
         {/* Seção Responsável (Roxo) */}
@@ -332,7 +351,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingBottom: 120,
+    paddingBottom: 24,
     gap: 24,
   },
   card: {

@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 100, // Margem inferior gigantesca para não colar no BottomBar
+    paddingBottom: 24, // Margem inferior normal
   },
   header: {
     marginBottom: 20,

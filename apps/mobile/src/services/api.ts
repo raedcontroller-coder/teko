@@ -2,10 +2,8 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 
 // Obtenha o IP da sua rede local (o mesmo que aparece no terminal do Expo)
-// Para testar no emulador Android, pode-se usar 10.0.2.2.
-// Como estamos usando Expo Go em um dispositivo físico na rede, o IP deve bater com a rede.
-// Substitua pelo IP da sua máquina rodando o backend
-const API_URL = 'https://teko.raed.world';
+// Para testar via Expo Go (dispositivo físico Android ou iOS) na rede Wi-Fi, usamos diretamente o IP da máquina.
+const API_URL = 'http://10.233.222.80:3000';
 
 export const api = axios.create({
   baseURL: API_URL,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, Text, StyleSheet, ImageBackground, TouchableOpacity, 
+import {
+  View, Text, StyleSheet, ImageBackground, TouchableOpacity,
   Image, Animated, Pressable, Modal, Easing, Dimensions, LogBox, Platform
 } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
@@ -38,30 +38,30 @@ const Bola3D = ({ targetRotations, duration, startTime, globalStartSize }: { tar
   // O Metro agora consegue dar require() no arquivo .glb!
   const { scene } = useGLTF(require('../../../assets/assets_goleiro/bola_futebol_3D.glb') as any);
   const meshRef = useRef<any>(null);
-  
+
   // Clonamos a malha (scene) e forçamos o tamanho/pivô exato para bater 1:1 com a bola 2D
   const clonedScene = React.useMemo(() => {
     const clone = scene.clone();
-    
+
     // Calcula o tamanho real (Bounding Box) do modelo .glb do usuário
     const box = new THREE.Box3().setFromObject(clone);
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
-    
+
     // Como o nosso Canvas agora tem 300x300 pixels (para evitar que a bola seja cortada ao crescer),
     // queremos que o tamanho base (scale=1) seja equivalente a 100 pixels.
     // Ajuste: 0.6x para nascer ainda menor (mais harmônico), conforme solicitado.
-    const targetDiameter = (4.66 / 3) * 0.6; 
+    const targetDiameter = (4.66 / 3) * 0.6;
     const scaleFactor = targetDiameter / maxDim;
-    
+
     // Guardamos o scaleFactor no userData para acessar no useFrame
     clone.userData.baseScale = scaleFactor;
     clone.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    
+
     // Centraliza o Pivô perfeitamente
     const center = box.getCenter(new THREE.Vector3());
     clone.position.set(-center.x * scaleFactor, -center.y * scaleFactor, -center.z * scaleFactor);
-    
+
     return clone;
   }, [scene]);
 
@@ -69,22 +69,22 @@ const Bola3D = ({ targetRotations, duration, startTime, globalStartSize }: { tar
     if (meshRef.current && duration > 0) {
       const elapsed = Date.now() - startTime;
       const t = Math.min(1, elapsed / duration); // vai de 0 até 1 durante o chute
-      
+
       // Aplicar rotação física real em radianos
       meshRef.current.rotation.x = (targetRotations.x * t) * (Math.PI / 180);
       meshRef.current.rotation.y = (targetRotations.y * t) * (Math.PI / 180);
       meshRef.current.rotation.z = (targetRotations.z * t) * (Math.PI / 180);
-      
+
       // Aplicar o Crescimento de Escala DENTRO do motor 3D
       const startScale = globalStartSize / 100;
       // Ajuste: Cresce até 1.66x (compensando a redução inicial para 0.6, mantendo o tamanho final igual)
-      const currentScale = startScale + ((1.66 - startScale) * t); 
+      const currentScale = startScale + ((1.66 - startScale) * t);
       const finalScale = clonedScene.userData.baseScale * currentScale;
       meshRef.current.scale.set(finalScale, finalScale, finalScale);
     }
   });
 
-  return <primitive ref={meshRef} object={clonedScene} scale={1} />; 
+  return <primitive ref={meshRef} object={clonedScene} scale={1} />;
 };
 // PRÉ-CARREGAMENTO FORÇADO DO MODELO NA MEMÓRIA PARA EVITAR LAG INICIAL
 useGLTF.preload(require('../../../assets/assets_goleiro/bola_futebol_3D.glb') as any);
@@ -706,9 +706,9 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   const [menuStep, setMenuStep] = useState<1 | 2>(1);
   const [countdownValue, setCountdownValue] = useState<number | string>(3);
   const [showExitModal, setShowExitModal] = useState(false);
-  const [score, setScore] = useState(0); 
-  const [currentShot, setCurrentShot] = useState(0); 
-  
+  const [score, setScore] = useState(0);
+  const [currentShot, setCurrentShot] = useState(0);
+
   const [isBallActive, setIsBallActive] = useState(false);
   const [flashType, setFlashType] = useState<'success' | 'error' | null>(null);
   const [gloveZIndex, setGloveZIndex] = useState(30);
@@ -722,7 +722,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   const countdownAnim = useRef(new Animated.Value(0)).current;
   const glovePosAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const gloveScaleAnim = useRef(new Animated.Value(1)).current;
-  
+
   // Refs
   const spawnTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shotTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -736,7 +736,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   const currentShotRef = useRef<number>(0);
 
   // Audio
-  const soundsRef = useRef<{ 
+  const soundsRef = useRef<{
     success: Audio.Sound | null; error: Audio.Sound | null; win: Audio.Sound | null;
     chute: Audio.Sound | null; defesa: Audio.Sound | null;
   }>({
@@ -748,16 +748,16 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
     const loadSounds = async () => {
       try {
         await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, staysActiveInBackground: false, shouldDuckAndroid: false });
-        
+
         const { sound: success } = await Audio.Sound.createAsync(require('../../../assets/click_correto_gonogo.mp3'));
         const { sound: error } = await Audio.Sound.createAsync(require('../../../assets/click_incorreto_gonogo.mp3'));
         const { sound: win } = await Audio.Sound.createAsync(require('../../../assets/venceu-jogo.mp3'));
         const { sound: chute } = await Audio.Sound.createAsync(require('../../../assets/chute_bola.mp3'));
         const { sound: defesa } = await Audio.Sound.createAsync(require('../../../assets/defesa_luva.mp3'));
-        
+
         await success.setVolumeAsync(1.0); await error.setVolumeAsync(1.0); await win.setVolumeAsync(1.0);
         await chute.setVolumeAsync(1.0); await defesa.setVolumeAsync(1.0);
-        
+
         if (isMounted) soundsRef.current = { success, error, win, chute, defesa };
       } catch (e) { console.error("Erro ao carregar sons", e); }
     };
@@ -800,7 +800,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
       } else {
         setAvailableSlots(DEFAULT_SLOTS);
       }
-      
+
       const sizeData = await AsyncStorage.getItem(GLOBAL_SIZE_KEY);
       if (sizeData) {
         setGlobalStartSize(parseInt(sizeData, 10));
@@ -878,19 +878,19 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
   const spawnBall = () => {
     // A interface mostrará qual chute estamos tentando defender no momento (1 a 10)
-    setCurrentShot(currentShotRef.current + 1);
+    setCurrentShot(currentShotRef.current);
     isShotProcessedRef.current = false;
-    
+
     // Choose random slot (curve)
     const randomSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];
     setActiveSlot(randomSlot);
     setIsBallActive(true);
     setFlashType(null);
     ballAppearTimeRef.current = Date.now();
-    
+
     // Play kick sound
     soundsRef.current.chute?.playFromPositionAsync(0);
-    
+
     // Reset Gloves
     glovePosAnim.setValue({ x: 0, y: 0 });
     gloveScaleAnim.setValue(1);
@@ -930,12 +930,12 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
   const handleSave = () => {
     if (isShotProcessedRef.current) return;
-    
+
     // Feedback imediato do impacto inicial (Apenas Som)
     soundsRef.current.defesa?.playFromPositionAsync(0);
-    
+
     const timeSinceSpawn = Date.now() - ballAppearTimeRef.current;
-    
+
     // Penalidade por clique antecipado (Vermelho/Amarelo)
     if (timeSinceSpawn < 2500) {
       handleMiss();
@@ -945,36 +945,36 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
     // Sucesso! Clicou no momento exato (Verde)
     // O cronômetro psicométrico real só começa a contar a partir dos 2500ms (momento em que a bola fica verde e clicável)
     const reactionTime = timeSinceSpawn - 2500;
-    
+
     isShotProcessedRef.current = true;
-    
+
     if (shotTimeoutRef.current) clearTimeout(shotTimeoutRef.current);
     shotProgressAnim.stopAnimation();
-    
+
     // ---- Animação das Luvas Pegando a Bola ----
     if (activeSlot) {
       const { width, height } = Dimensions.get('window');
       const t = currentProgressRef.current;
-      
+
       const p0 = activeSlot.p0;
       const p1 = activeSlot.p1;
       const p2 = activeSlot.p2;
-      const bx = Math.pow(1-t, 2) * p0.x + 2 * (1-t) * t * p1.x + Math.pow(t, 2) * p2.x;
-      const by = Math.pow(1-t, 2) * p0.y + 2 * (1-t) * t * p1.y + Math.pow(t, 2) * p2.y;
-      
+      const bx = Math.pow(1 - t, 2) * p0.x + 2 * (1 - t) * t * p1.x + Math.pow(t, 2) * p2.x;
+      const by = Math.pow(1 - t, 2) * p0.y + 2 * (1 - t) * t * p1.y + Math.pow(t, 2) * p2.y;
+
       const targetPixelX = (bx / 100) * width;
       const targetPixelY = (by / 100) * height;
-      
+
       const gloveRestX = width / 2;
       // Ajuste: O container agora é fixo de 400x300.
       // Topo = height - 220. Centro = height - 70. Palmas um pouco acima = height - 120.
-      const gloveRestY = height - 120; 
-      
+      const gloveRestY = height - 120;
+
       const deltaX = targetPixelX - gloveRestX;
       const deltaY = targetPixelY - gloveRestY;
-      
+
       setGloveZIndex(1000); // Joga a luva pra cima da bola
-      
+
       Animated.parallel([
         Animated.timing(glovePosAnim, {
           toValue: { x: deltaX, y: deltaY },
@@ -1003,10 +1003,10 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
     // O nível de tentativa SÓ avança se a defesa for um sucesso!
     currentShotRef.current += 1;
-    
+
     setScore(prev => prev + 1);
     setFlashType('success');
-    
+
     setTimeout(() => {
       setIsBallActive(false);
       setFlashType(null);
@@ -1017,14 +1017,14 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   const handleMiss = () => {
     if (isShotProcessedRef.current) return;
     isShotProcessedRef.current = true;
-    
+
     if (shotTimeoutRef.current) clearTimeout(shotTimeoutRef.current);
     shotProgressAnim.stopAnimation();
-    
+
     setFlashType('error');
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     soundsRef.current.error?.playFromPositionAsync(0);
-    
+
     setTimeout(() => {
       setIsBallActive(false);
       setFlashType(null);
@@ -1036,53 +1036,53 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
     setGameState('timeout');
     clearAllTimeouts();
     soundsRef.current.win?.replayAsync();
-    
+
     // Envia os dados para a API Python (cálculo do VTR)
     const telemetryPayload = {
       game: 'goleiro',
       reaction_times_ms: reactionTimesRef.current
     };
-    
+
     // Forçando o IP real da máquina para que funcione tanto no emulador quanto no device físico via Wi-Fi
     const apiUrl = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io/api/calculo/goleiro';
-    
+
     fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(telemetryPayload)
     }).then(res => res.json())
-        .then(async data => {
-          console.log("\n========================================================");
-          console.log(" 🧠 LAUDO FINAL DO PYTHON (VTR) 🧠");
-          console.log("========================================================");
-          console.log(JSON.stringify(data, null, 2));
-          console.log("========================================================\n");
-          
-          // Salva no banco de dados passando pelo Node.js
-          try {
-            await api.post('/api/sessions', {
-              alunoId,
-              gameName: 'Goleiro',
-              behaviorData: data
-            });
-            console.log("✅ Sessão salva no banco de dados com sucesso!");
-          } catch (err) {
-            console.log("❌ Erro ao salvar sessão no banco de dados:", err);
-          }
-        })
+      .then(async data => {
+        console.log("\n========================================================");
+        console.log(" 🧠 LAUDO FINAL DO PYTHON (VTR) 🧠");
+        console.log("========================================================");
+        console.log(JSON.stringify(data, null, 2));
+        console.log("========================================================\n");
+
+        // Salva no banco de dados passando pelo Node.js
+        try {
+          await api.post('/api/sessions', {
+            alunoId,
+            gameName: 'Goleiro',
+            behaviorData: data
+          });
+          console.log("✅ Sessão salva no banco de dados com sucesso!");
+        } catch (err) {
+          console.log("❌ Erro ao salvar sessão no banco de dados:", err);
+        }
+      })
       .catch(err => console.log('Failed to send telemetry:', err));
   };
 
   // Helper to pre-calculate bezier interpolations
   const getInterpolations = () => {
     if (!activeSlot) return null;
-    
+
     const steps = 50;
     const inputRange = [];
-    for(let i=0; i<=steps; i++) inputRange.push(i / steps);
+    for (let i = 0; i <= steps; i++) inputRange.push(i / steps);
 
     const { z: targetZ, x: targetX, y: targetY } = targetRotationsRef.current;
-    
+
     const getCurveForDelay = (delayT: number) => {
       const outX = [];
       const outY = [];
@@ -1090,24 +1090,24 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
       const outRotZ = [];
       const outRotX = [];
       const outRotY = [];
-      
-      for(let i=0; i<=steps; i++) {
+
+      for (let i = 0; i <= steps; i++) {
         let t = i / steps;
         let t_delayed = Math.max(0, t - delayT);
-        
+
         const p0 = activeSlot.p0;
         const p1 = activeSlot.p1;
         const p2 = activeSlot.p2;
 
-        const bx = Math.pow(1-t_delayed, 2) * p0.x + 2 * (1-t_delayed) * t_delayed * p1.x + Math.pow(t_delayed, 2) * p2.x;
-        const by = Math.pow(1-t_delayed, 2) * p0.y + 2 * (1-t_delayed) * t_delayed * p1.y + Math.pow(t_delayed, 2) * p2.y;
-        
+        const bx = Math.pow(1 - t_delayed, 2) * p0.x + 2 * (1 - t_delayed) * t_delayed * p1.x + Math.pow(t_delayed, 2) * p2.x;
+        const by = Math.pow(1 - t_delayed, 2) * p0.y + 2 * (1 - t_delayed) * t_delayed * p1.y + Math.pow(t_delayed, 2) * p2.y;
+
         const startScale = globalStartSize / 100;
 
         outX.push(`${bx}%`);
         outY.push(`${by}%`);
         outScale.push(startScale + ((1.66 - startScale) * t_delayed));
-        
+
         outRotZ.push(`${targetZ * t_delayed}deg`);
         outRotX.push(`${targetX * t_delayed}deg`);
         outRotY.push(`${targetY * t_delayed}deg`);
@@ -1176,12 +1176,12 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   return (
     <View style={styles.container}>
       {renderExitModal()}
-      
-      <ImageBackground 
-        source={isBallActive 
-          ? require('../../../assets/assets_goleiro/bola_chutada.png') 
+
+      <ImageBackground
+        source={isBallActive
+          ? require('../../../assets/assets_goleiro/bola_chutada.png')
           : require('../../../assets/assets_goleiro/campo_futebol.png')
-        } 
+        }
         style={styles.container}
         resizeMode="cover"
       >
@@ -1196,7 +1196,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
           ) : false && gameState === 'menu' && (
             <TouchableOpacity onPress={() => setGameState('editor')} style={styles.editorButton}>
               <Settings color="#fff" size={24} />
-              <Text style={{color: '#FFF', fontWeight: 'bold', marginLeft: 8}}>Editor de Curvas</Text>
+              <Text style={{ color: '#FFF', fontWeight: 'bold', marginLeft: 8 }}>Editor de Curvas</Text>
             </TouchableOpacity>
           )}
 
@@ -1204,7 +1204,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
             <View style={styles.centerTopStats} pointerEvents="none">
               <View style={styles.timerBox}>
                 <Text style={styles.timerText}>
-                  Chutes: {currentShot}/{TOTAL_SHOTS}
+                  Acertos: {currentShot}/{TOTAL_SHOTS}
                 </Text>
               </View>
               <View style={styles.scoreBox}>
@@ -1216,22 +1216,22 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
         </View>
 
         {(gameState === 'playing' || gameState === 'countdown') && (
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.glovesContainer, 
-              { 
+              styles.glovesContainer,
+              {
                 zIndex: gloveZIndex,
                 transform: [
                   { translateX: glovePosAnim.x },
                   { translateY: glovePosAnim.y },
                   { scale: gloveScaleAnim }
-                ] 
+                ]
               }
-            ]} 
+            ]}
             pointerEvents="none"
           >
-            <Image 
-              source={require('../../../assets/assets_goleiro/luvas_goleiro.png')} 
+            <Image
+              source={require('../../../assets/assets_goleiro/luvas_goleiro.png')}
               style={styles.glovesImage}
               resizeMode="contain"
             />
@@ -1245,7 +1245,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
                 <>
                   <Text style={styles.title}>Goleiro</Text>
                   <Text style={styles.subtitle}>Teste seus reflexos! Defenda todas as bolas antes que elas entrem no gol.</Text>
-                  <Pressable 
+                  <Pressable
                     style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
                     onPress={() => setMenuStep(2)}
                   >
@@ -1257,7 +1257,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
               {menuStep === 2 && (
                 <>
                   <Text style={[styles.title, { marginBottom: 8 }]}>Como Jogar</Text>
-                  
+
                   <Text style={[styles.subtitle, { fontSize: 16, marginBottom: 8, paddingHorizontal: 16, lineHeight: 22 }]}>
                     Toque na bola no exato momento em que o círculo ficar <Text style={{ color: '#34C759', fontWeight: '900' }}>VERDE</Text>!
                   </Text>
@@ -1267,25 +1267,25 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
                       <Circle cx="55" cy="55" r="30" stroke="#34C759" strokeWidth="4" fill="transparent" strokeOpacity={0.8} />
                       <Circle cx="55" cy="55" r="22" stroke="#34C759" strokeWidth="3" fill="transparent" strokeOpacity={0.6} />
                     </Svg>
-                    <Image 
-                      source={require('../../../assets/assets_goleiro/bola.png')} 
-                      style={{ width: 90, height: 90 }} 
-                      resizeMode="contain" 
+                    <Image
+                      source={require('../../../assets/assets_goleiro/bola.png')}
+                      style={{ width: 90, height: 90 }}
+                      resizeMode="contain"
                     />
                   </View>
 
                   <Text style={[styles.subtitle, { fontSize: 15, marginBottom: 16, paddingHorizontal: 16, color: '#FFF', lineHeight: 20 }]}>
                     Tocou <Text style={{ fontWeight: 'bold' }}>cedo demais</Text> ou deixou <Text style={{ fontWeight: 'bold' }}>passar</Text>? Ponto do adversário!
                   </Text>
-                  
+
                   <View style={styles.actionButtonsRow}>
-                    <Pressable 
-                      style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryButtonPressed]} 
+                    <Pressable
+                      style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryButtonPressed]}
                       onPress={() => setMenuStep(1)}
                     >
                       {({ pressed }) => <Text style={[styles.secondaryButtonText, pressed && { color: '#7B61FF' }]}>VOLTAR</Text>}
                     </Pressable>
-                    <Pressable 
+                    <Pressable
                       style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
                       onPress={startCountdown}
                     >
@@ -1300,7 +1300,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
         {gameState === 'countdown' && (
           <View style={[styles.centerContent, styles.countdownOverlay]}>
-            <Animated.Text style={[styles.countdownText, { 
+            <Animated.Text style={[styles.countdownText, {
               opacity: countdownAnim,
               transform: [{ scale: countdownAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }]
             }]}>
@@ -1311,19 +1311,19 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
         {/* Pré-compilação do Canvas: Sempre visível para forçar compilação de shader, mas mantido fora da tela! */}
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-          
+
           {/* Bola Principal (Renderização True 3D + SVG Hitbox) */}
           <Animated.View style={[styles.ballContainer, {
-              left: (gameState === 'playing' && isBallActive && animStyle) ? animStyle.main.x : -1000,
-              top: (gameState === 'playing' && isBallActive && animStyle) ? animStyle.main.y : -1000,
-              transform: [
-                { translateX: -50 },
-                { translateY: -50 }
-              ],
-              zIndex: 999
-            }
+            left: (gameState === 'playing' && isBallActive && animStyle) ? animStyle.main.x : -1000,
+            top: (gameState === 'playing' && isBallActive && animStyle) ? animStyle.main.y : -1000,
+            transform: [
+              { translateX: -50 },
+              { translateY: -50 }
+            ],
+            zIndex: 999
+          }
           ]} pointerEvents="box-none">
-            
+
             {/* Canvas Expandido (Não recebe toque) */}
             <View style={{
               position: 'absolute',
@@ -1334,10 +1334,10 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
                 <ambientLight intensity={1.2} />
                 <directionalLight position={[10, 10, 5]} intensity={2.5} />
                 <React.Suspense fallback={null}>
-                  <Bola3D 
-                    targetRotations={targetRotationsRef.current || {x:0, y:0, z:0}} 
-                    duration={currentDurationRef.current || 3500} 
-                    startTime={ballAppearTimeRef.current || Date.now()} 
+                  <Bola3D
+                    targetRotations={targetRotationsRef.current || { x: 0, y: 0, z: 0 }}
+                    duration={currentDurationRef.current || 3500}
+                    startTime={ballAppearTimeRef.current || Date.now()}
                     globalStartSize={globalStartSize || 15}
                   />
                 </React.Suspense>
@@ -1347,8 +1347,8 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
             {/* Apenas renderiza a interação (SVGs e Botões) se a bola estiver ativa */}
             {gameState === 'playing' && isBallActive && animStyle && (
               <Animated.View style={{
-                 position: 'absolute', width: 100, height: 100,
-                 transform: [{ scale: animStyle.main.scale }]
+                position: 'absolute', width: 100, height: 100,
+                transform: [{ scale: animStyle.main.scale }]
               }}>
                 <Pressable style={StyleSheet.absoluteFill} onPress={handleSave}>
                   {/* Anel Estático (Contorna perfeitamente a bola) */}
@@ -1379,13 +1379,13 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
                 Você é um verdadeiro campeão! Conseguiu defender com sucesso todos os <Text style={{ color: '#FFC857', fontWeight: 'bold' }}>{TOTAL_SHOTS}</Text> chutes.
               </Text>
               <View style={styles.actionButtonsRow}>
-                <Pressable 
+                <Pressable
                   style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryButtonPressed]}
                   onPress={onBack}
                 >
                   {({ pressed }) => <Text style={[styles.secondaryButtonText, pressed && { color: '#7B61FF' }]}>Sair do Jogo</Text>}
                 </Pressable>
-                <Pressable 
+                <Pressable
                   style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
                   onPress={startGame}
                 >
@@ -1527,9 +1527,9 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject, zIndex: 10,
   },
   glovesContainer: {
-    position: 'absolute', bottom: -80, 
-    left: '50%', marginLeft: -200, 
-    width: 400, height: 300, 
+    position: 'absolute', bottom: -80,
+    left: '50%', marginLeft: -200,
+    width: 400, height: 300,
     alignItems: 'center', justifyContent: 'center', zIndex: 30,
   },
   glovesImage: {

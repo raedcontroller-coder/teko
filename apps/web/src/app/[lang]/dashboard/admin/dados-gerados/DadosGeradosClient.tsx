@@ -16,6 +16,7 @@ interface DadosRow {
   alunoName: string;
   alunoAge: string;
   alunoGender: string;
+  alunoTdah: string;
   vtri: string;
   qa: string;
   imp: string;
@@ -57,7 +58,7 @@ export default function DadosGeradosClient({ rawData }: { rawData: DadosRow[] })
   };
 
   return (
-    <div className="w-full pb-16 animate-fade-in max-w-7xl mx-auto space-y-8">
+    <div className="w-full pb-16 px-4 sm:px-6 lg:px-8 animate-fade-in max-w-7xl mx-auto space-y-8 overflow-hidden">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-[#FFF6E3]/5 backdrop-blur-md border border-white/10 p-6 sm:p-8 rounded-2xl relative overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
         <div className="absolute top-0 right-0 w-64 h-64 bg-teko-yellow/5 rounded-full blur-[80px] pointer-events-none transform translate-x-1/2 -translate-y-1/2"></div>
@@ -93,16 +94,17 @@ export default function DadosGeradosClient({ rawData }: { rawData: DadosRow[] })
         </button>
       </div>
 
-      {/* Data Table */}
-      <div className="bg-[#161308]/60 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+    {/* Data Table */}
+      <div className="bg-[#161308]/60 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl w-full">
+        <div className="overflow-x-auto w-full max-w-[90vw] md:max-w-full">
+          <table className="w-full min-w-[1000px] text-left border-collapse">
             <thead>
               <tr className="bg-white/5 border-b border-white/10">
                 <th className="py-4 px-6 text-sm font-bold text-white/90 whitespace-nowrap">Psicólogo</th>
                 <th className="py-4 px-6 text-sm font-bold text-white/90 whitespace-nowrap">Contato Psi</th>
                 <th className="py-4 px-6 text-sm font-bold text-white/90 whitespace-nowrap">Responsável</th>
                 <th className="py-4 px-6 text-sm font-bold text-white/90 whitespace-nowrap">Criança</th>
+                <th className="py-4 px-6 text-sm font-bold text-teko-yellow whitespace-nowrap text-center">TDAH</th>
                 <th className="py-4 px-6 text-sm font-bold text-teko-yellow whitespace-nowrap text-center">VTRI</th>
                 <th className="py-4 px-6 text-sm font-bold text-teko-yellow whitespace-nowrap text-center">QA</th>
                 <th className="py-4 px-6 text-sm font-bold text-teko-yellow whitespace-nowrap text-center">IMP</th>
@@ -133,6 +135,11 @@ export default function DadosGeradosClient({ rawData }: { rawData: DadosRow[] })
                     <td className="py-4 px-6 whitespace-nowrap">
                       <p className="font-bold text-[#7B61FF] text-sm">{row.alunoName}</p>
                       <p className="text-xs text-white/50">{row.alunoAge} anos • {row.alunoGender}</p>
+                    </td>
+                    <td className="py-4 px-6 text-center whitespace-nowrap">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${row.alunoTdah === 'Sim' ? 'bg-teko-yellow/20 text-teko-yellow border border-teko-yellow/30' : 'bg-white/10 text-white/80'}`}>
+                        {row.alunoTdah}
+                      </span>
                     </td>
                     <td className="py-4 px-6 text-center whitespace-nowrap">
                       <span className="bg-white/10 px-3 py-1 rounded-full text-xs font-bold text-white/80">

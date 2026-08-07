@@ -30,6 +30,7 @@ export default function AdminPacientePerfilPage() {
     name: "",
     age: "",
     gender: "",
+    hasTdah: "false",
     guardianName: "",
     guardianEmail: "",
     guardianPhone: "",
@@ -73,6 +74,7 @@ export default function AdminPacientePerfilPage() {
           name: res.data.patient.name,
           age: res.data.patient.age || "",
           gender: res.data.patient.gender || "",
+          hasTdah: res.data.patient.hasTdah ? "true" : "false",
           guardianName: res.data.guardian?.name || "",
           guardianEmail: res.data.guardian?.email || "",
           guardianPhone: res.data.guardian?.phone || "",
@@ -122,7 +124,8 @@ export default function AdminPacientePerfilPage() {
     const res = await updatePatientAction(patientId, {
       name: formData.name,
       age: formData.age,
-      gender: formData.gender
+      gender: formData.gender,
+      hasTdah: formData.hasTdah === "true"
     }, id);
     setIsSavingPatient(false);
 
@@ -208,6 +211,18 @@ export default function AdminPacientePerfilPage() {
                       <option value="Masculino" className="text-black bg-white">Masculino</option>
                       <option value="Feminino" className="text-black bg-white">Feminino</option>
                       <option value="Prefiro não dizer" className="text-black bg-white">Prefiro não dizer</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-teko-yellow opacity-80 block">Diagnóstico de TDAH?</label>
+                    <select
+                      name="hasTdah"
+                      value={formData.hasTdah}
+                      onChange={handleChange}
+                      className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-teko-yellow rounded-lg p-4 font-headline-md text-white outline-none transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="false" className="text-black bg-white">Não possui</option>
+                      <option value="true" className="text-black bg-white">Possui diagnóstico (TDAH)</option>
                     </select>
                   </div>
                 </div>

@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingBottom: 120,
+    paddingBottom: 24,
     gap: 24,
   },
   card: {

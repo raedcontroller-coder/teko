@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, BackHandler, Modal, Text, Image, Pressable, StyleSheet } from 'react-native';
+import { View, BackHandler, Modal, Text, Image, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { setAuthToken } from './src/services/api';
 import { GlobalHeader } from './src/components/GlobalHeader';
 import { BottomTabBar, TabName } from './src/components/BottomTabBar';
@@ -21,10 +21,14 @@ import { AdminReportsScreen } from './src/screens/admin/AdminReportsScreen';
 import { NewPsychologistScreen } from './src/screens/admin/NewPsychologistScreen';
 import { PsychologistProfileScreen } from './src/screens/admin/PsychologistProfileScreen';
 
-export default function App() {
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+function MainApp() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authScreen, setAuthScreen] = useState<'Login' | 'Register'>('Login');
+  const [isRestoringAuth, setIsRestoringAuth] = useState<boolean>(true);
   
   // Roteamento
   const [currentTab, setCurrentTab] = useState<TabName>('Dashboard');
@@ -35,6 +39,27 @@ export default function App() {
   const [adminSelectedPsicologo, setAdminSelectedPsicologo] = useState<{ id: string, name: string } | null>(null);
 
   const [showExitModal, setShowExitModal] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    const restoreAuth = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('userToken');
+        const storedUser = await AsyncStorage.getItem('userData');
+        if (storedToken && storedUser) {
+          const user = JSON.parse(storedUser);
+          setAuthToken(storedToken);
+          setCurrentUser(user);
+          setCurrentTab(user?.role === 'GLOBAL_ADMIN' ? 'AdminDashboard' : 'Dashboard');
+          setIsAuthenticated(true);
+        }
+      } catch (e) {
+        console.error('Failed to restore auth', e);
+      } finally {
+        setIsRestoringAuth(false);
+      }
+    };
+    restoreAuth();
+  }, []);
 
   React.useEffect(() => {
     const backAction = () => {
@@ -53,7 +78,9 @@ export default function App() {
     return () => backHandler.remove();
   }, [isAuthenticated, activeGame]);
 
-  const handleLogout = (dest: 'Login' | 'Register') => {
+  const handleLogout = async (dest: 'Login' | 'Register') => {
+    await AsyncStorage.removeItem('userToken');
+    await AsyncStorage.removeItem('userData');
     setAuthToken(null);
     setCurrentUser(null);
     setIsAuthenticated(false);
@@ -61,13 +88,24 @@ export default function App() {
     setCurrentTab('Dashboard'); // reset state
   };
 
+  if (isRestoringAuth) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#064b46', justifyContent: 'center', alignItems: 'center' }}>
+        <StatusBar style="light" />
+        <ActivityIndicator size="large" color="#FFC857" />
+      </View>
+    );
+  }
+
   if (!isAuthenticated) {
     if (authScreen === 'Login') {
       return (
         <View style={{ flex: 1 }}>
           <StatusBar style="light" />
           <LoginScreen 
-            onLoginSuccess={(token, user) => {
+            onLoginSuccess={async (token, user) => {
+              await AsyncStorage.setItem('userToken', token);
+              await AsyncStorage.setItem('userData', JSON.stringify(user));
               setAuthToken(token);
               setCurrentUser(user);
               setCurrentTab(user?.role === 'GLOBAL_ADMIN' ? 'AdminDashboard' : 'Dashboard');
@@ -82,7 +120,9 @@ export default function App() {
       <View style={{ flex: 1 }}>
         <StatusBar style="light" />
         <RegisterScreen 
-          onRegisterSuccess={(token, user) => {
+          onRegisterSuccess={async (token, user) => {
+            await AsyncStorage.setItem('userToken', token);
+            await AsyncStorage.setItem('userData', JSON.stringify(user));
             setAuthToken(token);
             setCurrentUser(user);
             setCurrentTab(user?.role === 'GLOBAL_ADMIN' ? 'AdminDashboard' : 'Dashboard');
@@ -229,6 +269,14 @@ export default function App() {
         </View>
       </Modal>
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <MainApp />
+    </SafeAreaProvider>
   );
 }
 

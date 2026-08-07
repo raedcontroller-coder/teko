@@ -23,6 +23,7 @@ export async function createPatientAction(formData: FormData, adminPsicologoId?:
     const name = formData.get("name") as string;
     const age = formData.get("age") as string;
     const gender = formData.get("gender") as string;
+    const hasTdah = formData.get("hasTdah") === "true";
     
     const guardianName = formData.get("guardianName") as string;
     const guardianEmail = formData.get("guardianEmail") as string;
@@ -79,6 +80,7 @@ export async function createPatientAction(formData: FormData, adminPsicologoId?:
       email: childUniqueEmail,
       guardianId: guardianId,
       psicologoId: psicologoId,
+      hasTdah: hasTdah,
     });
 
     revalidatePath("/[lang]/dashboard/pacientes", "page");
@@ -198,7 +200,7 @@ export async function getPatientByIdAction(patientId: string, adminPsicologoId?:
   }
 }
 
-export async function updatePatientAction(patientId: string, data: { name: string; age: string; gender: string }, adminPsicologoId?: string) {
+export async function updatePatientAction(patientId: string, data: { name: string; age: string; gender: string; hasTdah?: boolean }, adminPsicologoId?: string) {
   try {
     const session = await getSession();
     if (!session || !session.sub) return { error: "Não autorizado." };
@@ -209,7 +211,7 @@ export async function updatePatientAction(patientId: string, data: { name: strin
     }
 
     await db.update(users)
-      .set({ name: data.name, age: data.age, gender: data.gender })
+      .set({ name: data.name, age: data.age, gender: data.gender, hasTdah: data.hasTdah })
       .where(and(eq(users.id, patientId), eq(users.psicologoId, psicologoId)));
     
     revalidatePath("/[lang]/dashboard/pacientes/[id]", "page");

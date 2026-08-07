@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../packages/db/db/index';
 import { users, gameSessions } from '../../../../../../packages/db/db/schema';
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "ID do usuário não encontrado no token." }, { status: 400 });
     }
 
-    const { name, age, gender, guardianName, guardianEmail, guardianPhone } = body;
+    const { name, age, gender, guardianName, guardianEmail, guardianPhone, hasTdah } = body;
 
     if (!name || !age || !gender || !guardianName || !guardianEmail || !guardianPhone) {
       return NextResponse.json({ error: "Todos os campos são obrigatórios." }, { status: 400 });
@@ -183,6 +183,7 @@ export async function POST(request: Request) {
       email: childUniqueEmail,
       guardianId: guardianId,
       psicologoId: psicologoId,
+      hasTdah: hasTdah ?? false,
     });
 
     return NextResponse.json({ success: true, message: "Paciente cadastrado com sucesso!" });

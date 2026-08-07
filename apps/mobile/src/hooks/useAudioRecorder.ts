@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
 import { Audio } from 'expo-av';
 import axios from 'axios';
+import { Platform } from 'react-native';
 
 // Para dispositivo físico, use o IP local da máquina.
-const API_URL = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io';
+const API_URL = 'http://10.233.222.80:3000';
 
 export interface ValidationResponse {
   valid: boolean;

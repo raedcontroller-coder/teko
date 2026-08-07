@@ -37,6 +37,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
     name: '',
     age: '',
     gender: '',
+    hasTdah: false,
     guardianName: '',
     guardianEmail: '',
     guardianPhone: '',
@@ -104,6 +105,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             name: patient.name || '',
             age: patient.age ? String(patient.age) : '',
             gender: patient.gender || '',
+            hasTdah: !!patient.hasTdah,
             guardianName: guardian?.name || '',
             guardianEmail: guardian?.email || '',
             guardianPhone: guardian?.phone || '',
@@ -158,6 +160,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
         name: formData.name,
         age: formData.age,
         gender: formData.gender,
+        hasTdah: formData.hasTdah,
       });
       if (response.data.success) {
         showToast('Dados do paciente salvos com sucesso!');
@@ -301,6 +304,24 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                     onPress={() => setFormData(prev => ({ ...prev, gender: gen }))}
                   >
                     <Text style={[styles.pillText, isSelected && styles.pillTextSelected]} numberOfLines={1} adjustsFontSizeToFit>{gen}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.labelYellow}>Paciente possui diagnóstico de TDAH?</Text>
+            <View style={styles.pillsContainer}>
+              {[true, false].map((val) => {
+                const isSelected = formData.hasTdah === val;
+                return (
+                  <TouchableOpacity
+                    key={val ? 'Sim' : 'Não'}
+                    style={[styles.pill, isSelected && styles.pillSelected]}
+                    onPress={() => setFormData(prev => ({ ...prev, hasTdah: val }))}
+                  >
+                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]}>{val ? 'Sim' : 'Não'}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -625,7 +646,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingBottom: 120,
+    paddingBottom: 24,
     gap: 24,
   },
   card: {

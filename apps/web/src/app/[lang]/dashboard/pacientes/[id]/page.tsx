@@ -49,6 +49,7 @@ export default function PacientePerfilPage() {
     name: "",
     age: "",
     gender: "",
+    hasTdah: "false",
     guardianName: "",
     guardianEmail: "",
     guardianPhone: "",
@@ -68,6 +69,7 @@ export default function PacientePerfilPage() {
             name: patient.name || "",
             age: patient.age || "",
             gender: patient.gender || "",
+            hasTdah: patient.hasTdah ? "true" : "false",
             guardianName: guardian?.name || "",
             guardianEmail: guardian?.email || "",
             guardianPhone: guardian?.phone || "",
@@ -148,6 +150,7 @@ export default function PacientePerfilPage() {
       name: formData.name,
       age: formData.age,
       gender: formData.gender,
+      hasTdah: formData.hasTdah === "true",
     });
     
     setIsSavingPatient(false);
@@ -274,6 +277,18 @@ export default function PacientePerfilPage() {
                       <option value="Masculino" className="text-black">Masculino</option>
                       <option value="Feminino" className="text-black">Feminino</option>
                       <option value="Prefiro não dizer" className="text-black">Prefiro não dizer</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-teko-yellow opacity-80 block">Diagnóstico de TDAH?</label>
+                    <select
+                      name="hasTdah"
+                      value={formData.hasTdah}
+                      onChange={handleChange}
+                      className="w-full bg-[#FFF6E3]/5 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border-none focus:ring-2 focus:ring-teko-yellow rounded-lg p-4 font-headline-md text-white outline-none transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="false" className="text-black">Não possui</option>
+                      <option value="true" className="text-black">Possui diagnóstico (TDAH)</option>
                     </select>
                   </div>
                 </div>

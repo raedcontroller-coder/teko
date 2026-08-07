@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children, params }: { children: 
   return (
     <div className="min-h-screen bg-deep-forest text-white flex">
       <Sidebar role={session?.role} />
-      <div className="flex-1 ml-64 flex flex-col">
+      <div className="flex-1 min-w-0 ml-64 flex flex-col">
         <Topbar />
         <main className="p-8">
           {children}

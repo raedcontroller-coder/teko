@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar, Pressable, Modal, FlatList, ActivityIndicator, TextInput } from 'react-native';
 import { Shield, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock, Camera, X, Search } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api } from '../services/api';
 
 interface GamesScreenProps {
@@ -9,6 +10,7 @@ interface GamesScreenProps {
 }
 
 export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame }) => {
+  const insets = useSafeAreaInsets();
   const animatedValues = useRef(Array.from({ length: 6 }).map(() => new Animated.Value(0))).current;
   const [modalVisible, setModalVisible] = useState(false);
   const [modalStep, setModalStep] = useState<'OPTIONS' | 'SELECT_PSI' | 'SELECT_CHILD'>('SELECT_CHILD');
@@ -222,8 +224,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalSafeArea}>
-            <View style={styles.modalContent}>
+            <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, 12) }]}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
                   {modalStep === 'OPTIONS' ? 'Como deseja jogar?' : 
@@ -342,6 +343,17 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
                               <Text style={styles.patientName}>{item.name}</Text>
                               <Text style={styles.patientAge}>{item.age} anos • Resp: {item.guardianName || 'Não informado'}</Text>
                             </View>
+                            <View style={[
+                              styles.tdahBadge, 
+                              item.hasTdah ? styles.tdahBadgeYes : styles.tdahBadgeNo
+                            ]}>
+                              <Text style={[
+                                styles.tdahBadgeText,
+                                item.hasTdah ? styles.tdahBadgeTextYes : styles.tdahBadgeTextNo
+                              ]}>
+                                TDAH: {item.hasTdah ? 'Sim' : 'Não'}
+                              </Text>
+                            </View>
                           </TouchableOpacity>
                         )}
                       />
@@ -354,7 +366,6 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
                 )
               )}
             </View>
-          </View>
         </View>
       </Modal>
     </>
@@ -604,16 +615,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'flex-end',
-  },
-  modalSafeArea: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    width: '100%',
-    backgroundColor: '#064b46',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+
   },
   modalContent: {
     backgroundColor: '#064b46',
@@ -652,7 +654,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   patientList: {
-    paddingBottom: 40,
+    paddingBottom: 0,
   },
   patientCard: {
     flexDirection: 'row',
@@ -692,6 +694,30 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
     marginTop: 4,
   },
+  tdahBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 100,
+    borderWidth: 1,
+  },
+  tdahBadgeYes: {
+    backgroundColor: 'rgba(234,179,8,0.2)',
+    borderColor: 'rgba(234,179,8,0.3)',
+  },
+  tdahBadgeNo: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'transparent',
+  },
+  tdahBadgeText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Bold',
+  },
+  tdahBadgeTextYes: {
+    color: '#EAB308',
+  },
+  tdahBadgeTextNo: {
+    color: 'rgba(255,255,255,0.8)',
+  },
   emptyPatients: {
     padding: 40,
     alignItems: 'center',
@@ -710,7 +736,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   optionsContainer: {
-    paddingBottom: 24,
+    paddingBottom: 0,
     gap: 16,
   },
   optionCard: {

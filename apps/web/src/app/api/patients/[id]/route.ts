@@ -122,10 +122,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     const body = await request.json();
 
     if (updateType === "patient") {
-      const { name, age, gender } = body;
+      const { name, age, gender, hasTdah } = body;
       
       const [updated] = await db.update(users)
-        .set({ name, age, gender })
+        .set({ name, age, gender, hasTdah })
         .where(
           and(
             eq(users.id, targetId),

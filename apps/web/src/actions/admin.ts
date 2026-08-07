@@ -358,6 +358,7 @@ export async function getAdminDadosGeradosAction(skipAuth: boolean = false) {
         alunoName: aluno.name || "N/A",
         alunoAge: aluno.age || "N/A",
         alunoGender: aluno.gender || "N/A",
+        alunoTdah: aluno.hasTdah ? "Sim" : "Não",
         vtri: metrics.vtri,
         qa: metrics.qa,
         imp: metrics.imp,
@@ -383,7 +384,7 @@ export async function exportAdminDadosGeradosCsvAction(skipAuth: boolean = false
   const headers = [
     "Psicólogo", "Email Psicólogo", "CRP", "Clínica",
     "Responsável", "Email Responsável", "Telefone",
-    "Criança", "Idade", "Gênero",
+    "Criança", "Idade", "Gênero", "TDAH",
     "VTRI", "QA", "IMP"
   ];
   
@@ -398,6 +399,7 @@ export async function exportAdminDadosGeradosCsvAction(skipAuth: boolean = false
     `"${row.alunoName}"`,
     `"${row.alunoAge}"`,
     `"${row.alunoGender}"`,
+    `"${row.alunoTdah}"`,
     `"${row.vtri}"`,
     `"${row.qa}"`,
     `"${row.imp}"`
