@@ -95,7 +95,7 @@ interface ActiveAnimal {
   duration: number;
 }
 
-const GAME_DURATION = 360; // 6 minutes
+const GAME_DURATION = 720; // 12 minutes
 const TARGET_ANIMAL: AnimalType = 'passaro'; // A criança deve tirar foto do pássaro
 
 const ALL_ANIMALS: AnimalType[] = ['urso', 'cobra', 'aguia', 'coruja', 'passaro', 'macaco'];
@@ -180,7 +180,7 @@ const AnimalSprite: React.FC<{
 
 export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack }) => {
   const [gameState, setGameState] = useState<'menu' | 'countdown' | 'playing' | 'photo_taken' | 'timeout'>('menu');
-  const [menuStep, setMenuStep] = useState<1 | 2>(1);
+  const [menuStep, setMenuStep] = useState<1 | 2 | 3>(1);
   const [countdownValue, setCountdownValue] = useState<number | string>(3);
   const [isCameraReady, setIsCameraReady] = useState(true);
   const [showExitModal, setShowExitModal] = useState(false);
@@ -206,10 +206,13 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
   const cameraPulseAnim = useRef(new Animated.Value(1)).current;
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isiIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const roundsQueueRef = useRef<boolean[]>([]);
+  const currentIsiRef = useRef<number>(0);
   
   // Controle exato de pássaros por fase para segurança psicométrica
-  const phase1BirdsLeft = useRef(6);
-  const phase2BirdsLeft = useRef(6);
+  const phase1BirdsLeft = useRef(10);
+  const phase2BirdsLeft = useRef(10);
   
   // Telemetry ref para Queda de Atenção
   const telemetryRef = useRef<{
@@ -302,9 +305,9 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
       let p2_commissions = 0;
 
       tData.forEach(t => {
-        // time_sec é o tempo decorrido do jogo (0 a 360)
-        // 6:00 decaindo até 3:01 significa que se passaram menos ou igual a 180 segundos.
-        if (t.spawnTimeGameSeconds <= 180) {
+        // time_sec é o tempo decorrido do jogo (0 a 720)
+        // 12:00 decaindo até 6:01 significa que se passaram menos ou igual a 360 segundos.
+        if (t.spawnTimeGameSeconds <= 360) {
           if (t.result === 'success' && t.reactionTimeMs) p1_rt.push(t.reactionTimeMs);
           else if (t.result === 'commission') p1_commissions++;
         } else {
@@ -316,11 +319,11 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
       console.log("\n========================================================");
       console.log(" 📸 COLETADOS: FOTÓGRAFO DA FLORESTA (PRÉ-PYTHON) 📸");
       console.log("========================================================");
-      console.log("-> 1º RECORTE: Primeiros 3 minutos (6:00 decaindo até 3:01)");
+      console.log("-> 1º RECORTE: Primeiros 6 minutos (12:00 decaindo até 6:01)");
       console.log(`   [1/2] Array de Tempos de Acertos (RT): [${p1_rt.join(', ')}]`);
       console.log(`   [2/2] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p1_commissions}`);
       
-      console.log("\n-> 2º RECORTE: Últimos 3 minutos (3:00 decaindo até 0:00)");
+      console.log("\n-> 2º RECORTE: Últimos 6 minutos (6:00 decaindo até 0:00)");
       console.log(`   [1/2] Array de Tempos de Acertos (RT): [${p2_rt.join(', ')}]`);
       console.log(`   [2/2] Soma Absoluta de Comissões (Fotos Erradas / Sem Pássaro): ${p2_commissions}`);
       console.log("========================================================\n");
@@ -380,6 +383,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
   const clearAllTimeouts = () => {
     if (spawnIntervalRef.current) clearTimeout(spawnIntervalRef.current);
     if (countdownIntervalRef.current) clearTimeout(countdownIntervalRef.current);
+    if (isiIntervalRef.current) clearTimeout(isiIntervalRef.current);
     setActiveAnimals([]);
   };
 
@@ -465,114 +469,77 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
     setMenuStep(1);
     setActiveAnimals([]);
     telemetryRef.current = [];
-    phase1BirdsLeft.current = 6;
-    phase2BirdsLeft.current = 6;
+    phase1BirdsLeft.current = 10;
+    phase2BirdsLeft.current = 10;
+    
+    // Gerar 80 estímulos exatos (40 por fase)
+    // 10 pássaros (true) e 30 distratores (false) em cada fase
+    const p1 = Array(40).fill(false).map((_, i) => i < 10).sort(() => Math.random() - 0.5);
+    const p2 = Array(40).fill(false).map((_, i) => i < 10).sort(() => Math.random() - 0.5);
+    roundsQueueRef.current = [...p1, ...p2];
+    
     startRound();
   };
 
   const startRound = () => {
     if (spawnIntervalRef.current) clearTimeout(spawnIntervalRef.current);
+    if (isiIntervalRef.current) clearTimeout(isiIntervalRef.current);
+    
     setIsCameraReady(true);
     cameraPulseAnim.stopAnimation();
     cameraPulseAnim.setValue(1);
     
-    // Evita loop duplo se já pausou
     setIsTimerPaused(false);
     setPhotographedStatus('none');
     
-    const roundDuration = Math.floor(Math.random() * 5 + 6) * 1000;
+    if (roundsQueueRef.current.length === 0) return; // Fim da fila, aguarda cronômetro global
+
+    const spawnBird = roundsQueueRef.current.shift()!;
+    // Tempo de aparição de 2000 a 5000ms
+    const animalDuration = Math.floor(Math.random() * 3000 + 2000); 
+    // Ciclo total de 9 segundos
+    const isiDuration = 9000 - animalDuration;
+    currentIsiRef.current = isiDuration;
+
+    const availableTypes = ALL_ANIMALS.filter(a => a !== TARGET_ANIMAL);
+    const type = spawnBird ? TARGET_ANIMAL : availableTypes[Math.floor(Math.random() * availableTypes.length)];
     
-    // Corrigido o bug do React Stale Closure usando o Ref mais recente
+    const validSlots = EDITOR_SLOTS.filter(s => s.type === type);
+    if (validSlots.length === 0) {
+      // Fallback de segurança
+      isiIntervalRef.current = setTimeout(startRound, 9000);
+      return;
+    }
+    
+    const randomSlot = validSlots[Math.floor(Math.random() * validSlots.length)];
+    const newAnimal: ActiveAnimal = { slot: randomSlot, id: Math.random().toString(36).substring(7), duration: animalDuration };
+    setActiveAnimals([newAnimal]);
+    
     const currentTimeLeft = timeLeftRef.current;
     
-    const isPhase1 = GAME_DURATION - currentTimeLeft <= 180;
-    let spawnBird = false;
-
-    // Regra rígida: NUNCA aparecer pássaros nos últimos 5 segundos de cada fase
-    // Fase 1 termina em timeLeft = 180 (5s finais: 185 até 181)
-    // Fase 2 termina em timeLeft = 0 (5s finais: 5 até 1)
-    const isForbiddenWindow = (currentTimeLeft > 180 && currentTimeLeft <= 185) || (currentTimeLeft > 0 && currentTimeLeft <= 5);
-
-    // Algoritmo para garantir exatos 6 pássaros em cada fase (antes da janela proibida)
-    if (!isForbiddenWindow) {
-      if (isPhase1) {
-        if (phase1BirdsLeft.current > 0) {
-          // Calcula tempo restante da fase 1 ignorando os últimos 5 segundos (180 + 5 = 185)
-          const timeRemainingInPhase = Math.max(0.1, currentTimeLeft - 185);
-          const roundsLeftAvg = Math.max(0.1, timeRemainingInPhase / 8);
-          if (Math.random() < (phase1BirdsLeft.current / roundsLeftAvg) || roundsLeftAvg <= phase1BirdsLeft.current) {
-            spawnBird = true;
-            phase1BirdsLeft.current -= 1;
-          }
-        }
-      } else {
-        if (phase2BirdsLeft.current > 0) {
-          // Calcula tempo restante da fase 2 ignorando os últimos 5 segundos (0 + 5 = 5)
-          const timeRemainingInPhase = Math.max(0.1, currentTimeLeft - 5);
-          const roundsLeftAvg = Math.max(0.1, timeRemainingInPhase / 8);
-          if (Math.random() < (phase2BirdsLeft.current / roundsLeftAvg) || roundsLeftAvg <= phase2BirdsLeft.current) {
-            spawnBird = true;
-            phase2BirdsLeft.current -= 1;
-          }
-        }
-      }
-    }
-
-    let availableTypes = ALL_ANIMALS.filter(a => a !== TARGET_ANIMAL);
-    const typesToSpawn: AnimalType[] = [];
-
     if (spawnBird) {
-      typesToSpawn.push(TARGET_ANIMAL);
-    }
-
-    const numToSpawn = Math.floor(Math.random() * 3) + 1; // 1 a 3 animais
-    const additionalToSpawn = spawnBird ? numToSpawn - 1 : numToSpawn;
-
-    for (let i = 0; i < additionalToSpawn; i++) {
-      const typeIndex = Math.floor(Math.random() * availableTypes.length);
-      typesToSpawn.push(availableTypes[typeIndex]);
-      availableTypes.splice(typeIndex, 1);
-    }
-    
-    const newAnimals: ActiveAnimal[] = [];
-    typesToSpawn.forEach(type => {
-      const validSlots = EDITOR_SLOTS.filter(s => {
-        if (s.type !== type) return false;
-        return newAnimals.every(a => {
-          const dx = s.x - a.slot.x;
-          const dy = s.y - a.slot.y;
-          return Math.sqrt(dx * dx + dy * dy) >= 15; 
-        });
+      telemetryRef.current.push({
+        spawnTimeGameSeconds: GAME_DURATION - currentTimeLeft,
+        result: 'omission',
+        reactionTimeMs: null,
+        spawnTimestamp: Date.now()
       });
-      if (validSlots.length > 0) {
-        const randomSlot = validSlots[Math.floor(Math.random() * validSlots.length)];
-        newAnimals.push({ slot: randomSlot, id: Math.random().toString(36).substring(7), duration: roundDuration });
-      }
-    });
-    setActiveAnimals(newAnimals);
-    
-    // Registra a aparição de pássaros na telemetria (assume omissão por padrão)
-    newAnimals.forEach(a => {
-      if (a.slot.type === TARGET_ANIMAL) {
-        telemetryRef.current.push({
-          spawnTimeGameSeconds: GAME_DURATION - currentTimeLeft,
-          result: 'omission',
-          reactionTimeMs: null,
-          spawnTimestamp: Date.now()
-        });
-      }
-    });
+    }
 
     if (spawnBird) {
       spawnIntervalRef.current = setTimeout(() => {
         if (photographedStatusRef.current === 'none') {
           setIsTimerPaused(true);
         } else {
-          startRound();
+          setActiveAnimals([]);
+          isiIntervalRef.current = setTimeout(startRound, currentIsiRef.current);
         }
-      }, roundDuration);
+      }, animalDuration);
     } else {
-      spawnIntervalRef.current = setTimeout(startRound, roundDuration);
+      spawnIntervalRef.current = setTimeout(() => {
+        setActiveAnimals([]);
+        isiIntervalRef.current = setTimeout(startRound, currentIsiRef.current);
+      }, animalDuration);
     }
   };
 
@@ -622,7 +589,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         setTimeout(() => {
           setActiveAnimals([]);
           setIsTimerPaused(false);
-          startRound();
+          isiIntervalRef.current = setTimeout(startRound, currentIsiRef.current);
         }, 300);
       } else {
         // Clicou rápido: Fade out natural no tempo original
@@ -722,6 +689,41 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
                     style={({ pressed }) => [
                       styles.playButton,
                       pressed && styles.playButtonPressed
+                    ]} 
+                    onPress={() => setMenuStep(3)}
+                  >
+                    {({ pressed }) => (
+                      <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>PRÓXIMO</Text>
+                    )}
+                  </Pressable>
+                </>
+              )}
+
+              {menuStep === 3 && (
+                <>
+                  <Text style={[styles.subtitle, { marginBottom: 12 }]}>
+                    Atenção ao relógio! Se o passarinho aparecer e você demorar muito...
+                  </Text>
+                  
+                  <View style={[styles.tutorialImageContainer, { marginBottom: 16 }]}>
+                    <Image source={ANIMAL_IMAGES[TARGET_ANIMAL]} style={[styles.tutorialImage, { opacity: 0.5 }]} resizeMode="contain" />
+                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>
+                      <X color="#EF4444" size={80} strokeWidth={3} />
+                    </View>
+                  </View>
+
+                  <Text style={[styles.subtitle, { fontSize: 14, color: '#EF4444', fontWeight: 'bold' }]}>
+                    O CRONÔMETRO VAI CONGELAR!
+                  </Text>
+                  <Text style={[styles.subtitle, { fontSize: 13, marginTop: 4, paddingHorizontal: 20 }]}>
+                    O jogo ficará travado e o tempo não avançará até que você finalmente tire a foto dele. Fique atento e seja rápido!
+                  </Text>
+                  
+                  <Pressable 
+                    style={({ pressed }) => [
+                      styles.playButton,
+                      pressed && styles.playButtonPressed,
+                      { marginTop: 16 }
                     ]} 
                     onPress={triggerCountdown}
                   >

@@ -95,7 +95,7 @@ interface GoleiroGameProps {
   onBack: () => void;
 }
 
-const TOTAL_SHOTS = 10;
+const TOTAL_SHOTS = 30;
 
 // Default curves if AsyncStorage is empty
 const DEFAULT_SLOTS: CurveSlot[] = [
@@ -910,7 +910,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
       y: (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 360),
     };
 
-    const shotDuration = 3500; // Tempo de voo travado em 3.5 segundos!
+    const shotDuration = Math.floor(Math.random() * 2001) + 2000; // Tempo de voo dinâmico de 2 a 4 segundos
     currentDurationRef.current = shotDuration;
 
     shotProgressAnim.setValue(0);
@@ -936,15 +936,17 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
     const timeSinceSpawn = Date.now() - ballAppearTimeRef.current;
 
+    const duration = currentDurationRef.current;
+
     // Penalidade por clique antecipado (Vermelho/Amarelo)
-    if (timeSinceSpawn < 2500) {
+    if (timeSinceSpawn < (duration - 1000)) {
       handleMiss();
       return;
     }
 
     // Sucesso! Clicou no momento exato (Verde)
-    // O cronômetro psicométrico real só começa a contar a partir dos 2500ms (momento em que a bola fica verde e clicável)
-    const reactionTime = timeSinceSpawn - 2500;
+    // O cronômetro psicométrico real só começa a contar a partir do momento em que a bola fica verde e clicável
+    const reactionTime = timeSinceSpawn - (duration - 1000);
 
     isShotProcessedRef.current = true;
 
@@ -1123,9 +1125,19 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
       };
     };
 
+    const duration = currentDurationRef.current || 3500;
+    const greenStartPercentage = (duration - 1000) / duration;
+
     const ringColor = shotProgressAnim.interpolate({
-      inputRange: [0, 0.42, 0.43, 0.71, 0.72, 1], // 1.5s (42%) -> 2.5s (71%) -> 3.5s (100%)
-      outputRange: ['#FF3B30', '#FF3B30', '#FFCC00', '#FFCC00', '#34C759', '#34C759'] // Vermelho -> Amarelo -> Verde
+      inputRange: [
+        0, 
+        0.30, 
+        0.31, 
+        greenStartPercentage - 0.01, 
+        greenStartPercentage, 
+        1
+      ], // 30% (Vermelho) -> Meio (Amarelo) -> Último 1 segundo (Verde)
+      outputRange: ['#FF3B30', '#FF3B30', '#FFCC00', '#FFCC00', '#34C759', '#34C759']
     });
 
     const innerRingScale = shotProgressAnim.interpolate({

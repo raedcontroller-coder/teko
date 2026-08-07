@@ -14,8 +14,8 @@ interface GoNoGoGameProps {
 
 type GameState = 'menu' | 'isi' | 'stimulus' | 'finished';
 
-const TOTAL_TRIALS = 20;
-const GO_RATIO = 0.7; // 14 Go, 6 No-Go
+const TOTAL_TRIALS = 100;
+const GO_RATIO = 0.8; // 80 Go, 20 No-Go
 
 const generateSequence = () => {
   const goCount = Math.round(TOTAL_TRIALS * GO_RATIO);
