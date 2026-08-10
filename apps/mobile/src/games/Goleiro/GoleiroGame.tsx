@@ -4,7 +4,7 @@ import {
   Image, Animated, Pressable, Modal, Easing, Dimensions, LogBox, Platform
 } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { Shield, ArrowLeft, Trophy, X, Frown, Settings } from 'lucide-react-native';
+import { Shield, ArrowLeft, Trophy, X, Frown, Settings, Flame } from 'lucide-react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
@@ -722,6 +722,11 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   const countdownAnim = useRef(new Animated.Value(0)).current;
   const glovePosAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const gloveScaleAnim = useRef(new Animated.Value(1)).current;
+  const comboWobbleAnim = useRef(new Animated.Value(0)).current;
+  const comboPopupAnim = useRef(new Animated.Value(0)).current;
+
+  // Combos
+  const [comboCount, setComboCount] = useState(0);
 
   // Refs
   const spawnTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -745,6 +750,28 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
   useEffect(() => {
     let isMounted = true;
+    
+    if (comboCount >= 2) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(comboWobbleAnim, { toValue: -15, duration: 80, useNativeDriver: true }),
+          Animated.timing(comboWobbleAnim, { toValue: 15, duration: 80, useNativeDriver: true }),
+          Animated.timing(comboWobbleAnim, { toValue: -10, duration: 80, useNativeDriver: true }),
+          Animated.timing(comboWobbleAnim, { toValue: 10, duration: 80, useNativeDriver: true }),
+          Animated.timing(comboWobbleAnim, { toValue: 0, duration: 80, useNativeDriver: true })
+        ])
+      ).start();
+
+      comboPopupAnim.setValue(0);
+      Animated.sequence([
+        Animated.spring(comboPopupAnim, { toValue: 1, useNativeDriver: true, friction: 5 }),
+        Animated.delay(1000),
+        Animated.timing(comboPopupAnim, { toValue: 0, duration: 300, useNativeDriver: true })
+      ]).start();
+    } else {
+      comboWobbleAnim.setValue(0);
+      comboPopupAnim.setValue(0);
+    }
     const loadSounds = async () => {
       try {
         await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, staysActiveInBackground: false, shouldDuckAndroid: false });
@@ -833,8 +860,11 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   const startCountdown = () => {
     setGameState('countdown');
     setCountdownValue(3);
+    setScore(0);
+    setCurrentShot(0);
+    setComboCount(0); 
+    
     let count = 3;
-
     const runAnimation = () => {
       countdownAnim.setValue(0);
       Animated.timing(countdownAnim, {
@@ -955,7 +985,9 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
     // ---- Animação das Luvas Pegando a Bola ----
     if (activeSlot) {
-      const { width, height } = Dimensions.get('window');
+      const { width: screenW, height: screenH } = Dimensions.get('window');
+      const width = Math.max(screenW, screenH);
+      const height = Math.min(screenW, screenH);
       const t = currentProgressRef.current;
 
       const p0 = activeSlot.p0;
@@ -969,8 +1001,8 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
       const gloveRestX = width / 2;
       // Ajuste: O container agora é fixo de 400x300.
-      // Topo = height - 220. Centro = height - 70. Palmas um pouco acima = height - 120.
-      const gloveRestY = height - 120;
+      // Topo = height - 220. Centro = height - 70.
+      const gloveRestY = height - 70;
 
       const deltaX = targetPixelX - gloveRestX;
       const deltaY = targetPixelY - gloveRestY;
@@ -1007,6 +1039,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
     currentShotRef.current += 1;
 
     setScore(prev => prev + 1);
+    setComboCount(prev => prev + 1);
     setFlashType('success');
 
     setTimeout(() => {
@@ -1019,6 +1052,8 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   const handleMiss = () => {
     if (isShotProcessedRef.current) return;
     isShotProcessedRef.current = true;
+    
+    setComboCount(0);
 
     if (shotTimeoutRef.current) clearTimeout(shotTimeoutRef.current);
     shotProgressAnim.stopAnimation();
@@ -1219,11 +1254,24 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
                   Acertos: {currentShot}/{TOTAL_SHOTS}
                 </Text>
               </View>
-              <View style={styles.scoreBox}>
-                <Shield color="#FFD700" size={16} />
-                <Text style={styles.scoreText}>{score}</Text>
-              </View>
             </View>
+          )}
+
+          {gameState === 'playing' && comboCount >= 2 && (
+            <Animated.View 
+              style={[styles.floatingCombo, { 
+                opacity: comboPopupAnim.interpolate({ inputRange: [0, 0.2, 0.8, 1], outputRange: [0, 1, 1, 0] }), 
+                transform: [
+                  { scale: comboPopupAnim.interpolate({ inputRange: [0, 0.2, 0.8, 1], outputRange: [0.5, 1.2, 1.2, 0.8] }) },
+                  { translateY: comboPopupAnim.interpolate({ inputRange: [0, 1], outputRange: [20, -20] }) },
+                  { rotate: comboWobbleAnim.interpolate({ inputRange: [-15, 15], outputRange: ['-15deg', '15deg'] }) }
+                ]
+              }]}
+              pointerEvents="none"
+            >
+              <Flame color="#FF8C00" size={32} />
+              <Text style={styles.floatingComboText}>{comboCount} acertos!</Text>
+            </Animated.View>
           )}
         </View>
 
@@ -1449,6 +1497,15 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     color: '#FFD700', fontSize: 16, fontWeight: 'bold',
+  },
+  floatingCombo: {
+    position: 'absolute', top: 40, right: 40, flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(255, 140, 0, 0.2)', paddingHorizontal: 20, paddingVertical: 10,
+    borderRadius: 20, borderWidth: 2, borderColor: '#FF8C00', gap: 10, zIndex: 100,
+  },
+  floatingComboText: {
+    color: '#FFD700', fontSize: 24, fontWeight: '900',
+    textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4,
   },
   modalOverlay: {
     flex: 1, alignItems: 'center', justifyContent: 'center',

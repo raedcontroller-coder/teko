@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, BackHandler, Modal, Text, Image, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
-import { setAuthToken } from './src/services/api';
+import { setAuthToken, setupInterceptors } from './src/services/api';
 import { GlobalHeader } from './src/components/GlobalHeader';
 import { BottomTabBar, TabName } from './src/components/BottomTabBar';
 import { DashboardScreen } from './src/screens/main/DashboardScreen';
@@ -39,6 +39,15 @@ function MainApp() {
   const [adminSelectedPsicologo, setAdminSelectedPsicologo] = useState<{ id: string, name: string } | null>(null);
 
   const [showExitModal, setShowExitModal] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    setupInterceptors(() => {
+      setCurrentUser(null);
+      setIsAuthenticated(false);
+      setAuthScreen('Login');
+      setCurrentTab('Dashboard');
+    });
+  }, []);
 
   React.useEffect(() => {
     const restoreAuth = async () => {
