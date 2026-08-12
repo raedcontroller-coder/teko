@@ -11,7 +11,7 @@ COPY packages/db/package.json ./packages/db/
 
 # Usamos npm ci para ser rápido e economizar RAM. 
 # O tailwindcss/node e postcss estão nas "dependencies" então ele vai baixar.
-RUN npm ci --include=dev
+RUN npm install --include=dev
 
 # Copiar o resto do código
 COPY . .
