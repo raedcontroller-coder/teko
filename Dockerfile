@@ -19,7 +19,9 @@ RUN npm config set fetch-retries 5 && \
 # Copiar o resto do código
 COPY . .
 
-# Fazer o build do Next.js
+# Fazer o build do Next.js (com limite de RAM e sem telemetria para evitar travamentos/OOM no Docker)
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=3072"
 RUN npm run build --workspace=@teko/web
 
 # Fase final super leve
