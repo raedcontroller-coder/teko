@@ -764,8 +764,8 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
 
       comboPopupAnim.setValue(0);
       Animated.sequence([
-        Animated.spring(comboPopupAnim, { toValue: 1, useNativeDriver: true, friction: 5 }),
-        Animated.delay(1000),
+        Animated.spring(comboPopupAnim, { toValue: 1, useNativeDriver: true, friction: 6, tension: 50 }),
+        Animated.delay(1500),
         Animated.timing(comboPopupAnim, { toValue: 0, duration: 300, useNativeDriver: true })
       ]).start();
     } else {
@@ -1257,23 +1257,24 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
             </View>
           )}
 
-          {gameState === 'playing' && comboCount >= 2 && (
-            <Animated.View 
-              style={[styles.floatingCombo, { 
-                opacity: comboPopupAnim.interpolate({ inputRange: [0, 0.2, 0.8, 1], outputRange: [0, 1, 1, 0] }), 
-                transform: [
-                  { scale: comboPopupAnim.interpolate({ inputRange: [0, 0.2, 0.8, 1], outputRange: [0.5, 1.2, 1.2, 0.8] }) },
-                  { translateY: comboPopupAnim.interpolate({ inputRange: [0, 1], outputRange: [20, -20] }) },
-                  { rotate: comboWobbleAnim.interpolate({ inputRange: [-15, 15], outputRange: ['-15deg', '15deg'] }) }
-                ]
-              }]}
-              pointerEvents="none"
-            >
-              <Flame color="#FF8C00" size={32} />
-              <Text style={styles.floatingComboText}>{comboCount} acertos!</Text>
-            </Animated.View>
-          )}
         </View>
+
+        {gameState === 'playing' && comboCount >= 2 && (
+          <Animated.View 
+            style={[styles.floatingCombo, { 
+              opacity: comboPopupAnim, 
+              transform: [
+                { scale: comboPopupAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) },
+                { translateY: comboPopupAnim.interpolate({ inputRange: [0, 1], outputRange: [30, 0] }) },
+                { rotate: comboWobbleAnim.interpolate({ inputRange: [-15, 15], outputRange: ['-5deg', '5deg'] }) }
+              ]
+            }]}
+            pointerEvents="none"
+          >
+            <Shield color="#FFD700" size={32} />
+            <Text style={styles.floatingComboText}>{comboCount} DEFESAS!</Text>
+          </Animated.View>
+        )}
 
         {(gameState === 'playing' || gameState === 'countdown') && (
           <Animated.View
@@ -1499,13 +1500,14 @@ const styles = StyleSheet.create({
     color: '#FFD700', fontSize: 16, fontWeight: 'bold',
   },
   floatingCombo: {
-    position: 'absolute', top: 40, right: 40, flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'rgba(255, 140, 0, 0.2)', paddingHorizontal: 20, paddingVertical: 10,
-    borderRadius: 20, borderWidth: 2, borderColor: '#FF8C00', gap: 10, zIndex: 100,
+    position: 'absolute', top: 50, right: 50, flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(0, 50, 20, 0.8)', paddingHorizontal: 24, paddingVertical: 12,
+    borderRadius: 24, borderWidth: 3, borderColor: '#FFD700', gap: 12, zIndex: 100,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.5, shadowRadius: 10, elevation: 10,
   },
   floatingComboText: {
-    color: '#FFD700', fontSize: 24, fontWeight: '900',
-    textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4,
+    color: '#FFD700', fontSize: 26, fontWeight: '900', fontStyle: 'italic',
+    textShadowColor: 'rgba(0,0,0,0.9)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6,
   },
   modalOverlay: {
     flex: 1, alignItems: 'center', justifyContent: 'center',
