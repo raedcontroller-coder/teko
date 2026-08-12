@@ -10,7 +10,11 @@ COPY packages/db/package.json ./packages/db/
 
 # Usamos npm ci para ser rápido, previsível e economizar RAM. 
 # A base Debian (Bookworm) evita os erros nativos (ETXTBSY e Exit 255) do Alpine.
-RUN npm ci
+# Configurações de rede máximas adicionadas para tolerar VPS com internet instável no Coolify.
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm ci --prefer-offline
 
 # Copiar o resto do código
 COPY . .
