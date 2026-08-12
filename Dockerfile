@@ -1,7 +1,6 @@
-FROM docker.io/library/node:20-alpine AS builder
+FROM docker.io/library/node:20-bookworm-slim AS builder
 
-# Instalar dependencias do sistema necessarias
-RUN apk add --no-cache libc6-compat
+# O Bookworm já possui suporte completo à glibc, dispensando o libc6-compat
 WORKDIR /app
 
 # Copiar os arquivos de lock e package.json
@@ -9,9 +8,9 @@ COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/db/package.json ./packages/db/
 
-# Usamos npm ci para ser rápido e economizar RAM. 
-# O tailwindcss/node e postcss estão nas "dependencies" então ele vai baixar.
-RUN npm config set fetch-retries 5 && npm config set fetch-retry-maxtimeout 120000 && npm install --include=dev
+# Usamos npm ci para ser rápido, previsível e economizar RAM. 
+# A base Debian (Bookworm) evita os erros nativos (ETXTBSY e Exit 255) do Alpine.
+RUN npm ci
 
 # Copiar o resto do código
 COPY . .
