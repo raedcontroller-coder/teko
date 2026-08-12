@@ -11,7 +11,7 @@ COPY packages/db/package.json ./packages/db/
 
 # Usamos npm ci para ser rápido e economizar RAM. 
 # O tailwindcss/node e postcss estão nas "dependencies" então ele vai baixar.
-RUN npm install --include=dev
+RUN npm config set fetch-retries 5 && npm config set fetch-retry-maxtimeout 120000 && npm install --include=dev
 
 # Copiar o resto do código
 COPY . .
