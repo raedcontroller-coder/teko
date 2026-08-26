@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
-import { Home, Users, Gamepad2, User, BarChart2 } from 'lucide-react-native';
+import { Home, Users, Gamepad2, User, BarChart2, Calendar } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export type TabName = 'Dashboard' | 'Patients' | 'Games' | 'Profile' | 'AdminDashboard' | 'Psychologists' | 'AdminReports' | 'NewPsychologist' | 'AdminPatients' | 'AdminPsychologistProfile';
+export type TabName = 'Dashboard' | 'Patients' | 'Agenda' | 'Games' | 'Profile' | 'AdminDashboard' | 'Psychologists' | 'AdminReports' | 'NewPsychologist' | 'AdminPatients' | 'AdminPsychologistProfile';
 
 interface BottomTabBarProps {
   currentTab: TabName;
@@ -18,6 +18,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ currentTab, onTabPre
   const psychTabs: { name: TabName; label: string; Icon: any }[] = [
     { name: 'Dashboard', label: 'Início', Icon: Home },
     { name: 'Patients', label: 'Pacientes', Icon: Users },
+    { name: 'Agenda', label: 'Agenda', Icon: Calendar },
     { name: 'Games', label: 'Jogos', Icon: Gamepad2 },
     { name: 'Profile', label: 'Perfil', Icon: User },
   ];

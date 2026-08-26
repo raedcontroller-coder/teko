@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Perfil do Paciente - Notas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "on-error-container": "#93000a",
+                            "tertiary": "#7f4025",
+                            "error-container": "#ffdad6",
+                            "on-surface-variant": "#3e4947",
+                            "tertiary-container": "#9c573a",
+                            "on-tertiary": "#ffffff",
+                            "tertiary-fixed-dim": "#ffb598",
+                            "inverse-surface": "#2d3130",
+                            "on-tertiary-fixed": "#370e00",
+                            "on-primary-fixed-variant": "#00504a",
+                            "outline-variant": "#bdc9c6",
+                            "on-primary-container": "#a3faef",
+                            "surface-dim": "#d7dbd9",
+                            "surface-white": "#FFFFFF",
+                            "on-primary": "#ffffff",
+                            "inverse-primary": "#7fd5cc",
+                            "inverse-on-surface": "#eef1f0",
+                            "on-tertiary-container": "#ffe5db",
+                            "primary": "#005c55",
+                            "secondary-container": "#eae2cf",
+                            "surface-variant": "#e0e3e1",
+                            "surface-bright": "#f7faf8",
+                            "on-error": "#ffffff",
+                            "surface-container-highest": "#e0e3e1",
+                            "accent-amarelo": "#FFC857",
+                            "secondary": "#635e4f",
+                            "surface-container": "#ebefed",
+                            "error": "#ba1a1a",
+                            "on-secondary-fixed": "#1f1b10",
+                            "structural-dark": "#084D48",
+                            "on-secondary-fixed-variant": "#4b4639",
+                            "surface-container-low": "#f1f4f3",
+                            "primary-container": "#0d766e",
+                            "surface-container-lowest": "#ffffff",
+                            "on-secondary": "#ffffff",
+                            "secondary-fixed": "#eae2cf",
+                            "primary-fixed-dim": "#7fd5cc",
+                            "background": "#f7faf8",
+                            "on-secondary-container": "#6a6455",
+                            "disabled-gray": "#E0E0E0",
+                            "outline": "#6e7977",
+                            "accent-lilas": "#7B61FF",
+                            "on-primary-fixed": "#00201d",
+                            "surface": "#f7faf8",
+                            "secondary-fixed-dim": "#cec6b4",
+                            "structural-light": "#64C6BE",
+                            "surface-container-high": "#e5e9e7",
+                            "on-background": "#181c1c",
+                            "tertiary-fixed": "#ffdbce",
+                            "primary-fixed": "#9bf2e8",
+                            "on-tertiary-fixed-variant": "#72361b",
+                            "surface-tint": "#006a63",
+                            "on-surface": "#181c1c"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "card-padding": "20px",
+                            "unit": "8px",
+                            "gutter": "16px",
+                            "container-margin": "24px"
+                    },
+                    "fontFamily": {
+                            "headline-lg": ["Plus Jakarta Sans"],
+                            "label-sm": ["Plus Jakarta Sans"],
+                            "headline-md": ["Plus Jakarta Sans"],
+                            "body-md": ["Plus Jakarta Sans"],
+                            "body-lg": ["Plus Jakarta Sans"],
+                            "headline-lg-mobile": ["Plus Jakarta Sans"],
+                            "label-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                            "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                            "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                            "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-structural-dark text-on-primary min-h-screen font-body-md pb-24">
+<!-- Top Navigation (Mobile Hidden, Web Visible) -->
+<header class="hidden md:flex justify-between items-center w-full px-container-margin py-4 max-w-7xl mx-auto bg-structural-dark text-on-primary docked full-width top-0 z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-headline-md font-headline-md font-bold text-accent-amarelo" data-icon="api" data-weight="fill" style="font-variation-settings: 'FILL' 1;">api</span>
+<span class="text-headline-md font-headline-md font-bold text-on-primary">TekoPorã</span>
+</div>
+<nav class="flex gap-6">
+<a class="text-on-primary/70 hover:opacity-80 transition-opacity text-label-lg font-label-lg" href="#">Início</a>
+<a class="text-accent-amarelo font-bold text-label-lg font-label-lg hover:opacity-80 transition-opacity" href="#">Pacientes</a>
+<a class="text-on-primary/70 hover:opacity-80 transition-opacity text-label-lg font-label-lg" href="#">Relatórios</a>
+<a class="text-on-primary/70 hover:opacity-80 transition-opacity text-label-lg font-label-lg" href="#">Perfil</a>
+</nav>
+</header>
+<main class="max-w-3xl mx-auto md:mt-8 relative z-10">
+<!-- Header: Patient Info -->
+<div class="px-container-margin pt-6 pb-4 md:px-0">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-accent-amarelo flex-shrink-0">
+<img alt="Enzo Gabriel" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a 6-year-old child with a friendly smile, well-lit, soft studio lighting, clinical but welcoming setting, modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgnqR1reI9XyT3ZGLOZH4a9a6Y5Ig1In5qqf9SRnCgTN33nicBn1KVcUQ3QZqtzW9N1hm2NC1FwEtDOff_lrLkShs_zAVbwgrmzH-uYv1NpGPB3oIv_oO8ftj93oaRHbi3qfx26o9FsNaZygal2sGbyT5H6kETirxCN10-IaoLIbJuOTRflatMfW6V4zbu-lMuAyDEJORUR1h-F2izsnGm3ZOWCicL75sbpPyLWgmmC6Hj7ilQow8n"/>
+</div>
+<div>
+<h1 class="text-headline-md font-headline-md text-on-primary">Enzo Gabriel</h1>
+<p class="text-body-md font-body-md text-on-primary/80">6 anos • ID: #98724</p>
+</div>
+<button class="ml-auto glass-card p-2 rounded-full text-on-primary hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Horizontal Sliding Tab Bar -->
+<div class="w-full overflow-x-auto hide-scrollbar border-b border-white/10 mb-6">
+<div class="flex px-container-margin md:px-0 gap-6 w-max min-w-full">
+<button class="py-3 text-label-lg font-label-lg text-on-primary/60 hover:text-on-primary transition-colors whitespace-nowrap">Resumo</button>
+<button class="py-3 text-label-lg font-label-lg text-on-primary/60 hover:text-on-primary transition-colors whitespace-nowrap">Anamnese</button>
+<button class="py-3 text-label-lg font-label-lg text-accent-amarelo font-bold border-b-2 border-accent-amarelo whitespace-nowrap relative">
+                    Notas
+                    <div class="absolute bottom-[-2px] left-0 w-full h-[2px] bg-accent-amarelo rounded-t-full shadow-[0_-2px_10px_rgba(255,200,87,0.5)]"></div>
+</button>
+<button class="py-3 text-label-lg font-label-lg text-on-primary/60 hover:text-on-primary transition-colors whitespace-nowrap">Resultados</button>
+<button class="py-3 text-label-lg font-label-lg text-on-primary/60 hover:text-on-primary transition-colors whitespace-nowrap">Evolução</button>
+</div>
+</div>
+<!-- Content Area -->
+<div class="px-container-margin md:px-0">
+<!-- Action Button -->
+<button class="w-full bg-accent-amarelo text-structural-dark text-label-lg font-label-lg font-bold py-4 rounded-xl shadow-lg hover:scale-[0.98] transition-transform flex items-center justify-center gap-2 mb-8">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                Adicionar Nova Nota
+            </button>
+<!-- Timeline View -->
+<div class="relative pl-6 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-white/10">
+<!-- Card 1 -->
+<div class="relative mb-8 last:mb-0 group">
+<div class="absolute -left-6 top-6 w-3 h-3 bg-structural-light rounded-full border-2 border-structural-dark z-10 shadow-[0_0_8px_rgba(100,198,190,0.5)]"></div>
+<div class="glass-card rounded-xl p-card-padding shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:bg-white/10 transition-colors">
+<div class="flex justify-between items-start mb-3">
+<span class="text-label-sm font-label-sm text-on-primary/60">16 de Agosto</span>
+<span class="bg-blue-500/20 text-blue-300 text-label-sm font-label-sm px-3 py-1 rounded-full border border-blue-500/30">Sessão</span>
+</div>
+<p class="text-body-md font-body-md text-on-primary/90 leading-relaxed">
+                            Paciente demonstrou excelente engajamento durante o Jogo da Bomba. Houve melhora na fluência semântica...
+                        </p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="relative mb-8 last:mb-0 group">
+<div class="absolute -left-6 top-6 w-3 h-3 bg-white/30 rounded-full border-2 border-structural-dark z-10 group-hover:bg-accent-amarelo transition-colors"></div>
+<div class="glass-card rounded-xl p-card-padding shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:bg-white/10 transition-colors">
+<div class="flex justify-between items-start mb-3">
+<span class="text-label-sm font-label-sm text-on-primary/60">10 de Agosto</span>
+<span class="bg-orange-500/20 text-orange-300 text-label-sm font-label-sm px-3 py-1 rounded-full border border-orange-500/30">Família</span>
+</div>
+<p class="text-body-md font-body-md text-on-primary/90 leading-relaxed">
+                            Reunião com os pais para alinhar estratégias de reforço positivo em casa. Relataram avanços na comunicação...
+                        </p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="relative mb-8 last:mb-0 group">
+<div class="absolute -left-6 top-6 w-3 h-3 bg-white/30 rounded-full border-2 border-structural-dark z-10 group-hover:bg-accent-lilas transition-colors"></div>
+<div class="glass-card rounded-xl p-card-padding shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:bg-white/10 transition-colors">
+<div class="flex justify-between items-start mb-3">
+<span class="text-label-sm font-label-sm text-on-primary/60">03 de Agosto</span>
+<span class="bg-accent-lilas/20 text-purple-300 text-label-sm font-label-sm px-3 py-1 rounded-full border border-accent-lilas/30">Escola</span>
+</div>
+<p class="text-body-md font-body-md text-on-primary/90 leading-relaxed">
+                            Contato com a coordenação pedagógica. Observada redução na agitação motora durante atividades em grupo...
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Visible, Web Hidden) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 pb-4 pt-2 shadow-[0_-4px_15px_rgba(13,118,110,0.05)] bg-surface-container-lowest md:hidden rounded-t-xl text-primary dark:text-primary-fixed">
+<a class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-high transition-colors hover:opacity-80 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-label-sm font-label-sm mt-1">Início</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 hover:bg-surface-container-high transition-colors hover:opacity-80 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="groups" data-weight="fill" style="font-variation-settings: 'FILL' 1;">groups</span>
+<span class="text-label-sm font-label-sm mt-1 font-bold">Pacientes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-high transition-colors hover:opacity-80 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-label-sm font-label-sm mt-1">Relatórios</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-high transition-colors hover:opacity-80 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-sm font-label-sm mt-1">Perfil</span>
+</a>
+</nav>
+</body></html>

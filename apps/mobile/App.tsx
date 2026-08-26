@@ -13,6 +13,7 @@ import { GoNoGoGame } from './src/games/GoNoGo/GoNoGoGame';
 import { FotografoGame } from './src/games/Fotografo/FotografoGame';
 import { LoginScreen } from './src/screens/auth/LoginScreen';
 import { RegisterScreen } from './src/screens/auth/RegisterScreen';
+import { AgendaScreen } from './src/screens/main/AgendaScreen';
 
 // Telas do Admin
 import { AdminDashboardScreen } from './src/screens/admin/AdminDashboardScreen';
@@ -162,6 +163,8 @@ function MainApp() {
         return <DashboardScreen onNavigateToPatients={() => setCurrentTab('Patients')} />;
       case 'Patients':
         return <PatientsScreen />;
+      case 'Agenda':
+        return <AgendaScreen />;
       
       // Admin Tabs
       case 'AdminDashboard':

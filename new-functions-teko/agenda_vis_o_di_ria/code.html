@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Agenda - Teko App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "accent-amarelo": "#FFC857",
+                      "on-surface-variant": "#3e4947",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-container": "#0d766e",
+                      "inverse-surface": "#2d3130",
+                      "secondary-fixed-dim": "#cec6b4",
+                      "secondary-container": "#eae2cf",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed": "#00201d",
+                      "surface-tint": "#006a63",
+                      "surface-container": "#ebefed",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed-variant": "#72361b",
+                      "error": "#ba1a1a",
+                      "tertiary": "#7f4025",
+                      "on-primary-fixed-variant": "#00504a",
+                      "tertiary-fixed-dim": "#ffb598",
+                      "surface-container-low": "#f1f4f3",
+                      "accent-lilas": "#7B61FF",
+                      "secondary": "#635e4f",
+                      "outline-variant": "#bdc9c6",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#a3faef",
+                      "on-error-container": "#93000a",
+                      "primary": "#005c55",
+                      "inverse-primary": "#7fd5cc",
+                      "surface-container-high": "#e5e9e7",
+                      "structural-light": "#64C6BE",
+                      "surface-container-highest": "#e0e3e1",
+                      "surface": "#f7faf8",
+                      "disabled-gray": "#E0E0E0",
+                      "surface-white": "#FFFFFF",
+                      "surface-dim": "#d7dbd9",
+                      "tertiary-container": "#9c573a",
+                      "primary-fixed": "#9bf2e8",
+                      "surface-variant": "#e0e3e1",
+                      "structural-dark": "#084D48",
+                      "on-secondary-fixed-variant": "#4b4639",
+                      "secondary-fixed": "#eae2cf",
+                      "on-background": "#181c1c",
+                      "on-secondary-container": "#6a6455",
+                      "error-container": "#ffdad6",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed": "#370e00",
+                      "primary-fixed-dim": "#7fd5cc",
+                      "surface-bright": "#f7faf8",
+                      "on-secondary-fixed": "#1f1b10",
+                      "tertiary-fixed": "#ffdbce",
+                      "inverse-on-surface": "#eef1f0",
+                      "outline": "#6e7977",
+                      "background": "#f7faf8",
+                      "on-surface": "#181c1c",
+                      "on-tertiary-container": "#ffe5db"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-padding": "20px",
+                      "unit": "8px",
+                      "container-margin": "24px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-lg": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-structural-dark min-h-screen text-on-primary pb-24 md:pb-0">
+<!-- Header Section -->
+<header class="pt-10 px-container-margin pb-4 sticky top-0 bg-structural-dark/95 backdrop-blur-md z-40">
+<div class="flex justify-between items-center mb-6">
+<h1 class="text-headline-md font-headline-md text-surface-white">Agenda</h1>
+<button class="w-10 h-10 rounded-full bg-surface-white/10 flex items-center justify-center hover:bg-surface-white/20 transition-colors">
+<span class="material-symbols-outlined text-surface-white" data-icon="search">search</span>
+</button>
+</div>
+<!-- View Toggle -->
+<div class="bg-surface-white/10 p-1 rounded-full flex justify-between items-center mb-6">
+<button class="flex-1 py-2 rounded-full bg-surface-white text-structural-dark text-label-lg font-label-lg shadow-sm">Dia</button>
+<button class="flex-1 py-2 rounded-full text-surface-white text-label-lg font-label-lg hover:bg-surface-white/10 transition-colors">Semana</button>
+<button class="flex-1 py-2 rounded-full text-surface-white text-label-lg font-label-lg hover:bg-surface-white/10 transition-colors">Mês</button>
+</div>
+<!-- Date Carousel -->
+<div class="flex space-x-3 overflow-x-auto hide-scrollbar pb-2">
+<button class="flex flex-col items-center justify-center min-w-[64px] h-[80px] rounded-xl bg-surface-white/10 text-surface-white">
+<span class="text-label-sm font-label-sm opacity-80 mb-1">SEG</span>
+<span class="text-headline-md font-headline-md">14</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[64px] h-[80px] rounded-xl bg-accent-amarelo text-structural-dark shadow-[0_4px_15px_rgba(255,200,87,0.3)]">
+<span class="text-label-sm font-label-sm font-bold mb-1">TER</span>
+<span class="text-headline-md font-headline-md">15</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[64px] h-[80px] rounded-xl bg-surface-white/10 text-surface-white">
+<span class="text-label-sm font-label-sm opacity-80 mb-1">QUA</span>
+<span class="text-headline-md font-headline-md">16</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[64px] h-[80px] rounded-xl bg-surface-white/10 text-surface-white">
+<span class="text-label-sm font-label-sm opacity-80 mb-1">QUI</span>
+<span class="text-headline-md font-headline-md">17</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[64px] h-[80px] rounded-xl bg-surface-white/10 text-surface-white">
+<span class="text-label-sm font-label-sm opacity-80 mb-1">SEX</span>
+<span class="text-headline-md font-headline-md">18</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[64px] h-[80px] rounded-xl bg-surface-white/10 text-surface-white">
+<span class="text-label-sm font-label-sm opacity-80 mb-1">SAB</span>
+<span class="text-headline-md font-headline-md">19</span>
+</button>
+</div>
+</header>
+<!-- Main Content - Appointments List -->
+<main class="px-container-margin py-4 space-y-4">
+<!-- Appointment Card 1 -->
+<div class="glass-card rounded-xl p-card-padding flex items-center relative overflow-hidden group hover:bg-surface-white/20 transition-all duration-300">
+<!-- Time Indicator Strip -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-structural-light rounded-l-xl"></div>
+<div class="mr-4 flex flex-col items-center justify-center w-16">
+<span class="text-body-md font-body-md font-bold text-surface-white">09:00</span>
+<span class="text-label-sm font-label-sm text-surface-white/70">10:00</span>
+</div>
+<div class="relative w-12 h-12 rounded-full overflow-hidden mr-4 flex-shrink-0 border-2 border-surface-white/30">
+<img alt="Enzo Gabriel" class="w-full h-full object-cover" data-alt="A brightly lit, high-quality photograph of a cheerful young boy with curly brown hair, smiling gently. The portrait is taken in a soft, modern clinical environment with warm, nurturing light mode aesthetics. The colors are gentle pastels, emphasizing safety and curiosity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSAbXLGDqL8Fv1vBA9BRfq7ZAYJNfGEoWsM9aEjKEVnxzTBHKaySOEOo5UUnVYUnnK94e1HF1cWuUAxnImMrPLTCLhA6NWw6QSXO4F_GzK7H8TU1ce4xx9Vu2WsQxjIABMLN566R_5mZKpMOHS6o1tn6V6teAmE0iyhyfD94eiBi38kIH0xSrO2M8s-T913Ay5pdQZmB1SbzBnzWHFre4Y7UN8ZMQCfDPdh7gB3POec1wmLEYwutZl"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-body-lg font-body-lg font-bold text-surface-white truncate mb-1">Enzo Gabriel, 6 anos</h3>
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-[#4ADE80] mr-2"></span>
+<span class="text-label-sm font-label-sm text-surface-white/80">Avaliação Cognitiva</span>
+</div>
+</div>
+</div>
+<!-- Appointment Card 2 -->
+<div class="glass-card rounded-xl p-card-padding flex items-center relative overflow-hidden group hover:bg-surface-white/20 transition-all duration-300">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-amarelo rounded-l-xl"></div>
+<div class="mr-4 flex flex-col items-center justify-center w-16">
+<span class="text-body-md font-body-md font-bold text-surface-white">11:00</span>
+<span class="text-label-sm font-label-sm text-surface-white/70">11:45</span>
+</div>
+<div class="relative w-12 h-12 rounded-full overflow-hidden mr-4 flex-shrink-0 border-2 border-surface-white/30">
+<img alt="Sofia Martins" class="w-full h-full object-cover" data-alt="A portrait of a thoughtful young girl with straight dark hair, wearing a colorful knitted sweater. She is in a well-lit, child-friendly space with a clean, modern aesthetic. Soft, natural light illuminates her face, reflecting a playful yet scientifically grounded environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1c7OgBsXOwUlsud7hqy1ggtLaeSaHFGqie1M-EnRtvEAYdvCQcqn92UeeoSzu43DohbP8ZRzhtiSIOl363i05FTroiKcXxEQQq0Mih-nl2l1bJgaxDFlr1PBsgolq_hvCb5QwBVKwlJcdsktaYsn-7StErLT7g5Ui8q5N3sCs9xYxFpJsF3ouAf3lF5RMyLE-8RaeiQweUx2Cjr2wZ3CiuGpjj18x96_wPTjYjPCTLgWHvrZa6gqQ"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-body-lg font-body-lg font-bold text-surface-white truncate mb-1">Sofia Martins, 8 anos</h3>
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-disabled-gray mr-2"></span>
+<span class="text-label-sm font-label-sm text-surface-white/80">Aguardando Confirmação</span>
+</div>
+</div>
+</div>
+<!-- Appointment Card 3 -->
+<div class="glass-card rounded-xl p-card-padding flex items-center relative overflow-hidden group hover:bg-surface-white/20 transition-all duration-300">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-lilas rounded-l-xl"></div>
+<div class="mr-4 flex flex-col items-center justify-center w-16">
+<span class="text-body-md font-body-md font-bold text-surface-white">14:00</span>
+<span class="text-label-sm font-label-sm text-surface-white/70">15:00</span>
+</div>
+<div class="relative w-12 h-12 rounded-full overflow-hidden mr-4 flex-shrink-0 border-2 border-surface-white/30">
+<img alt="Lucas Silva" class="w-full h-full object-cover" data-alt="A warm, engaging photo of a smiling boy with glasses and short blond hair. The background is a slightly blurred, modern playroom setting designed for low-anxiety interactions. The lighting is bright and cheerful, reinforcing a supportive and professional clinical brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPNi6IabXyrAMZ7xqLZ8LFKS3_NsEiXg70u8YC0Tr3KIm3tRo3WLuXME9V6udgkC-e2IfJRkr6XtkL49gWqc_ulVimQMWAMpWEpiCrQFlEi7LZ6bOmYDWxawN08E_saG0X3RKtsu8zcWaiZeo6vQMAETFcWb-oDjZyhs-BZ-5qOCbA0d9RunZfJVhpOZPu57l8VJr5oBaauiYXd2fwiTSvYMbKNGze6GqDwzBMRz4ipmhj-6DUbd9L"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-body-lg font-body-lg font-bold text-surface-white truncate mb-1">Lucas Silva, 7 anos</h3>
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-[#4ADE80] mr-2"></span>
+<span class="text-label-sm font-label-sm text-surface-white/80">Sessão Lúdica</span>
+</div>
+</div>
+</div>
+<!-- Break/Lunch Item -->
+<div class="py-2 flex items-center justify-center opacity-60">
+<div class="h-px bg-surface-white/20 flex-1"></div>
+<span class="px-4 text-label-sm font-label-sm text-surface-white flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="restaurant">restaurant</span>
+                 Intervalo
+             </span>
+<div class="h-px bg-surface-white/20 flex-1"></div>
+</div>
+<!-- Appointment Card 4 -->
+<div class="glass-card rounded-xl p-card-padding flex items-center relative overflow-hidden group hover:bg-surface-white/20 transition-all duration-300">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-structural-light rounded-l-xl"></div>
+<div class="mr-4 flex flex-col items-center justify-center w-16">
+<span class="text-body-md font-body-md font-bold text-surface-white">16:30</span>
+<span class="text-label-sm font-label-sm text-surface-white/70">17:30</span>
+</div>
+<div class="relative w-12 h-12 rounded-full overflow-hidden mr-4 flex-shrink-0 border-2 border-surface-white/30">
+<div class="w-full h-full bg-surface-white/20 flex items-center justify-center">
+<span class="text-body-lg font-body-lg font-bold text-surface-white">MJ</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-body-lg font-body-lg font-bold text-surface-white truncate mb-1">Maria Julia, 5 anos</h3>
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-[#4ADE80] mr-2"></span>
+<span class="text-label-sm font-label-sm text-surface-white/80">Primeira Consulta</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed bottom-24 right-6 md:bottom-8 md:right-8 w-14 h-14 bg-accent-amarelo rounded-full shadow-[0_4px_20px_rgba(255,200,87,0.4)] flex items-center justify-center z-40 hover:scale-105 transition-transform duration-200 active:scale-95">
+<span class="material-symbols-outlined text-structural-dark text-headline-lg font-headline-lg" data-icon="add">add</span>
+</button>
+<!-- Bottom Navigation Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 pb-4 pt-2 shadow-[0_-4px_15px_rgba(13,118,110,0.05)] bg-surface-container-lowest dark:bg-inverse-surface rounded-t-xl">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-label-sm font-label-sm mt-1 text-on-primary-container font-bold">Início</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-high transition-colors rounded-full active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="text-label-sm font-label-sm mt-1">Pacientes</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-high transition-colors rounded-full active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-label-sm font-label-sm mt-1">Relatórios</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-high transition-colors rounded-full active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-sm font-label-sm mt-1">Perfil</span>
+</button>
+</nav>
+<!-- Desktop Navigation Placeholder (Hidden on Mobile) -->
+<nav class="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface-container-lowest border-r border-surface-variant p-4 z-50">
+<div class="mb-10 px-4 mt-6">
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed">TekoPorã</h1>
+</div>
+<div class="space-y-2">
+<button class="w-full flex items-center p-3 rounded-lg bg-primary-container text-on-primary-container font-bold">
+<span class="material-symbols-outlined mr-3" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+                Início
+            </button>
+<button class="w-full flex items-center p-3 rounded-lg text-secondary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined mr-3" data-icon="groups">groups</span>
+                Pacientes
+            </button>
+<button class="w-full flex items-center p-3 rounded-lg text-secondary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined mr-3" data-icon="analytics">analytics</span>
+                Relatórios
+            </button>
+<button class="w-full flex items-center p-3 rounded-lg text-secondary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined mr-3" data-icon="person">person</span>
+                Perfil
+            </button>
+</div>
+</nav>
+</body></html>

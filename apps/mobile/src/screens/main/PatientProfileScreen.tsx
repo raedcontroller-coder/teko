@@ -17,6 +17,9 @@ import {
 } from 'react-native';
 import { ArrowLeft, Baby, User, Shield, Target, Camera, Bomb, Save, Trash2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react-native';
 import { api } from '../../services/api';
+import { AnamneseTab } from './patient-tabs/AnamneseTab';
+import { NotasTab } from './patient-tabs/NotasTab';
+import { EvolucaoTab } from './patient-tabs/EvolucaoTab';
 
 interface PatientProfileScreenProps {
   patientId: string;
@@ -29,6 +32,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
   const [loading, setLoading] = useState(true);
   const [savingPatient, setSavingPatient] = useState(false);
   const [savingGuardian, setSavingGuardian] = useState(false);
+  const [activeTab, setActiveTab] = useState<'Dados' | 'Anamnese' | 'Notas' | 'Evolução'>('Dados');
   
   const [guardianId, setGuardianId] = useState('');
   const [sessions, setSessions] = useState<any[]>([]);
@@ -251,6 +255,21 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
         <View style={{ width: 24 }} />
       </View>
 
+      <View style={styles.topTabsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.topTabsScroll}>
+          {['Dados', 'Anamnese', 'Notas', 'Evolução'].map((tab) => (
+            <TouchableOpacity 
+              key={tab} 
+              style={[styles.topTabBtn, activeTab === tab && styles.topTabBtnActive]}
+              onPress={() => setActiveTab(tab as any)}
+            >
+              <Text style={[styles.topTabText, activeTab === tab && styles.topTabTextActive]}>{tab}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {activeTab === 'Dados' && (
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
         {/* Seção Criança (Amarelo) */}
@@ -505,6 +524,11 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
         </View>
 
       </ScrollView>
+      )}
+
+      {activeTab === 'Anamnese' && <AnamneseTab />}
+      {activeTab === 'Notas' && <NotasTab />}
+      {activeTab === 'Evolução' && <EvolucaoTab />}
 
       {/* Modal de Confirmação de Edição do Responsável */}
       <Modal
@@ -642,6 +666,41 @@ const styles = StyleSheet.create({
   topBarTitle: {
     color: '#FFF',
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  topTabsContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  topTabsScroll: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: 8,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  topTabBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    backgroundColor: 'transparent',
+  },
+  topTabBtnActive: {
+    backgroundColor: '#FFC857',
+    shadowColor: '#FFC857',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  topTabText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  topTabTextActive: {
+    color: '#181c1c',
     fontWeight: 'bold',
   },
   scrollContent: {

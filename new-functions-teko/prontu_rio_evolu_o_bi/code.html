@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Evolução Clínica - Enzo Gabriel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#084D48",
+                        "accent-amarelo": "#FFC857",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#0d766e",
+                        "surface-bright": "#f7faf8",
+                        "surface": "#084D48",
+                        "on-secondary-fixed": "#1f1b10",
+                        "accent-lilas": "#7B61FF",
+                        "tertiary-fixed-dim": "#ffb598",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#a3faef",
+                        "surface-container": "#0d766e",
+                        "on-secondary-container": "#6a6455",
+                        "inverse-primary": "#7fd5cc",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#2d3130",
+                        "on-surface": "#ffffff",
+                        "outline": "#6e7977",
+                        "structural-light": "#64C6BE",
+                        "inverse-on-surface": "#eef1f0",
+                        "surface-tint": "#006a63",
+                        "on-tertiary-fixed-variant": "#72361b",
+                        "on-tertiary-fixed": "#370e00",
+                        "surface-dim": "#084D48",
+                        "secondary-container": "#eae2cf",
+                        "primary-fixed-dim": "#7fd5cc",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#00201d",
+                        "secondary-fixed": "#eae2cf",
+                        "on-tertiary-container": "#ffe5db",
+                        "secondary": "#635e4f",
+                        "secondary-fixed-dim": "#cec6b4",
+                        "on-primary-fixed-variant": "#00504a",
+                        "surface-container-lowest": "#084D48",
+                        "surface-container-low": "#0d766e",
+                        "on-secondary-fixed-variant": "#4b4639",
+                        "tertiary-fixed": "#ffdbce",
+                        "tertiary-container": "#9c573a",
+                        "primary-fixed": "#9bf2e8",
+                        "primary": "#64C6BE",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#0d766e",
+                        "surface-variant": "#0d766e",
+                        "surface-container-high": "#0d766e",
+                        "tertiary": "#7f4025",
+                        "disabled-gray": "#E0E0E0",
+                        "surface-white": "#FFFFFF",
+                        "structural-dark": "#084D48",
+                        "error": "#ba1a1a",
+                        "on-background": "#ffffff",
+                        "outline-variant": "#bdc9c6",
+                        "on-primary-container": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "20px",
+                        "container-margin": "24px",
+                        "gutter": "16px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #084D48; color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(13, 118, 110, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(100, 198, 190, 0.2);
+            border-radius: 1.5rem;
+        }
+        .chart-grid { stroke: rgba(255, 255, 255, 0.1); stroke-width: 1; stroke-dasharray: 4 4; }
+        .chart-line-yellow { stroke: #FFC857; stroke-width: 3; fill: none; }
+        .chart-line-purple { stroke: #7B61FF; stroke-width: 3; fill: none; }
+        .chart-area-yellow { fill: url(#grad-yellow); }
+        .chart-area-purple { fill: url(#grad-purple); }
+        .chart-dot-yellow { fill: #FFC857; stroke: #084D48; stroke-width: 2; }
+        .chart-dot-purple { fill: #7B61FF; stroke: #084D48; stroke-width: 2; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-background px-container-margin py-4 sticky top-0 z-40">
+<div class="flex justify-between items-center w-full max-w-7xl mx-auto">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-high transition-colors text-primary">
+<span class="material-symbols-outlined text-[28px]">arrow_back</span>
+</button>
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-surface-container-high overflow-hidden mb-1 flex items-center justify-center border-2 border-primary">
+<img alt="Enzo Gabriel" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZex46lvqii0mE15squuT2uATJiqrVrQDOhKwdm42qgHlz5t1g5jWTYWJO02BWKEVHsU6z3offXMyVeZtBNZ4XadpxbQc8KtkSe5duwFrddz1Mbo3QLGbNC7LNAsKWYFOyueW4_S8ZelK0dv5rA35IYQQwIP57p1ICrCeRWsi0s_lRhKLaeMMUkh8ojPj07mAXkxmn6fmMj02txCZGOSIAiz5tJ4ZK3NQzoXrm6NFHSJMeFlWiNHuS"/>
+</div>
+<h1 class="text-label-lg font-label-lg text-on-surface">Enzo Gabriel</h1>
+<span class="text-label-sm font-label-sm text-structural-light">6 anos</span>
+</div>
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-high transition-colors text-primary">
+<span class="material-symbols-outlined text-[28px]">more_vert</span>
+</button>
+</div>
+<!-- Tabs -->
+<div class="mt-6 border-b border-primary-container/30 overflow-x-auto hide-scrollbar">
+<ul class="flex space-x-6 min-w-max px-4">
+<li><button class="pb-3 text-label-lg font-label-lg text-structural-light">Visão Geral</button></li>
+<li>
+<button class="pb-3 text-label-lg font-label-lg text-accent-amarelo font-bold relative">
+                        Evolução
+                        <div class="absolute bottom-0 left-0 w-full h-1 bg-accent-amarelo rounded-t-full"></div>
+</button>
+</li>
+<li><button class="pb-3 text-label-lg font-label-lg text-structural-light">Histórico</button></li>
+<li><button class="pb-3 text-label-lg font-label-lg text-structural-light">Relatórios</button></li>
+</ul>
+</div>
+</header>
+<main class="px-container-margin py-6 max-w-7xl mx-auto space-y-8">
+<!-- Section 1: Goleiro (VTR) -->
+<section>
+<h2 class="text-headline-md font-headline-md text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-structural-light">sports_soccer</span>
+                Goleiro <span class="text-structural-light text-body-md font-body-md">(Tempo de Reação - VTR)</span>
+</h2>
+<div class="glass-card p-5">
+<!-- Data Summaries -->
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="bg-primary-container/40 rounded-xl p-4 border border-primary/20">
+<span class="text-label-sm font-label-sm text-structural-light block mb-1">VTR Inicial</span>
+<div class="text-headline-md font-headline-md text-on-surface">245<span class="text-label-sm font-label-sm text-structural-light ml-1">ms</span></div>
+</div>
+<div class="bg-primary-container/40 rounded-xl p-4 border border-primary/20">
+<span class="text-label-sm font-label-sm text-structural-light block mb-1">VTR Atual</span>
+<div class="text-headline-md font-headline-md text-accent-amarelo flex items-center">
+                            182<span class="text-label-sm font-label-sm text-structural-light ml-1 mr-2">ms</span>
+<span class="material-symbols-outlined text-accent-amarelo text-[16px]">trending_down</span>
+</div>
+</div>
+</div>
+<!-- Chart -->
+<div class="relative w-full h-48 mb-6 mt-4">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 400 200">
+<defs>
+<lineargradient id="grad-yellow" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#FFC857" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#FFC857" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid -->
+<line class="chart-grid" x1="0" x2="400" y1="40" y2="40"></line>
+<line class="chart-grid" x1="0" x2="400" y1="100" y2="100"></line>
+<line class="chart-grid" x1="0" x2="400" y1="160" y2="160"></line>
+<!-- Area -->
+<path class="chart-area-yellow" d="M0,180 C50,150 100,160 150,120 C200,80 250,90 300,50 C350,10 400,20 400,20 L400,200 L0,200 Z"></path>
+<!-- Line (Spline) -->
+<path class="chart-line-yellow" d="M0,180 C50,150 100,160 150,120 C200,80 250,90 300,50 C350,10 400,20 400,20"></path>
+<!-- Dots -->
+<circle class="chart-dot-yellow" cx="0" cy="180" r="4"></circle>
+<circle class="chart-dot-yellow" cx="150" cy="120" r="4"></circle>
+<circle class="chart-dot-yellow shadow-lg shadow-accent-amarelo/50" cx="300" cy="50" r="6"></circle>
+<circle class="chart-dot-yellow" cx="400" cy="20" r="4"></circle>
+<!-- Y Axis Labels -->
+<text fill="#64C6BE" font-size="10" text-anchor="end" x="-5" y="45">200</text>
+<text fill="#64C6BE" font-size="10" text-anchor="end" x="-5" y="105">225</text>
+<text fill="#64C6BE" font-size="10" text-anchor="end" x="-5" y="165">250</text>
+<!-- X Axis Labels -->
+<text fill="#64C6BE" font-size="10" text-anchor="middle" x="0" y="215">01/10</text>
+<text fill="#64C6BE" font-size="10" text-anchor="middle" x="150" y="215">08/10</text>
+<text fill="#64C6BE" font-size="10" text-anchor="middle" x="300" y="215">15/10</text>
+<text fill="#64C6BE" font-size="10" text-anchor="middle" x="400" y="215">22/10</text>
+<!-- Tooltip -->
+<g transform="translate(300, 20)">
+<rect fill="#FFC857" height="22" rx="4" width="50" x="-25" y="-25"></rect>
+<polygon fill="#FFC857" points="-5,-3 5,-3 0,2"></polygon>
+<text fill="#084D48" font-size="12" font-weight="bold" text-anchor="middle" x="0" y="-10">182ms</text>
+</g>
+</svg>
+</div>
+<!-- AI Insight -->
+<div class="bg-surface/50 rounded-xl p-4 border border-accent-amarelo/30 flex gap-3">
+<div class="bg-accent-amarelo/20 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-accent-amarelo text-[18px]">auto_awesome</span>
+</div>
+<div>
+<span class="text-label-sm font-label-sm text-accent-amarelo font-bold block mb-1">Análise Assistida</span>
+<p class="text-label-sm font-label-sm text-on-surface/90 leading-relaxed">
+                            O tempo de reação variável (VTR) demonstrou forte estabilização nas últimas 3 sessões, indicando melhora no controle inibitório.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Fotógrafo da Floresta (DV) -->
+<section>
+<h2 class="text-headline-md font-headline-md text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-structural-light">photo_camera</span>
+                Fotógrafo <span class="text-structural-light text-body-md font-body-md">(Desempenho Visual)</span>
+</h2>
+<div class="glass-card p-5">
+<div class="flex justify-between items-end mb-6">
+<div>
+<span class="text-label-sm font-label-sm text-structural-light block mb-1">Pontuação Atual</span>
+<div class="text-headline-lg font-headline-lg text-accent-lilas">85%</div>
+</div>
+<div class="bg-accent-lilas/20 text-accent-lilas px-3 py-1 rounded-full text-label-sm font-label-sm flex items-center gap-1 border border-accent-lilas/30">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +12%
+                    </div>
+</div>
+<!-- Chart -->
+<div class="relative w-full h-48 mb-2 mt-4">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 400 200">
+<defs>
+<lineargradient id="grad-purple" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#7B61FF" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#7B61FF" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid -->
+<line class="chart-grid" x1="0" x2="400" y1="40" y2="40"></line>
+<line class="chart-grid" x1="0" x2="400" y1="100" y2="100"></line>
+<line class="chart-grid" x1="0" x2="400" y1="160" y2="160"></line>
+<!-- Area -->
+<path class="chart-area-purple" d="M0,150 C80,140 120,80 200,90 C280,100 320,40 400,30 L400,200 L0,200 Z"></path>
+<!-- Line (Spline) -->
+<path class="chart-line-purple" d="M0,150 C80,140 120,80 200,90 C280,100 320,40 400,30"></path>
+<!-- Dots -->
+<circle class="chart-dot-purple" cx="0" cy="150" r="4"></circle>
+<circle class="chart-dot-purple" cx="200" cy="90" r="4"></circle>
+<circle class="chart-dot-purple shadow-lg shadow-accent-lilas/50" cx="400" cy="30" r="6"></circle>
+<!-- X Axis Labels -->
+<text fill="#64C6BE" font-size="10" text-anchor="middle" x="0" y="215">Sessão 1</text>
+<text fill="#64C6BE" font-size="10" text-anchor="middle" x="200" y="215">Sessão 3</text>
+<text fill="#64C6BE" font-size="10" text-anchor="middle" x="400" y="215">Sessão 5</text>
+</svg>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 pb-4 pt-2 shadow-[0_-4px_15px_rgba(13,118,110,0.2)] bg-surface-container-lowest rounded-t-xl hidden md:hidden">
+<!-- Hiding bottom nav as requested for top level destination rule, but adding it for structure in case it's needed on mobile view for a profile -->
+<div class="flex flex-col items-center justify-center text-structural-light p-2 w-16">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="text-label-sm font-label-sm">Início</span>
+</div>
+<div class="flex flex-col items-center justify-center text-structural-light p-2 w-16">
+<span class="material-symbols-outlined mb-1">groups</span>
+<span class="text-label-sm font-label-sm">Pacientes</span>
+</div>
+<div class="flex flex-col items-center justify-center text-structural-light p-2 w-16">
+<span class="material-symbols-outlined mb-1">analytics</span>
+<span class="text-label-sm font-label-sm">Relatórios</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-2 w-16">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="text-label-sm font-label-sm">Perfil</span>
+</div>
+</nav>
+</body></html>
