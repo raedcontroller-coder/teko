@@ -38,7 +38,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ currentTab, onTabPre
       <ScrollView 
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, !isGlobalAdmin && { flex: 1, justifyContent: 'space-around' }]}
+        contentContainerStyle={styles.scrollContent}
       >
         {tabs.map((tab) => {
           const isActive = currentTab === tab.name;

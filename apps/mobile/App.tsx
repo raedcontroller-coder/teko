@@ -228,7 +228,7 @@ function MainApp() {
   return (
     <View style={{ flex: 1, backgroundColor: '#084D48' }}>
       <StatusBar style="light" />
-      <GlobalHeader user={currentUser} />
+      <GlobalHeader user={currentUser} onProfilePress={() => setCurrentTab('Profile')} />
       <View style={{ flex: 1 }}>
         {renderTabContent()}
       </View>

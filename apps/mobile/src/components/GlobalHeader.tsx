@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Image, Platform, StatusBar, TouchableOpacity } from 'react-native';
 
 interface GlobalHeaderProps {
   user: any;
+  onProfilePress?: () => void;
 }
 
-export const GlobalHeader: React.FC<GlobalHeaderProps> = ({ user }) => {
+export const GlobalHeader: React.FC<GlobalHeaderProps> = ({ user, onProfilePress }) => {
   const roleDisplay = user?.role === 'GLOBAL_ADMIN' ? 'Administrador' :
                       user?.role === 'PSICOLOGO' ? 'Psicólogo' :
                       user?.role === 'FAMILIAR' ? 'Familiar' : 'Usuário';
@@ -15,9 +16,9 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({ user }) => {
   return (
     <View style={styles.header}>
       <View style={styles.headerRow}>
-        <View style={styles.logoRow}>
+        <TouchableOpacity style={styles.logoRow} onPress={onProfilePress} activeOpacity={0.7} disabled={!onProfilePress}>
           <Image source={require('../../assets/icon.jpg')} style={styles.logoImage} resizeMode="cover" />
-        </View>
+        </TouchableOpacity>
         <View style={styles.userInfo}>
           <Text style={styles.userName}>Olá, {userName}</Text>
           <View style={styles.roleBadge}>
