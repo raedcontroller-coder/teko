@@ -526,7 +526,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
       </ScrollView>
       )}
 
-      {activeTab === 'Anamnese' && <AnamneseTab />}
+      {activeTab === 'Anamnese' && <AnamneseTab patientId={patientId} adminPsicologoId={adminPsicologoId} />}
       {activeTab === 'Notas' && <NotasTab />}
       {activeTab === 'Evolução' && <EvolucaoTab />}
 
@@ -888,9 +888,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   carouselBadge: {
-    backgroundColor: 'rgba(123,97,255,0.1)',
-    borderWidth: 1,
     backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
