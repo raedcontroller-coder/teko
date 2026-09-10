@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { Sparkles } from 'lucide-react-native';
 
 interface Appointment {
-  id: number;
+  id: string | number;
   date: string;
   time: string;
   end: string;

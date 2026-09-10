@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 
 interface Appointment {
-  id: number;
+  id: string | number;
   date: string;
   time: string;
   end: string;
@@ -28,10 +28,12 @@ interface WeeklyViewProps {
 }
 
 export function WeeklyView({ currentDate, appointments, holidays = [], onDayPress }: WeeklyViewProps) {
-  const [viewDate, setViewDate] = useState(new Date(currentDate + 'T00:00:00'));
+  const [viewDate, setViewDate] = useState(new Date((currentDate || new Date().toISOString().split('T')[0]) + 'T00:00:00'));
 
   useEffect(() => {
-    setViewDate(new Date(currentDate + 'T00:00:00'));
+    if (currentDate) {
+      setViewDate(new Date(currentDate + 'T00:00:00'));
+    }
   }, [currentDate]);
 
   const handlePrevWeek = () => {
@@ -72,7 +74,7 @@ export function WeeklyView({ currentDate, appointments, holidays = [], onDayPres
     const number = d.getDate();
     const dayApps = appointments.filter(app => app.date === isoDate);
     
-    dayApps.sort((a, b) => a.time.localeCompare(b.time));
+    dayApps.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
     
     const isWeekend = d.getDay() === 0 || d.getDay() === 6;
     const isHoliday = holidays.some(h => h.date === isoDate);

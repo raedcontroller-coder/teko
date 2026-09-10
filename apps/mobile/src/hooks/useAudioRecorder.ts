@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 
 // Para dispositivo físico, use o IP local da máquina.
-const API_URL = 'http://10.158.64.80:3000';
+const API_URL = 'http://10.148.246.80:3000';
 
 export interface ValidationResponse {
   valid: boolean;

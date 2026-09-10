@@ -1,6 +1,36 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { Plus, X, Trash2, Save, FileText, Users, Book, Activity, MoreHorizontal, Edit3, AlertTriangle } from 'lucide-react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  Modal, 
+  TextInput, 
+  KeyboardAvoidingView, 
+  Platform, 
+  TouchableWithoutFeedback, 
+  Keyboard, 
+  ActivityIndicator, 
+  Animated, 
+  Easing 
+} from 'react-native';
+import { 
+  Plus, 
+  X, 
+  Trash2, 
+  Save, 
+  FileText, 
+  Users, 
+  Book, 
+  Activity, 
+  MoreHorizontal, 
+  Edit3, 
+  AlertTriangle, 
+  CheckCircle2, 
+  XCircle 
+} from 'lucide-react-native';
+import { api } from '../../../services/api';
 
 interface Note {
   id: string;
@@ -8,6 +38,12 @@ interface Note {
   category: string;
   title: string;
   color: string;
+  createdAt?: string;
+}
+
+interface NotasTabProps {
+  patientId?: string;
+  adminPsicologoId?: string;
 }
 
 const CATEGORIES = [
@@ -17,22 +53,114 @@ const CATEGORIES = [
   { label: 'Outros', color: '#10B981', icon: FileText }
 ];
 
-export function NotasTab() {
-  const [notes, setNotes] = useState<Note[]>([
-    { id: '1', date: '16 de Agosto', category: 'Sessão', title: 'Paciente demonstrou excelente engajamento durante o Jogo da Bomba. Houve melhora na fluência semântica...', color: '#3B82F6' },
-    { id: '2', date: '10 de Agosto', category: 'Família', title: 'Reunião com os pais para alinhar estratégias de reforço positivo em casa. Relataram avanços na comunicação...', color: '#F59E0B' },
-  ]);
+export function NotasTab({ patientId, adminPsicologoId }: NotasTabProps) {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const [optionsNote, setOptionsNote] = useState<Note | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [emptyNoteError, setEmptyNoteError] = useState(false); // To replace native Alert for empty notes
+  const [emptyNoteError, setEmptyNoteError] = useState(false);
   
   // Form State
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0]);
   const [noteContent, setNoteContent] = useState('');
+
+  // Toast States & Animations
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const slideAnim = useRef(new Animated.Value(-100)).current;
+
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const errorSlideAnim = useRef(new Animated.Value(-100)).current;
+
+  const triggerSuccessToast = (msg: string) => {
+    setSuccessMessage(msg);
+    setShowSuccessToast(true);
+    Animated.timing(slideAnim, {
+      toValue: 20,
+      duration: 300,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.ease),
+    }).start();
+
+    setTimeout(() => {
+      Animated.timing(slideAnim, {
+        toValue: -100,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease),
+      }).start(() => setShowSuccessToast(false));
+    }, 3000);
+  };
+
+  const triggerErrorToast = (msg: string) => {
+    setErrorMessage(msg);
+    setShowErrorToast(true);
+    Animated.timing(errorSlideAnim, {
+      toValue: 20,
+      duration: 300,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.ease),
+    }).start();
+
+    setTimeout(() => {
+      Animated.timing(errorSlideAnim, {
+        toValue: -100,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease),
+      }).start(() => setShowErrorToast(false));
+    }, 3000);
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    try {
+      const d = new Date(dateString);
+      const day = d.getDate();
+      const month = d.toLocaleString('pt-BR', { month: 'long' });
+      return `${day} de ${month.charAt(0).toUpperCase() + month.slice(1)}`;
+    } catch {
+      return dateString;
+    }
+  };
+
+  const fetchNotes = async () => {
+    if (!patientId) return;
+    try {
+      setLoading(true);
+      const url = adminPsicologoId 
+        ? `/api/patients/${patientId}/notes?psicologoId=${adminPsicologoId}`
+        : `/api/patients/${patientId}/notes`;
+      const response = await api.get(url);
+      if (response.data?.success && Array.isArray(response.data?.data)) {
+        const formatted = response.data.data.map((item: any) => ({
+          id: item.id,
+          date: formatDate(item.createdAt),
+          category: item.category || 'Sessão',
+          title: item.title,
+          color: item.color || '#3B82F6',
+          createdAt: item.createdAt,
+        }));
+        setNotes(formatted);
+      } else {
+        setNotes([]);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar notas clínicas:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotes();
+  }, [patientId, adminPsicologoId]);
 
   const openModalForNew = () => {
     setEditingId(null);
@@ -56,44 +184,83 @@ export function NotasTab() {
     Keyboard.dismiss();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!noteContent.trim()) {
       setEmptyNoteError(true);
       return;
     }
 
-    if (editingId) {
-      // Edit existing
-      setNotes(prev => prev.map(n => n.id === editingId ? {
-        ...n,
-        category: activeCategory.label,
-        color: activeCategory.color,
-        title: noteContent.trim(),
-      } : n));
-    } else {
-      // Create new
-      const now = new Date();
-      const formattedDate = `${now.getDate()} de ${now.toLocaleString('pt-BR', { month: 'long' })}`;
-      
-      const newNote: Note = {
-        id: Math.random().toString(),
-        date: formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1),
-        category: activeCategory.label,
-        color: activeCategory.color,
-        title: noteContent.trim(),
-      };
-      setNotes(prev => [newNote, ...prev]);
+    if (!patientId) {
+      triggerErrorToast("Identificador do paciente não informado.");
+      return;
     }
-    closeModal();
+
+    try {
+      setSaving(true);
+      const payload = {
+        category: activeCategory.label,
+        title: noteContent.trim(),
+        color: activeCategory.color,
+      };
+
+      if (editingId) {
+        // Editar Nota Existente
+        const url = adminPsicologoId 
+          ? `/api/patients/${patientId}/notes/${editingId}?psicologoId=${adminPsicologoId}`
+          : `/api/patients/${patientId}/notes/${editingId}`;
+        await api.put(url, payload);
+        await fetchNotes();
+        closeModal();
+        triggerSuccessToast("Nota atualizada com sucesso!");
+      } else {
+        // Criar Nova Nota
+        const url = adminPsicologoId 
+          ? `/api/patients/${patientId}/notes?psicologoId=${adminPsicologoId}`
+          : `/api/patients/${patientId}/notes`;
+        await api.post(url, payload);
+        await fetchNotes();
+        closeModal();
+        triggerSuccessToast("Nota criada com sucesso!");
+      }
+    } catch (err: any) {
+      console.error("Erro ao salvar nota clínica:", err);
+      triggerErrorToast(err.response?.data?.error || "Falha ao salvar nota no servidor.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const executeDelete = () => {
-    if (deleteConfirmId) {
-      setNotes(prev => prev.filter(n => n.id !== deleteConfirmId));
-      if (editingId === deleteConfirmId) closeModal();
+  const executeDelete = async () => {
+    if (!deleteConfirmId || !patientId) return;
+    try {
+      setSaving(true);
+      const targetId = deleteConfirmId;
       setDeleteConfirmId(null);
+
+      const url = adminPsicologoId 
+        ? `/api/patients/${patientId}/notes/${targetId}?psicologoId=${adminPsicologoId}`
+        : `/api/patients/${patientId}/notes/${targetId}`;
+      await api.delete(url);
+
+      if (editingId === targetId) closeModal();
+      await fetchNotes();
+      triggerSuccessToast("Nota excluída com sucesso!");
+    } catch (err: any) {
+      console.error("Erro ao excluir nota clínica:", err);
+      triggerErrorToast(err.response?.data?.error || "Falha ao excluir nota.");
+    } finally {
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FFC857" />
+        <Text style={styles.loadingText}>Carregando bloco de notas...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -235,15 +402,23 @@ export function NotasTab() {
               <TouchableOpacity 
                 style={styles.cancelActionBtn} 
                 onPress={() => setDeleteConfirmId(null)}
+                disabled={saving}
               >
                 <Text style={styles.cancelActionText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.dangerActionBtn} 
                 onPress={executeDelete}
+                disabled={saving}
               >
-                <Trash2 size={18} color="#000" style={{ marginRight: 8 }} />
-                <Text style={styles.dangerActionText}>Excluir</Text>
+                {saving ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <>
+                    <Trash2 size={18} color="#000" style={{ marginRight: 8 }} />
+                    <Text style={styles.dangerActionText}>Excluir</Text>
+                  </>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -311,25 +486,60 @@ export function NotasTab() {
 
             <View style={styles.modalActions}>
               {editingId && (
-                <TouchableOpacity style={styles.editorDeleteBtn} onPress={() => setDeleteConfirmId(editingId)}>
+                <TouchableOpacity style={styles.editorDeleteBtn} onPress={() => setDeleteConfirmId(editingId)} disabled={saving}>
                   <Trash2 size={20} color="#F87171" />
                 </TouchableOpacity>
               )}
 
-              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: activeCategory.color }]} onPress={handleSave}>
-                <Save size={20} color="#000" style={{ marginRight: 8 }} />
-                <Text style={styles.saveBtnText}>Salvar Nota</Text>
+              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: activeCategory.color }]} onPress={handleSave} disabled={saving}>
+                {saving ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <>
+                    <Save size={20} color="#000" style={{ marginRight: 8 }} />
+                    <Text style={styles.saveBtnText}>Salvar Nota</Text>
+                  </>
+                )}
               </TouchableOpacity>
             </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Popup Toast de Sucesso Teko Style */}
+      {showSuccessToast && (
+        <Animated.View style={[styles.toastContainer, { transform: [{ translateY: slideAnim }] }]}>
+          <View style={styles.toastIconBg}>
+            <CheckCircle2 color="#FFC857" size={28} />
+          </View>
+          <View style={styles.toastTextContainer}>
+            <Text style={styles.toastTitle}>Sucesso!</Text>
+            <Text style={styles.toastMessage}>{successMessage}</Text>
+          </View>
+        </Animated.View>
+      )}
+
+      {/* Popup Toast de Erro Teko Style */}
+      {showErrorToast && (
+        <Animated.View style={[styles.errorToastContainer, { transform: [{ translateY: errorSlideAnim }] }]}>
+          <View style={styles.errorToastIconBg}>
+            <XCircle color="#FF4B4B" size={28} />
+          </View>
+          <View style={styles.toastTextContainer}>
+            <Text style={styles.errorToastTitle}>Ops, algo deu errado!</Text>
+            <Text style={styles.toastMessage}>{errorMessage}</Text>
+          </View>
+        </Animated.View>
+      )}
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  loadingText: { color: 'rgba(255,255,255,0.6)', marginTop: 12, fontSize: 14 },
   
   fab: { 
     position: 'absolute', 
@@ -493,7 +703,7 @@ const styles = StyleSheet.create({
     minHeight: 160, 
     textAlignVertical: 'top',
     borderWidth: 1,
-    marginBottom: 8, // Changed from 24 to 8 to accommodate error text closely
+    marginBottom: 8,
   },
   errorText: { color: '#F87171', fontSize: 13, marginBottom: 16, paddingHorizontal: 4 },
   
@@ -501,4 +711,93 @@ const styles = StyleSheet.create({
   editorDeleteBtn: { padding: 16, backgroundColor: 'rgba(248, 113, 113, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(248, 113, 113, 0.3)', marginRight: 16 },
   saveBtn: { flex: 1, flexDirection: 'row', padding: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   saveBtnText: { color: '#000', fontWeight: 'bold', fontSize: 16 },
+
+  /* Teko Toast Banners */
+  toastContainer: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 20 : 10,
+    right: 16,
+    left: 16,
+    backgroundColor: '#181c1c', 
+    borderLeftWidth: 6,
+    borderLeftColor: '#FFC857',
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16, 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 20,
+    zIndex: 9999,
+  },
+  toastIconBg: {
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,200,87,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,200,87,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  toastTextContainer: {
+    flex: 1,
+  },
+  toastTitle: {
+    color: '#FFC857', 
+    fontSize: 16,
+    fontWeight: '900',
+    marginBottom: 2,
+  },
+  toastMessage: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 13,
+  },
+  errorToastContainer: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 20 : 10,
+    right: 16,
+    left: 16,
+    backgroundColor: '#181c1c', 
+    borderLeftWidth: 6,
+    borderLeftColor: '#FF4B4B',
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16, 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 20,
+    zIndex: 9999,
+  },
+  errorToastIconBg: {
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 75, 75, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 75, 75, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  errorToastTitle: {
+    color: '#FF4B4B', 
+    fontSize: 16,
+    fontWeight: '900',
+    marginBottom: 2,
+  },
 });

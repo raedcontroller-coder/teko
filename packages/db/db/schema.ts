@@ -78,3 +78,41 @@ export const anamneses = pgTable('anamneses', {
   deletedAt: timestamp('deleted_at'),
 });
 
+// 6. Clinical Notes Table (Notepad observations per Patient & Psychologist)
+export const clinicalNotes = pgTable('clinical_notes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  patientId: uuid('patient_id').references(() => users.id).notNull(),
+  psicologoId: uuid('psicologo_id').references(() => users.id).notNull(),
+  
+  category: text('category').notNull().default('Sessão'), // 'Sessão' | 'Família' | 'Escola' | 'Outros'
+  title: text('title').notNull(), // Content/observation text of the note
+  color: text('color').default('#3B82F6'),
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'),
+});
+
+// 7. Appointments Table (Agenda sessions per Psychologist)
+export const appointments = pgTable('appointments', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  psicologoId: uuid('psicologo_id').references(() => users.id).notNull(),
+  patientId: uuid('patient_id').references(() => users.id),
+  
+  date: text('date').notNull(), // 'YYYY-MM-DD'
+  startTime: text('start_time').notNull(), // 'HH:mm'
+  endTime: text('end_time').notNull(), // 'HH:mm'
+  
+  title: text('title').notNull(),
+  name: text('name').notNull(), // Patient/client name
+  type: text('type').notNull(), // e.g. 'Avaliação Cognitiva', 'Terapia Infantil'
+  status: text('status').notNull().default('confirmado'), // 'confirmado' | 'aguardando' | 'cancelado'
+  color: text('color').default('#10B981'),
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'),
+});
+
+
+

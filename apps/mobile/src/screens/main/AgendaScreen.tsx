@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, ActivityIndicator, Animated, Easing, Dimensions, ScrollView, Pressable } from 'react-native';
 import { Plus, Search, X, Trash2, XCircle } from 'lucide-react-native';
+import { api } from '../../services/api';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -30,7 +31,35 @@ export function AgendaScreen() {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [isLoadingHolidays, setIsLoadingHolidays] = useState(true);
 
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const fetchAppointments = async () => {
+    try {
+      const response = await api.get('/api/appointments');
+      if (response.data?.success && Array.isArray(response.data?.data)) {
+        const mapped = response.data.data.map((item: any) => ({
+          id: item.id,
+          date: item.date,
+          time: item.startTime,
+          end: item.endTime,
+          title: item.title,
+          name: item.name,
+          type: item.type,
+          status: item.status || 'confirmado',
+          color: item.color || '#10B981',
+          patientId: item.patientId
+        }));
+        setAppointments(mapped);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar agendamentos:", err);
+    }
+  };
+
   useEffect(() => {
+    fetchAppointments();
+
     const currentYear = parseInt(selectedDate.split('-')[0]);
     setIsLoadingHolidays(true);
     
@@ -52,26 +81,19 @@ export function AgendaScreen() {
     .finally(() => setIsLoadingHolidays(false));
   }, []); // Executa uma vez ao montar, carregando 3 anos na memória
 
-  const [appointments, setAppointments] = useState([
-    { id: 1, date: '2026-08-26', time: '09:00', end: '10:00', title: 'Sessão Inicial', name: 'Enzo Gabriel, 6 anos', type: 'Avaliação Cognitiva', status: 'confirmado', color: '#10B981' },
-    { id: 2, date: '2026-08-26', time: '11:00', end: '11:45', title: 'Acompanhamento', name: 'Sofia Martins, 8 anos', type: 'Aguardando Confirmação', status: 'aguardando', color: '#F59E0B' },
-    { id: 3, date: '2026-08-27', time: '14:00', end: '15:00', title: 'Sessão Lúdica Semanal', name: 'Lucas Silva, 7 anos', type: 'Terapia Infantil', status: 'confirmado', color: '#8B5CF6' },
-    { id: 4, date: '2026-08-15', time: '10:00', end: '11:00', title: 'Entrevista de Devolutiva', name: 'Maria Eduarda', type: 'Retorno', status: 'confirmado', color: '#EF4444' }
-  ]);
-
   // --- Search State ---
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredAppointments = appointments.filter(app => {
     const q = searchQuery.toLowerCase();
-    return app.name.toLowerCase().includes(q) || app.title.toLowerCase().includes(q);
+    return (app.name || '').toLowerCase().includes(q) || (app.title || '').toLowerCase().includes(q);
   });
 
   // --- Modal Form State ---
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isColorPickerVisible, setIsColorPickerVisible] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | number | null>(null);
   const [formDate, setFormDate] = useState('');
   const [formTitle, setFormTitle] = useState('');
   const [formName, setFormName] = useState('');
@@ -183,7 +205,7 @@ export function AgendaScreen() {
     setIsModalVisible(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formTitle.trim()) {
       showError('Por favor, informe o título do agendamento.');
       return;
@@ -248,43 +270,55 @@ export function AgendaScreen() {
 
     const finalIsoDate = formatToISO(formDate);
 
-    if (editingId) {
-      setAppointments(prev => prev.map(app => 
-        app.id === editingId 
-          ? { ...app, title: formTitle, name: formName, time: formTime, end: formEnd, type: formType, date: finalIsoDate, color: formColor } 
-          : app
-      ));
-    } else {
-      const newApp = {
-        id: Date.now(),
+    try {
+      setIsSaving(true);
+      const payload = {
         date: finalIsoDate,
-        title: formTitle,
-        name: formName,
-        time: formTime,
-        end: formEnd,
-        type: formType,
+        startTime: formTime,
+        endTime: formEnd,
+        title: formTitle.trim(),
+        name: formName.trim(),
+        type: formType.trim(),
         status: 'confirmado',
         color: formColor,
       };
-      setAppointments(prev => {
-        const newArr = [...prev, newApp];
-        return newArr.sort((a, b) => a.time.localeCompare(b.time));
-      });
+
+      if (editingId) {
+        await api.put(`/api/appointments/${editingId}`, payload);
+      } else {
+        await api.post('/api/appointments', payload);
+      }
+
+      await fetchAppointments();
+      setIsModalVisible(false);
+    } catch (err: any) {
+      console.error("Erro ao salvar agendamento:", err);
+      showError(err.response?.data?.error || "Falha ao salvar agendamento no servidor.");
+    } finally {
+      setIsSaving(false);
     }
-    setIsModalVisible(false);
   };
 
-  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | number | null>(null);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string | number) => {
     setDeleteConfirmId(id);
   };
 
-  const confirmDeletion = () => {
+  const confirmDeletion = async () => {
     if (deleteConfirmId !== null) {
-      setAppointments(prev => prev.filter(app => app.id !== deleteConfirmId));
-      setDeleteConfirmId(null);
-      if (isModalVisible) setIsModalVisible(false);
+      try {
+        setIsSaving(true);
+        await api.delete(`/api/appointments/${deleteConfirmId}`);
+        setDeleteConfirmId(null);
+        if (isModalVisible) setIsModalVisible(false);
+        await fetchAppointments();
+      } catch (err: any) {
+        console.error("Erro ao excluir agendamento:", err);
+        showError(err.response?.data?.error || "Falha ao excluir agendamento.");
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 

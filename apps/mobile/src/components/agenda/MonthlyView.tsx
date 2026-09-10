@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 
 interface Appointment {
-  id: number;
+  id: string | number;
   date: string;
   time?: string;
   end?: string;
@@ -28,11 +28,13 @@ interface MonthlyViewProps {
 }
 
 export function MonthlyView({ currentDate, appointments, holidays = [], onDayPress }: MonthlyViewProps) {
-  const [viewDate, setViewDate] = useState(new Date(currentDate + 'T00:00:00'));
+  const [viewDate, setViewDate] = useState(new Date((currentDate || new Date().toISOString().split('T')[0]) + 'T00:00:00'));
 
   // Sincroniza caso o pai mude o currentDate drasticamente
   useEffect(() => {
-    setViewDate(new Date(currentDate + 'T00:00:00'));
+    if (currentDate) {
+      setViewDate(new Date(currentDate + 'T00:00:00'));
+    }
   }, [currentDate]);
 
   const handlePrevMonth = () => {
