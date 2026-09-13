@@ -217,7 +217,10 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
             await api.post('/api/sessions', {
               alunoId,
               gameName: 'GoNoGo',
-              behaviorData: result
+              behaviorData: {
+                ...result,
+                acertos_go: rawMetrics.hits ?? rawMetrics.reactionTimesHits?.length ?? 0
+              }
             });
             console.log("✅ Sessão GoNoGo salva no banco de dados com sucesso!");
           } catch (err) {

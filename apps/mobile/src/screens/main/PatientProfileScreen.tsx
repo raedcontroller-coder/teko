@@ -528,7 +528,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
 
       {activeTab === 'Anamnese' && <AnamneseTab patientId={patientId} adminPsicologoId={adminPsicologoId} />}
       {activeTab === 'Notas' && <NotasTab patientId={patientId} adminPsicologoId={adminPsicologoId} />}
-      {activeTab === 'Evolução' && <EvolucaoTab />}
+      {activeTab === 'Evolução' && <EvolucaoTab patientId={patientId} adminPsicologoId={adminPsicologoId} />}
 
       {/* Modal de Confirmação de Edição do Responsável */}
       <Modal

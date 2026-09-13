@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, ActivityIndicator, Animated, Easing, Dimensions, ScrollView, Pressable } from 'react-native';
 import { Plus, Search, X, Trash2, XCircle } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../../services/api';
 
 const screenWidth = Dimensions.get('window').width;
@@ -51,6 +52,15 @@ export function AgendaScreen() {
           patientId: item.patientId
         }));
         setAppointments(mapped);
+
+        // Extrai as cores de agendamentos cadastrados e inclui nas recentes
+        const fetchedColors = mapped.map((item: any) => (item.color || '#10B981').toUpperCase());
+        setRecentColors(prev => {
+          const combined = [...fetchedColors, ...prev];
+          const unique = Array.from(new Set(combined.filter((c: string) => /^#[0-9A-Fa-f]{6}$/.test(c)))).slice(0, 10);
+          AsyncStorage.setItem('agenda_recent_colors', JSON.stringify(unique)).catch(e => console.error(e));
+          return unique;
+        });
       }
     } catch (err) {
       console.error("Erro ao carregar agendamentos:", err);
@@ -102,6 +112,35 @@ export function AgendaScreen() {
   const [formType, setFormType] = useState('');
   const [formColor, setFormColor] = useState('#10B981');
   const [recentColors, setRecentColors] = useState<string[]>(['#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#3B82F6']);
+
+  // Carrega as cores recentes salvas localmente no AsyncStorage
+  useEffect(() => {
+    const loadRecentColors = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('agenda_recent_colors');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setRecentColors(parsed);
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar cores recentes:', err);
+      }
+    };
+    loadRecentColors();
+  }, []);
+
+  const saveRecentColor = (colorToSave: string) => {
+    if (!/^#[0-9A-Fa-f]{6}$/.test(colorToSave)) return;
+    const upper = colorToSave.toUpperCase();
+    setRecentColors(prev => {
+      const filtered = prev.filter(c => c.toUpperCase() !== upper);
+      const updated = [upper, ...filtered].slice(0, 10);
+      AsyncStorage.setItem('agenda_recent_colors', JSON.stringify(updated)).catch(e => console.error(e));
+      return updated;
+    });
+  };
   
   // --- Toast State ---
   const [errorSlideAnim] = useState(new Animated.Value(-screenWidth));
@@ -134,12 +173,65 @@ export function AgendaScreen() {
   };
 
   // --- Time Helpers ---
-  const handleTimeChange = (text: string, setTime: (val: string) => void) => {
-    let val = text.replace(/\D/g, '');
-    if (val.length > 2) {
-      val = val.replace(/^(\d{2})(\d)/, '$1:$2');
+  const handleTimeChange = (text: string, setTime: (val: string) => void, prevVal: string = '') => {
+    const isDeleting = text.length < prevVal.length;
+    let digits = text.replace(/\D/g, '');
+
+    // Se o valor anterior tinha :00 autopreenchido (ex: 14:00) e o usuário digitou mais um número (ex: 14:003 -> 14003)
+    if (!isDeleting && /^(\d{2})00(\d{1,2})$/.test(digits)) {
+      digits = digits.replace(/^(\d{2})00(\d{1,2})$/, '$1$2');
     }
-    setTime(val.slice(0, 5));
+
+    if (digits.length === 0) {
+      setTime('');
+      return;
+    }
+
+    // Validação do Primeiro Dígito da Hora
+    const h1 = parseInt(digits[0], 10);
+    
+    // Se o usuário digitar um número > 2 como primeiro dígito (ex: 9), transforma em 09:00
+    if (digits.length === 1 && h1 > 2) {
+      setTime(`0${h1}:00`);
+      return;
+    }
+
+    if (digits.length === 1) {
+      setTime(digits);
+      return;
+    }
+
+    // Trava de horas em no máximo 23 (ex: 28:00 -> 23:00)
+    let h2 = parseInt(digits[1], 10);
+    let hh = h1 * 10 + h2;
+    if (hh > 23) hh = 23;
+    const hhStr = String(hh).padStart(2, '0');
+
+    if (digits.length === 2) {
+      if (isDeleting) {
+        setTime(hhStr);
+      } else {
+        setTime(`${hhStr}:00`);
+      }
+      return;
+    }
+
+    // Validação de Minutos (00 a 59)
+    // O primeiro dígito dos minutos (dígito 3) não pode ser maior que 5 (ex: 23:69 -> 23:59)
+    let m1 = parseInt(digits[2], 10);
+    if (m1 > 5) m1 = 5;
+
+    if (digits.length === 3) {
+      setTime(`${hhStr}:${m1}`);
+      return;
+    }
+
+    let m2 = parseInt(digits[3], 10);
+    let mm = m1 * 10 + m2;
+    if (mm > 59) mm = 59;
+    const mmStr = String(mm).padStart(2, '0');
+
+    setTime(`${hhStr}:${mmStr}`);
   };
 
   const handleTimeBlur = (time: string, setTime: (val: string) => void) => {
@@ -151,13 +243,15 @@ export function AgendaScreen() {
     else if (digits.length === 2) digits = `${digits}00`;
     else if (digits.length === 3) digits = `${digits}0`;
 
-    const h = parseInt(digits.slice(0, 2));
-    const m = parseInt(digits.slice(2, 4));
+    let h = parseInt(digits.slice(0, 2), 10);
+    let m = parseInt(digits.slice(2, 4), 10);
     
-    const validH = h > 23 ? 23 : h;
-    const validM = m > 59 ? 59 : m;
+    if (isNaN(h) || h < 0) h = 0;
+    if (h > 23) h = 23;
+    if (isNaN(m) || m < 0) m = 0;
+    if (m > 59) m = 59;
     
-    setTime(`${String(validH).padStart(2, '0')}:${String(validM).padStart(2, '0')}`);
+    setTime(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
   };
 
   // --- Date Helpers ---
@@ -248,6 +342,17 @@ export function AgendaScreen() {
       showError('Defina o horário de término da consulta.');
       return;
     }
+
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(formTime)) {
+      showError('Horário de início inválido. O horário deve estar entre 00:00 e 23:59.');
+      return;
+    }
+    if (!timeRegex.test(formEnd)) {
+      showError('Horário de término inválido. O horário deve estar entre 00:00 e 23:59.');
+      return;
+    }
+
     if (!/^#[0-9A-Fa-f]{6}$/.test(formColor)) {
       showError('A cor informada é inválida. Use o formato Hexadecimal (Ex: #FF0000).');
       return;
@@ -262,11 +367,8 @@ export function AgendaScreen() {
       return;
     }
 
-    // Atualiza cores recentes
-    setRecentColors(prev => {
-      const newColors = [formColor, ...prev.filter(c => c.toUpperCase() !== formColor.toUpperCase())];
-      return newColors.slice(0, 5);
-    });
+    // Salva e persiste a cor recente utilizada
+    saveRecentColor(formColor);
 
     const finalIsoDate = formatToISO(formDate);
 
@@ -429,10 +531,27 @@ export function AgendaScreen() {
           style={styles.modalOverlay} 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+          {/* SPINNER & PROCESSING OVERLAY - FULL SCREEN CENTERED */}
+          {isSaving && (
+            <View style={styles.fullScreenProcessingOverlay}>
+              <View style={styles.processingCard}>
+                <ActivityIndicator size="large" color="#FFC857" style={{ marginBottom: 14 }} />
+                <Text style={styles.processingTitle}>
+                  {editingId ? 'Processando e validando edição...' : 'Criando agendamento...'}
+                </Text>
+                <Text style={styles.processingSub}>Aguarde a confirmação das alterações</Text>
+              </View>
+            </View>
+          )}
+
           <View style={[styles.modalContent, { maxHeight: Dimensions.get('window').height * 0.85 }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editingId ? 'Editar Agendamento' : 'Novo Agendamento'}</Text>
-              <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeBtn}>
+              <TouchableOpacity 
+                onPress={() => !isSaving && setIsModalVisible(false)} 
+                style={[styles.closeBtn, isSaving && { opacity: 0.5 }]}
+                disabled={isSaving}
+              >
                 <X size={24} color="#fff" />
               </TouchableOpacity>
             </View>
@@ -449,27 +568,30 @@ export function AgendaScreen() {
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={formTitle} 
                 onChangeText={setFormTitle} 
+                editable={!isSaving}
               />
 
               <Text style={styles.label}>Nome do Paciente</Text>
               <TextInput 
                 style={styles.input} 
-                placeholder="Ex: Enzo Gabriel" 
+                placeholder="Ex: João Silva" 
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={formName} 
                 onChangeText={setFormName} 
+                editable={!isSaving}
               />
 
               <View style={styles.row}>
                 <View style={styles.halfInput}>
-                  <Text style={styles.label}>Data</Text>
+                  <Text style={styles.label}>Data (DD/MM/AAAA)</Text>
                   <TextInput 
                     style={styles.input} 
-                    placeholder="26/08/2026" 
+                    placeholder="25/12/2026" 
                     placeholderTextColor="rgba(255,255,255,0.4)"
                     value={formDate} 
                     onChangeText={handleDateChange} 
                     keyboardType="numeric"
+                    editable={!isSaving}
                   />
                 </View>
                 <View style={styles.halfInput}>
@@ -480,6 +602,7 @@ export function AgendaScreen() {
                     placeholderTextColor="rgba(255,255,255,0.4)"
                     value={formType} 
                     onChangeText={setFormType} 
+                    editable={!isSaving}
                   />
                 </View>
               </View>
@@ -492,9 +615,10 @@ export function AgendaScreen() {
                     placeholder="09:00" 
                     placeholderTextColor="rgba(255,255,255,0.4)"
                     value={formTime} 
-                    onChangeText={(t) => handleTimeChange(t, setFormTime)} 
+                    onChangeText={(t) => handleTimeChange(t, setFormTime, formTime)} 
                     onBlur={() => handleTimeBlur(formTime, setFormTime)}
                     keyboardType="numeric"
+                    editable={!isSaving}
                   />
                 </View>
                 <View style={styles.halfInput}>
@@ -504,9 +628,10 @@ export function AgendaScreen() {
                     placeholder="10:00" 
                     placeholderTextColor="rgba(255,255,255,0.4)"
                     value={formEnd} 
-                    onChangeText={(t) => handleTimeChange(t, setFormEnd)} 
+                    onChangeText={(t) => handleTimeChange(t, setFormEnd, formEnd)} 
                     onBlur={() => handleTimeBlur(formEnd, setFormEnd)}
                     keyboardType="numeric"
+                    editable={!isSaving}
                   />
                 </View>
               </View>
@@ -515,7 +640,8 @@ export function AgendaScreen() {
               <View style={styles.colorPickerContainer}>
                 <TouchableOpacity 
                   style={[styles.colorPreview, { backgroundColor: /^#[0-9A-Fa-f]{6}$/.test(formColor) ? formColor : 'transparent' }]} 
-                  onPress={() => setIsColorPickerVisible(true)}
+                  onPress={() => !isSaving && setIsColorPickerVisible(true)}
+                  disabled={isSaving}
                 />
                 <TextInput 
                   style={styles.hexInput}
@@ -523,11 +649,16 @@ export function AgendaScreen() {
                   onChangeText={setFormColor}
                   maxLength={7}
                   autoCapitalize="characters"
+                  editable={!isSaving}
                 />
               </View>
 
               <Text style={styles.label}>Cores Recentes</Text>
-              <View style={styles.recentColorsRow}>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                contentContainerStyle={styles.recentColorsRow}
+              >
                 {recentColors.map(color => (
                   <TouchableOpacity 
                     key={color} 
@@ -536,10 +667,11 @@ export function AgendaScreen() {
                       { backgroundColor: color }, 
                       formColor.toUpperCase() === color.toUpperCase() && styles.colorBubbleSelected
                     ]} 
-                    onPress={() => setFormColor(color)}
+                    onPress={() => !isSaving && setFormColor(color)}
+                    disabled={isSaving}
                   />
                 ))}
-              </View>
+              </ScrollView>
 
             </ScrollView>
 
@@ -548,13 +680,22 @@ export function AgendaScreen() {
                 <TouchableOpacity 
                   style={styles.deleteBtn} 
                   onPress={() => handleDelete(editingId)}
+                  disabled={isSaving}
                 >
                   <Trash2 size={20} color="#EF4444" />
                 </TouchableOpacity>
               )}
               
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-                <Text style={styles.saveBtnText}>Salvar</Text>
+              <TouchableOpacity 
+                style={[styles.saveBtn, isSaving && { opacity: 0.7 }]} 
+                onPress={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <ActivityIndicator color="#181c1c" size="small" />
+                ) : (
+                  <Text style={styles.saveBtnText}>{editingId ? 'Salvar Alterações' : 'Salvar'}</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -600,7 +741,10 @@ export function AgendaScreen() {
 
             <TouchableOpacity 
               style={styles.pickerSaveBtn} 
-              onPress={() => setIsColorPickerVisible(false)}
+              onPress={() => {
+                saveRecentColor(formColor);
+                setIsColorPickerVisible(false);
+              }}
             >
               <Text style={styles.pickerSaveText}>Confirmar Cor</Text>
             </TouchableOpacity>
@@ -713,5 +857,50 @@ const styles = StyleSheet.create({
   deleteModalCancelText: { color: 'rgba(255,255,255,0.7)', fontSize: 16, fontWeight: 'bold' },
   deleteModalConfirmButtonRed: { flex: 1, height: 52, borderRadius: 12, backgroundColor: '#FF4B4B', alignItems: 'center', justifyContent: 'center' },
   deleteModalConfirmTextRed: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+
+  // Processing Overlay Styles
+  fullScreenProcessingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 99999,
+    elevation: 25,
+  },
+  processingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(8, 77, 72, 0.9)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  processingCard: {
+    backgroundColor: '#181c1c',
+    paddingHorizontal: 28,
+    paddingVertical: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 200, 87, 0.4)',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 10,
+  },
+  processingTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  processingSub: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 12,
+    textAlign: 'center',
+  },
 });
 
