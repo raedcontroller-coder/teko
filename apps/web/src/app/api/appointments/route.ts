@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     const { psicologoId } = auth;
 
     const body = await request.json();
-    const { date, startTime, endTime, title, name, type, status, color, patientId } = body;
+    const { date, startTime, endTime, title, name, type, status, color, patientId, notes } = body;
 
     if (!date || !startTime || !endTime || !title || !name) {
       return NextResponse.json({ error: "Preencha todos os campos obrigatórios (data, horário, título e paciente)." }, { status: 400 });
@@ -90,7 +90,8 @@ export async function POST(request: Request) {
       title: title.trim(),
       name: name.trim(),
       type: type || 'Atendimento Geral',
-      status: status || 'confirmado',
+      status: status || 'a_confirmar',
+      notes: notes ? notes.trim() : null,
       color: color || '#10B981',
     }).returning();
 

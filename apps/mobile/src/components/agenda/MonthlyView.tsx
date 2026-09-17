@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { theme } from '../../theme/theme';
+import { useTranslation } from '../../i18n';
 
-interface Appointment {
+export interface Appointment {
   id: string | number;
   date: string;
   time?: string;
@@ -15,41 +16,47 @@ interface Appointment {
   color: string;
 }
 
-interface Holiday {
+export interface Holiday {
   date: string;
   name: string;
   type: string;
 }
 
 interface MonthlyViewProps {
-  currentDate: string; // determines the initially selected day/month
+  currentDate: string;
   appointments: Appointment[];
   holidays?: Holiday[];
   onDayPress: (date: string) => void;
 }
 
-import { useTranslation } from '../../i18n';
+const parseISODate = (dateStr: string): Date => {
+  if (!dateStr || typeof dateStr !== 'string') return new Date();
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return new Date();
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return new Date();
+  return new Date(year, month, day);
+};
 
 export function MonthlyView({ currentDate, appointments, holidays = [], onDayPress }: MonthlyViewProps) {
   const { t, language } = useTranslation();
-  const [viewDate, setViewDate] = useState(new Date((currentDate || new Date().toISOString().split('T')[0]) + 'T00:00:00'));
+  const [viewDate, setViewDate] = useState<Date>(parseISODate(currentDate));
 
-  // Sincroniza caso o pai mude o currentDate drasticamente
   useEffect(() => {
     if (currentDate) {
-      setViewDate(new Date(currentDate + 'T00:00:00'));
+      setViewDate(parseISODate(currentDate));
     }
   }, [currentDate]);
 
   const handlePrevMonth = () => {
-    const newDate = new Date(viewDate);
-    newDate.setMonth(newDate.getMonth() - 1);
+    const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
     setViewDate(newDate);
   };
 
   const handleNextMonth = () => {
-    const newDate = new Date(viewDate);
-    newDate.setMonth(newDate.getMonth() + 1);
+    const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
     setViewDate(newDate);
   };
 
@@ -76,7 +83,7 @@ export function MonthlyView({ currentDate, appointments, holidays = [], onDayPre
   const days = generateMonthDays();
   const locale = language === 'en' ? 'en-US' : 'pt-BR';
   const monthName = viewDate.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
-  const weekdaysList = t.agenda.shortWeekdays || ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+  const weekdaysList = Array.isArray(t.agenda.shortWeekdays) ? t.agenda.shortWeekdays : ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
   return (
     <View style={styles.container}>
@@ -136,7 +143,7 @@ export function MonthlyView({ currentDate, appointments, holidays = [], onDayPre
                   {day.apps.length > 0 && (
                     <View style={styles.dotsRow}>
                       {day.apps.slice(0, 3).map((a, i) => (
-                        <View key={i} style={[styles.dot, { backgroundColor: a.color }]} />
+                        <View key={i} style={[styles.dot, { backgroundColor: a.color || theme.colors.primary }]} />
                       ))}
                     </View>
                   )}

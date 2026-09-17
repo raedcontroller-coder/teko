@@ -12,9 +12,11 @@ import {
   Animated,
   Easing,
   Modal,
-  Pressable
+  Pressable,
+  Image
 } from 'react-native';
-import { UserCircle, Lock, Save, AlertTriangle, Trash2, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react-native';
+import { UserCircle, Lock, Save, AlertTriangle, Trash2, Eye, EyeOff, CheckCircle2, XCircle, Camera, Upload } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { api } from '../../services/api';
 import { theme } from '../../theme/theme';
 import { useTranslation } from '../../i18n';
@@ -35,6 +37,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
     email: '',
     crp: '',
     clinicName: '',
+    avatarUrl: '',
   });
 
   const [securityData, setSecurityData] = useState({
@@ -110,6 +113,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
             email: u.email || '',
             crp: u.crp || '',
             clinicName: u.clinicName || '',
+            avatarUrl: u.avatarUrl || '',
           });
         }
       } catch (error) {
@@ -120,6 +124,34 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
     };
     fetchData();
   }, []);
+
+  const pickImageFromDevice = async () => {
+    try {
+      if (ImagePicker.requestMediaLibraryPermissionsAsync) {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permissionResult && !permissionResult.granted) {
+          showError('Permissão para acessar as fotos do celular é necessária.');
+          return;
+        }
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions ? ImagePicker.MediaTypeOptions.Images : ['images'] as any,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.6,
+        base64: true,
+      });
+
+      if (result && !result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        const imageUri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+        setPersonalData(prev => ({ ...prev, avatarUrl: imageUri }));
+      }
+    } catch (err) {
+      showError('Não foi possível carregar a imagem do celular.');
+    }
+  };
 
   const handlePersonalChange = (key: string, value: string) => {
     let finalValue = value;
@@ -246,6 +278,40 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
               <Text style={styles.sectionTitle}>{t.profileScreen.myDetails}</Text>
               <Text style={styles.sectionSubtitle}>{t.profileScreen.myDetailsSub}</Text>
             </View>
+          </View>
+
+          {/* Avatar Hero Widget (UI/UX Redesign) */}
+          <View style={styles.avatarHeroContainer}>
+            <TouchableOpacity 
+              style={styles.avatarHeroWrapper}
+              onPress={pickImageFromDevice}
+              activeOpacity={0.85}
+            >
+              <View style={styles.avatarHeroCircle}>
+                <Image 
+                  source={personalData.avatarUrl ? { uri: personalData.avatarUrl } : require('../../../assets/icon.jpg')} 
+                  style={styles.avatarHeroImage}
+                  resizeMode="cover"
+                />
+              </View>
+              {/* Badge Flutuante de Câmera */}
+              <View style={styles.avatarHeroBadge}>
+                <Camera size={16} color="#FFF" strokeWidth={2.4} />
+              </View>
+            </TouchableOpacity>
+
+            <Text style={styles.avatarHeroTitle}>Foto de Perfil</Text>
+            <Text style={styles.avatarHeroSub}>Toque no avatar para escolher uma foto do seu celular</Text>
+
+            {Boolean(personalData.avatarUrl) && (
+              <TouchableOpacity 
+                style={styles.avatarRemoveBtn} 
+                onPress={() => setPersonalData(prev => ({ ...prev, avatarUrl: '' }))}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.avatarRemoveText}>Remover foto / Voltar ao padrão</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={styles.formGroup}>
@@ -917,5 +983,69 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 15,
     fontWeight: '700',
-  }
+  },
+
+  /* Avatar Hero Widget */
+  avatarHeroContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.cardBorder,
+  },
+  avatarHeroWrapper: {
+    position: 'relative',
+    marginBottom: 10,
+  },
+  avatarHeroCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 3,
+    borderColor: theme.colors.primary,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.tealSoft,
+    ...theme.shadows.card,
+  },
+  avatarHeroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarHeroBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    ...theme.shadows.subtle,
+  },
+  avatarHeroTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: theme.colors.textDark,
+  },
+  avatarHeroSub: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  avatarRemoveBtn: {
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  avatarRemoveText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.accentOrange,
+    textDecorationLine: 'underline',
+  },
 });

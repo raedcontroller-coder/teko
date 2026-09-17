@@ -11,7 +11,7 @@ const { width } = Dimensions.get('window');
 const GAMES = [
   { id: 'fotografo', labelKey: 'fotografo', subKey: 'fotografoSub', icon: Camera, color: '#7C3AED' },
   { id: 'goleiro', labelKey: 'goleiro', subKey: 'goleiroSub', icon: Activity, color: theme.colors.primary },
-  { id: 'toca_rapido', labelKey: 'tocaRapido', subKey: 'tocaRapidoSub', icon: Zap, color: '#D97706' },
+  { id: 'toca_rapido', labelKey: 'tocaRapido', subKey: 'tocaRapidoSub', icon: Zap, color: '#E6A902' },
 ];
 
 interface EvolucaoTabProps {
@@ -269,8 +269,8 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
             {selectedGame === 'toca_rapido' && (
               <View style={styles.gameSection}>
                 <View style={styles.sectionHeader}>
-                  <View style={[styles.headerIconBox, { backgroundColor: 'rgba(217, 119, 6, 0.15)', borderColor: 'rgba(217, 119, 6, 0.3)' }]}>
-                    <Zap color="#D97706" size={22} />
+                  <View style={[styles.headerIconBox, { backgroundColor: 'rgba(230, 169, 2, 0.15)', borderColor: 'rgba(230, 169, 2, 0.3)' }]}>
+                    <Zap color="#E6A902" size={22} />
                   </View>
                   <View style={styles.headerTitleCol}>
                     <Text style={styles.gameTitle}>{t.evolucao.tocaRapido}</Text>
@@ -278,7 +278,7 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
                   </View>
                 </View>
 
-                <View style={[styles.chartCard, { borderColor: 'rgba(217, 119, 6, 0.3)' }]}>
+                <View style={[styles.chartCard, { borderColor: 'rgba(230, 169, 2, 0.3)' }]}>
                   <View style={styles.statsRow}>
                     <View style={styles.statBox}>
                       <Text style={styles.statLabel}>{t.evolucao.initialImproperHitsSession1}</Text>
@@ -288,9 +288,9 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
                     </View>
                     <View style={styles.statBox}>
                       <Text style={styles.statLabel}>{t('evolucao.currentImproperHitsSession', { count: currentSessionsCount })}</Text>
-                      <Text style={[styles.statValueHighlight, { color: '#D97706' }]}>
+                      <Text style={[styles.statValueHighlight, { color: '#E6A902' }]}>
                         {currentGameData.stats?.lastVal}
-                        <Text style={[styles.statUnitHighlight, { color: '#D97706' }]}> {t.evolucao.improperHits}</Text>
+                        <Text style={[styles.statUnitHighlight, { color: '#E6A902' }]}> {t.evolucao.improperHits}</Text>
                       </Text>
                     </View>
                   </View>
@@ -301,18 +301,18 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
                   <View style={styles.chartWrapper}>
                     <LineChart 
                       data={currentGameData.chartData} 
-                      {...getChartConfig('#D97706', currentGameData.chartData.length)} 
+                      {...getChartConfig('#E6A902', currentGameData.chartData.length)} 
                     />
                   </View>
 
                   <Text style={styles.axisXLabel}>{t.evolucao.xAxisSessions}</Text>
 
-                  <View style={[styles.aiCard, { backgroundColor: 'rgba(217, 119, 6, 0.08)', borderColor: 'rgba(217, 119, 6, 0.2)' }]}>
-                    <View style={[styles.aiIconBox, { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
-                      <Sparkles color="#D97706" size={16} />
+                  <View style={[styles.aiCard, { backgroundColor: 'rgba(230, 169, 2, 0.08)', borderColor: 'rgba(230, 169, 2, 0.2)' }]}>
+                    <View style={[styles.aiIconBox, { backgroundColor: 'rgba(230, 169, 2, 0.15)' }]}>
+                      <Sparkles color="#E6A902" size={16} />
                     </View>
                     <View style={styles.aiTextCol}>
-                      <Text style={[styles.aiTitle, { color: '#D97706' }]}>{t.evolucao.aiAnalysisTitle}</Text>
+                      <Text style={[styles.aiTitle, { color: '#E6A902' }]}>{t.evolucao.aiAnalysisTitle}</Text>
                       <Text style={styles.aiDesc}>{currentGameData.aiAnalysis}</Text>
                     </View>
                   </View>

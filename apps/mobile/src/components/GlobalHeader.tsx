@@ -32,7 +32,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({ user, onProfilePress
         >
           <View style={styles.avatarContainer}>
             <Image 
-              source={require('../../assets/icon.jpg')} 
+              source={user?.avatarUrl ? { uri: user.avatarUrl } : require('../../assets/icon.jpg')} 
               style={styles.avatarImage} 
               resizeMode="cover" 
             />

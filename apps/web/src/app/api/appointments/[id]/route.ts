@@ -60,7 +60,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     }
 
     const body = await request.json();
-    const { date, startTime, endTime, title, name, type, status, color, patientId } = body;
+    const { date, startTime, endTime, title, name, type, status, color, patientId, notes } = body;
 
     const [updated] = await db.update(appointments)
       .set({
@@ -72,6 +72,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         type: type || existing.type,
         status: status || existing.status,
         color: color || existing.color,
+        notes: notes !== undefined ? notes : existing.notes,
         patientId: patientId !== undefined ? patientId : existing.patientId,
         updatedAt: new Date()
       })

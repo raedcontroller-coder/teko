@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Pressable, Image, ActivityIndicator } from 'react-native';
-import { UserPlus, Users, FileText, Gamepad2, ChevronRight, Sparkles } from 'lucide-react-native';
+import { UserPlus, Users, Gamepad2, ChevronRight, Calendar, Clock, CheckCircle2, AlertCircle, Plus } from 'lucide-react-native';
 import { api } from '../../services/api';
 import { NewPatientScreen } from './NewPatientScreen';
 import { theme } from '../../theme/theme';
@@ -8,33 +8,51 @@ import { useTranslation } from '../../i18n';
 
 interface DashboardScreenProps {
   onNavigateToPatients?: () => void;
+  onNavigateToAgenda?: () => void;
+  onOpenCreateAppointment?: () => void;
 }
 
-export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToPatients }) => {
+type AppointmentTopic = 'hoje' | 'amanha' | 'semana';
+
+const formatDateToYYYYMMDD = (d: Date) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToPatients, onNavigateToAgenda, onOpenCreateAppointment }) => {
   const { t } = useTranslation();
   const [patients, setPatients] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreatingPatient, setIsCreatingPatient] = useState(false);
+  const [activeTopic, setActiveTopic] = useState<AppointmentTopic>('hoje');
 
-  const fetchPatients = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/patients');
-      if (response.data.success) {
-        setPatients(response.data.data);
+      const [patientsRes, appointmentsRes] = await Promise.all([
+        api.get('/api/patients').catch(() => ({ data: { success: false, data: [] } })),
+        api.get('/api/appointments').catch(() => ({ data: { success: false, data: [] } }))
+      ]);
+
+      if (patientsRes.data.success) {
+        setPatients(patientsRes.data.data);
+      }
+      if (appointmentsRes.data.success) {
+        setAppointments(appointmentsRes.data.data);
       }
     } catch (error) {
-      console.error('Erro ao buscar pacientes no dashboard:', error);
+      console.error('Erro ao buscar dados no dashboard:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPatients();
+    fetchData();
   }, []);
-
-  const recentPatients = patients.slice(0, 4);
 
   if (isCreatingPatient) {
     return (
@@ -42,13 +60,53 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToPa
         onBack={() => setIsCreatingPatient(false)}
         onSuccess={() => {
           setIsCreatingPatient(false);
-          fetchPatients();
+          fetchData();
         }}
       />
     );
   }
 
   const totalSessions = patients.reduce((acc, p) => acc + (p.sessionCount || 0), 0);
+
+  // Datas para Filtragem
+  const now = new Date();
+  const todayStr = formatDateToYYYYMMDD(now);
+  
+  const tomorrowDate = new Date(now);
+  tomorrowDate.setDate(now.getDate() + 1);
+  const tomorrowStr = formatDateToYYYYMMDD(tomorrowDate);
+
+  // Calcula o domingo do início da semana corrente e o domingo do fim da semana (8 dias)
+  const currentDayOfWeek = now.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+  
+  const startOfWeekDate = new Date(now);
+  startOfWeekDate.setDate(now.getDate() - currentDayOfWeek);
+  const startOfWeekStr = formatDateToYYYYMMDD(startOfWeekDate);
+
+  const endOfWeekDate = new Date(startOfWeekDate);
+  endOfWeekDate.setDate(startOfWeekDate.getDate() + 7); // Domingo seguinte
+  const endOfWeekStr = formatDateToYYYYMMDD(endOfWeekDate);
+
+  // Categorização dos Agendamentos
+  const todayAppointments = appointments.filter(a => a.date === todayStr);
+  const tomorrowAppointments = appointments.filter(a => a.date === tomorrowStr);
+  // "Essa semana" engloba de domingo a domingo da semana em específico
+  const thisWeekAppointments = appointments.filter(a => a.date >= startOfWeekStr && a.date <= endOfWeekStr);
+
+  const getAppointmentsForActiveTopic = () => {
+    switch (activeTopic) {
+      case 'hoje':
+        return todayAppointments;
+      case 'amanha':
+        return tomorrowAppointments;
+      case 'semana':
+        return thisWeekAppointments;
+      default:
+        return todayAppointments;
+    }
+  };
+
+  const activeAppointmentsList = getAppointmentsForActiveTopic();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -72,7 +130,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToPa
           <Text style={styles.newPatientButtonText}>{t.dashboard.addPatient}</Text>
         </Pressable>
 
-        {/* Cards de Métricas Estáticos com Spinner nas Informações */}
+        {/* Cards de Métricas Estáticos */}
         <View style={styles.metricsGrid}>
           {/* Card: Pacientes Ativos */}
           <View style={[styles.metricCard, styles.metricCardPrimary]}>
@@ -132,68 +190,169 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToPa
           </View>
         </View>
 
-        {/* Seção Pacientes Recentes */}
+        {/* Seção Próximos Agendamentos */}
         <View style={styles.recentSection}>
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionTitle}>{t.dashboard.myPatients}</Text>
-              <Text style={styles.sectionSubtitle}>{t.dashboard.recentActivity}</Text>
+              <Text style={styles.sectionTitle}>{t.dashboard.upcomingAppointments}</Text>
+              <Text style={styles.sectionSubtitle}>{t.dashboard.upcomingAppointmentsSub}</Text>
             </View>
             
+            {/* Botão Agenda Completa */}
             <TouchableOpacity 
               style={styles.seeAllButton}
-              onPress={onNavigateToPatients} 
+              onPress={onNavigateToAgenda} 
               activeOpacity={0.7}
             >
-              <Text style={styles.seeAllText}>{t.dashboard.viewAll}</Text>
+              <Text style={styles.seeAllText}>{t.dashboard.fullAgenda}</Text>
               <ChevronRight size={14} color={theme.colors.primary} strokeWidth={2.4} />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.patientListContainer}>
-            {loading ? (
-              <View style={styles.loadingListContainer}>
-                <ActivityIndicator size="small" color={theme.colors.primary} />
-                <Text style={styles.loadingListText}>{t.dashboard.loadingPatientsData}</Text>
+          {/* Pílulas de Tópicos (Hoje, Amanhã, Essa semana) */}
+          <View style={styles.topicTabsContainer}>
+            <TouchableOpacity
+              style={[styles.topicTabPill, activeTopic === 'hoje' && styles.topicTabPillActive]}
+              onPress={() => setActiveTopic('hoje')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.topicTabText, activeTopic === 'hoje' && styles.topicTabTextActive]}>
+                {t.dashboard.topicToday}
+              </Text>
+              <View style={[styles.topicBadge, activeTopic === 'hoje' && styles.topicBadgeActive]}>
+                <Text style={[styles.topicBadgeText, activeTopic === 'hoje' && styles.topicBadgeTextActive]}>
+                  {todayAppointments.length}
+                </Text>
               </View>
-            ) : recentPatients.length > 0 ? (
-              recentPatients.map((patient, index) => {
-                const isGirl = patient.gender?.toLowerCase().includes('fem') || patient.name?.endsWith('a') || index % 2 === 1;
-                const avatarSource = isGirl 
-                  ? require('../../../assets/elementos_visuais/menina_crianca.png')
-                  : require('../../../assets/elementos_visuais/menino_crianca.png');
+            </TouchableOpacity>
 
-                return (
-                  <TouchableOpacity 
-                    key={patient.id} 
-                    style={styles.patientRowCard}
-                    onPress={onNavigateToPatients}
-                    activeOpacity={0.75}
-                  >
-                    <View style={styles.patientAvatarContainer}>
-                      <Image source={avatarSource} style={styles.patientAvatarImage} resizeMode="cover" />
-                    </View>
-                    <View style={styles.patientMainInfo}>
-                      <Text style={styles.patientName}>{patient.name}</Text>
-                      <Text style={styles.patientSubText}>{t('common.ageAndSessions', { age: patient.age, count: patient.sessionCount || 0 })}</Text>
-                    </View>
-                    <View style={styles.patientStatusBadge}>
-                      <Text style={styles.patientStatusText}>
-                        {patient.lastSessionDate 
-                          ? new Date(patient.lastSessionDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) 
-                          : t.common.new
-                        }
-                      </Text>
-                    </View>
-                    <ChevronRight size={18} color={theme.colors.textMuted} />
-                  </TouchableOpacity>
-                );
-              })
-            ) : (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>{t.dashboard.noPatientsFound}</Text>
+            <TouchableOpacity
+              style={[styles.topicTabPill, activeTopic === 'amanha' && styles.topicTabPillActive]}
+              onPress={() => setActiveTopic('amanha')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.topicTabText, activeTopic === 'amanha' && styles.topicTabTextActive]}>
+                {t.dashboard.topicTomorrow}
+              </Text>
+              <View style={[styles.topicBadge, activeTopic === 'amanha' && styles.topicBadgeActive]}>
+                <Text style={[styles.topicBadgeText, activeTopic === 'amanha' && styles.topicBadgeTextActive]}>
+                  {tomorrowAppointments.length}
+                </Text>
               </View>
-            )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.topicTabPill, activeTopic === 'semana' && styles.topicTabPillActive]}
+              onPress={() => setActiveTopic('semana')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.topicTabText, activeTopic === 'semana' && styles.topicTabTextActive]}>
+                {t.dashboard.topicThisWeek}
+              </Text>
+              <View style={[styles.topicBadge, activeTopic === 'semana' && styles.topicBadgeActive]}>
+                <Text style={[styles.topicBadgeText, activeTopic === 'semana' && styles.topicBadgeTextActive]}>
+                  {thisWeekAppointments.length}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Container da Lista de Agendamentos com o botão + no canto inferior direito */}
+          <View style={styles.appointmentsWrapper}>
+            <View style={styles.appointmentListContainer}>
+              {loading ? (
+                <View style={styles.loadingListContainer}>
+                  <ActivityIndicator size="small" color={theme.colors.primary} />
+                  <Text style={styles.loadingListText}>{t.dashboard.loadingAppointments}</Text>
+                </View>
+              ) : activeAppointmentsList.length > 0 ? (
+                activeAppointmentsList.map((item) => {
+                  const colorAccent = item.color || theme.colors.primary;
+                  const isConfirmed = item.status === 'confirmado';
+
+                  return (
+                    <TouchableOpacity 
+                      key={item.id} 
+                      style={[styles.appointmentRowCard, { borderLeftColor: colorAccent }]}
+                      onPress={onNavigateToAgenda}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.appointmentMainInfo}>
+                        <Text style={styles.appointmentPatientName}>{item.name}</Text>
+                        <Text style={styles.appointmentTitle}>{`${item.title} • ${item.type}`}</Text>
+                        {activeTopic === 'semana' && (
+                          <Text style={styles.appointmentDateSub}>
+                            {`📅 ${new Date(item.date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}`}
+                          </Text>
+                        )}
+                      </View>
+
+                      <View style={styles.appointmentRightContainer}>
+                        <View style={styles.appointmentTimePill}>
+                          <Clock size={15} color={theme.colors.primary} strokeWidth={2.4} />
+                          <Text style={styles.appointmentTimeText}>{`${item.startTime} - ${item.endTime}`}</Text>
+                        </View>
+                        {(!item.status || item.status === 'a_confirmar') && (
+                          <View style={[styles.appointmentStatusBadge, { backgroundColor: '#FEF3C7', borderColor: '#FCD34D', borderWidth: 1 }]}>
+                            <Clock size={11} color="#F59E0B" />
+                            <Text style={[styles.appointmentStatusText, { color: '#F59E0B' }]}>
+                              {t.agenda.statusAConfirmar}
+                            </Text>
+                          </View>
+                        )}
+                        {item.status === 'confirmado' && (
+                          <View style={[styles.appointmentStatusBadge, { backgroundColor: '#D1FAE5', borderColor: '#6EE7B7', borderWidth: 1 }]}>
+                            <CheckCircle2 size={11} color="#10B981" />
+                            <Text style={[styles.appointmentStatusText, { color: '#10B981' }]}>
+                              {t.agenda.statusConfirmado}
+                            </Text>
+                          </View>
+                        )}
+                        {item.status === 'concluido' && (
+                          <View style={[styles.appointmentStatusBadge, { backgroundColor: '#E0F2FE', borderColor: '#7DD3FC', borderWidth: 1 }]}>
+                            <CheckCircle2 size={11} color="#0284C7" />
+                            <Text style={[styles.appointmentStatusText, { color: '#0284C7' }]}>
+                              {t.agenda.statusConcluido}
+                            </Text>
+                          </View>
+                        )}
+                        {item.status === 'cancelado' && (
+                          <View style={[styles.appointmentStatusBadge, { backgroundColor: '#FEE2E2', borderColor: '#FCA5A5', borderWidth: 1 }]}>
+                            <AlertCircle size={11} color="#EF4444" />
+                            <Text style={[styles.appointmentStatusText, { color: '#EF4444' }]}>
+                              {t.agenda.statusCancelado}
+                            </Text>
+                          </View>
+                        )}
+                        {item.status === 'falta' && (
+                          <View style={[styles.appointmentStatusBadge, { backgroundColor: '#F3F4F6', borderColor: '#D1D5DB', borderWidth: 1 }]}>
+                            <AlertCircle size={11} color="#6B7280" />
+                            <Text style={[styles.appointmentStatusText, { color: '#6B7280' }]}>
+                              {t.agenda.statusFalta}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <TouchableOpacity 
+                    style={styles.centerAddButton}
+                    onPress={onOpenCreateAppointment || onNavigateToAgenda}
+                    activeOpacity={0.8}
+                  >
+                    <Plus size={24} color={theme.colors.primary} strokeWidth={2.4} />
+                  </TouchableOpacity>
+                  <Text style={styles.emptyText}>
+                    {activeTopic === 'hoje' && t.dashboard.noAppointmentsToday}
+                    {activeTopic === 'amanha' && t.dashboard.noAppointmentsTomorrow}
+                    {activeTopic === 'semana' && t.dashboard.noAppointmentsWeek}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 
@@ -357,6 +516,20 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     marginTop: 2,
   },
+  appointmentsWrapper: {
+    position: 'relative',
+  },
+  centerAddButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.tealSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.tealMint,
+  },
   seeAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -373,72 +546,165 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: theme.colors.primary,
   },
-  patientListContainer: {
-    gap: 10,
+  /* Tópicos de Agendamento (Hoje, Amanhã, Essa semana) */
+  topicTabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 4,
+    marginBottom: 16,
+    width: '100%',
   },
-  patientRowCard: {
+  topicTabPill: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.cardBg,
+    borderWidth: 1.5,
+    borderColor: theme.colors.cardBorder,
+    gap: 5,
+    ...theme.shadows.subtle,
+  },
+  topicTabPillActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primaryDark,
+    ...theme.shadows.card,
+    elevation: 4,
+  },
+  topicTabText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.textDark,
+  },
+  topicTabTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  topicBadge: {
+    backgroundColor: theme.colors.tealSoft,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  topicBadgeActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
+  },
+  topicBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: theme.colors.primary,
+  },
+  topicBadgeTextActive: {
+    color: '#FFFFFF',
+  },
+
+  /* Agendamentos List */
+  appointmentListContainer: {
+    gap: 10,
+  },
+  appointmentRowCard: {
     backgroundColor: theme.colors.cardBg,
     borderRadius: theme.radii.md,
-    padding: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: theme.colors.cardBorder,
+    borderLeftWidth: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 12,
     ...theme.shadows.subtle,
   },
-  patientAvatarContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    overflow: 'hidden',
+  appointmentMainInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  appointmentRightContainer: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  appointmentTimePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: theme.colors.tealSoft,
-    borderWidth: 1.5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: theme.radii.full,
+    borderWidth: 1,
     borderColor: theme.colors.tealMint,
   },
-  patientAvatarImage: {
-    width: '100%',
-    height: '100%',
+  appointmentTimeText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: theme.colors.primary,
+    letterSpacing: -0.2,
   },
-  patientMainInfo: {
-    flex: 1,
-  },
-  patientName: {
-    fontSize: 15,
-    fontWeight: '700',
+  appointmentPatientName: {
+    fontSize: 16,
+    fontWeight: '800',
     color: theme.colors.textDark,
-    marginBottom: 2,
   },
-  patientSubText: {
-    fontSize: 12,
+  appointmentTitle: {
+    fontSize: 13,
+    fontWeight: '500',
     color: theme.colors.textMuted,
   },
-  patientStatusBadge: {
-    backgroundColor: theme.colors.tealSoft,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+  appointmentDateSub: {
+    fontSize: 11,
+    color: theme.colors.textMuted,
+    marginTop: 2,
+  },
+  appointmentStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
     borderRadius: theme.radii.full,
   },
-  patientStatusText: {
+  statusConfirmedBg: {
+    backgroundColor: '#E6F7F0',
+  },
+  statusPendingBg: {
+    backgroundColor: '#FEF3F0',
+  },
+  appointmentStatusText: {
     fontSize: 11,
-    fontWeight: '600',
-    color: theme.colors.primary,
+    fontWeight: '700',
+  },
+  statusConfirmedText: {
+    color: theme.colors.accentGreen,
+  },
+  statusPendingText: {
+    color: theme.colors.accentOrange,
   },
   loadingContainer: {
     padding: 24,
     alignItems: 'center',
   },
   emptyContainer: {
-    padding: 24,
+    paddingVertical: 28,
+    paddingHorizontal: 20,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: theme.colors.cardBg,
     borderRadius: theme.radii.md,
     borderWidth: 1,
     borderColor: theme.colors.cardBorder,
+    minHeight: 125,
+    position: 'relative',
   },
   emptyText: {
     color: theme.colors.textMuted,
     fontSize: 13,
+    textAlign: 'center',
   },
   valueSpinnerWrapper: {
     height: 36,
@@ -446,7 +712,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   loadingListContainer: {
-    minHeight: 110,
+    minHeight: 125,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: theme.colors.cardBg,
@@ -454,7 +720,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.cardBorder,
     gap: 10,
-    paddingVertical: 24,
+    paddingVertical: 28,
+    position: 'relative',
     ...theme.shadows.subtle,
   },
   loadingListText: {

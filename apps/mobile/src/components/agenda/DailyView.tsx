@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
-import { Sparkles, MoreHorizontal, Edit3, Trash2, X } from 'lucide-react-native';
+import { Sparkles, MoreHorizontal, Edit3, Trash2, X, FileText, CheckCircle2, AlertCircle, Clock } from 'lucide-react-native';
 import { theme } from '../../theme/theme';
+import { useTranslation } from '../../i18n';
 
-interface Appointment {
+export interface Appointment {
   id: string | number;
   date: string;
   time: string;
@@ -13,9 +14,11 @@ interface Appointment {
   type: string;
   status: string;
   color: string;
+  notes?: string;
+  patientId?: string;
 }
 
-interface Holiday {
+export interface Holiday {
   date: string;
   name: string;
   type: string;
@@ -27,23 +30,61 @@ interface DailyViewProps {
   holidays?: Holiday[];
   onEdit: (app: Appointment) => void;
   onDelete: (id: any) => void;
+  onStatusChange?: (id: string | number, status: string) => void;
   onDateChange?: (date: string) => void;
 }
 
-import { useTranslation } from '../../i18n';
+const parseISODate = (dateStr: string): Date => {
+  if (!dateStr || typeof dateStr !== 'string') return new Date();
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return new Date();
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return new Date();
+  return new Date(year, month, day);
+};
 
-export function DailyView({ selectedDate, appointments, holidays = [], onEdit, onDelete }: DailyViewProps) {
+export function DailyView({ selectedDate, appointments, holidays = [], onEdit, onDelete, onStatusChange }: DailyViewProps) {
   const { t, language } = useTranslation();
   const [optionsApp, setOptionsApp] = useState<Appointment | null>(null);
+
   const todaysAppointments = appointments.filter(app => app.date === selectedDate);
-  
-  // Format date correctly in local time according to selected app language
-  const [year, month, day] = selectedDate.split('-');
-  const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  todaysAppointments.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+  const dateObj = parseISODate(selectedDate);
   const locale = language === 'en' ? 'en-US' : 'pt-BR';
   const formattedDate = dateObj.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
 
   const currentHoliday = holidays.find(h => h.date === selectedDate);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmado': return '#10B981';
+      case 'concluido': return '#0284C7';
+      case 'cancelado': return '#EF4444';
+      case 'falta': return '#6B7280';
+      default: return '#F59E0B'; // a_confirmar
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'confirmado': return t.agenda.statusConfirmado;
+      case 'concluido': return t.agenda.statusConcluido;
+      case 'cancelado': return t.agenda.statusCancelado;
+      case 'falta': return t.agenda.statusFalta;
+      default: return t.agenda.statusAConfirmar;
+    }
+  };
+
+  const statusList = [
+    { id: 'a_confirmar', label: t.agenda.statusAConfirmar, color: '#F59E0B', bgActive: '#FEF3C7' },
+    { id: 'confirmado', label: t.agenda.statusConfirmado, color: '#10B981', bgActive: '#D1FAE5' },
+    { id: 'concluido', label: t.agenda.statusConcluido, color: '#0284C7', bgActive: '#E0F2FE' },
+    { id: 'cancelado', label: t.agenda.statusCancelado, color: '#EF4444', bgActive: '#FEE2E2' },
+    { id: 'falta', label: t.agenda.statusFalta, color: '#6B7280', bgActive: '#F3F4F6' },
+  ];
 
   return (
     <View style={styles.container}>
@@ -61,43 +102,62 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
         </View>
       )}
 
-      <ScrollView style={styles.appointmentList} contentContainerStyle={{ paddingBottom: 120 }}>
-        {todaysAppointments.map((app) => (
-          <View key={app.id}>
-            <TouchableOpacity 
-              activeOpacity={0.7} 
-              style={styles.appointmentCard}
-              onPress={() => onEdit(app)}
-            >
-              <View style={[styles.cardBorder, { backgroundColor: app.color }]} />
+      <ScrollView style={styles.appointmentList} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+        {todaysAppointments.map((app) => {
+          const statusColor = getStatusColor(app.status);
 
-              <View style={styles.timeCol}>
-                <Text style={styles.timeStart}>{app.time}</Text>
-                <Text style={styles.timeEnd}>{app.end}</Text>
-              </View>
-
-              <View style={styles.infoCol}>
-                <Text style={styles.appName}>{app.title}</Text>
-                <View style={styles.statusRow}>
-                  <View style={[styles.statusDot, { backgroundColor: app.status === 'confirmado' ? '#10B981' : '#D1D5DB' }]} />
-                  <Text style={styles.appType}>{app.type} • {app.name}</Text>
-                </View>
-              </View>
-
-              {/* Botão translúcido de três pontos no canto direito */}
+          return (
+            <View key={app.id}>
               <TouchableOpacity 
-                style={styles.threeDotsBtn}
-                activeOpacity={0.6}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  setOptionsApp(app);
-                }}
+                activeOpacity={0.7} 
+                style={styles.appointmentCard}
+                onPress={() => onEdit(app)}
               >
-                <MoreHorizontal size={20} color={theme.colors.primary} />
+                <View style={[styles.cardBorder, { backgroundColor: app.color || theme.colors.primary }]} />
+
+                <View style={styles.timeCol}>
+                  <Text style={styles.timeStart}>{app.time}</Text>
+                  <Text style={styles.timeEnd}>{app.end}</Text>
+                </View>
+
+                <View style={styles.infoCol}>
+                  <Text style={styles.appName}>{app.title}</Text>
+                  <View style={styles.statusRow}>
+                    <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+                    <Text style={styles.appType}>{`${app.type} • ${app.name}`}</Text>
+                  </View>
+
+                  {/* Notes Preview if available */}
+                  {!!app.notes && (
+                    <View style={styles.notesRow}>
+                      <FileText size={12} color={theme.colors.textMuted} />
+                      <Text style={styles.notesText} numberOfLines={1}>{app.notes}</Text>
+                    </View>
+                  )}
+
+                  <View style={[styles.statusBadgePill, { backgroundColor: `${statusColor}18`, borderColor: `${statusColor}40` }]}>
+                    <Text style={[styles.statusBadgeText, { color: statusColor }]}>
+                      {getStatusLabel(app.status)}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Translucent 3 dots button */}
+                <TouchableOpacity 
+                  style={styles.threeDotsBtn}
+                  activeOpacity={0.6}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    setOptionsApp(app);
+                  }}
+                >
+                  <MoreHorizontal size={20} color={theme.colors.primary} />
+                </TouchableOpacity>
               </TouchableOpacity>
-            </TouchableOpacity>
-          </View>
-        ))}
+            </View>
+          );
+        })}
+
         {todaysAppointments.length === 0 && (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>{t.agenda.noAppointmentsDay}</Text>
@@ -105,7 +165,7 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
         )}
       </ScrollView>
 
-      {/* OPTIONS MODAL (Teko Translucent Options Style) */}
+      {/* OPTIONS MODAL */}
       <Modal visible={!!optionsApp} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={() => setOptionsApp(null)}>
@@ -119,6 +179,46 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
                 <X size={20} color={theme.colors.primary} />
               </TouchableOpacity>
             </View>
+
+            {optionsApp && (
+              <View style={styles.appSummaryBox}>
+                <Text style={styles.appSummaryTitle}>{optionsApp.title}</Text>
+                <Text style={styles.appSummarySubtitle}>{`${optionsApp.name} • ${optionsApp.time} - ${optionsApp.end}`}</Text>
+              </View>
+            )}
+
+            {/* Quick Status Selection */}
+            {onStatusChange && optionsApp && (
+              <View style={styles.statusSectionContainer}>
+                <Text style={styles.statusSectionTitle}>{t.agenda.statusLabel}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statusPillsRow}>
+                  {statusList.map((item) => {
+                    const isActive = optionsApp.status === item.id;
+                    return (
+                      <TouchableOpacity
+                        key={item.id}
+                        style={[
+                          styles.statusOptionPill,
+                          { borderColor: isActive ? item.color : theme.colors.cardBorder },
+                          isActive && { backgroundColor: item.bgActive }
+                        ]}
+                        onPress={() => {
+                          const targetId = optionsApp.id;
+                          setOptionsApp(prev => prev ? { ...prev, status: item.id } : null);
+                          onStatusChange(targetId, item.id);
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        <View style={[styles.statusOptionDot, { backgroundColor: item.color }]} />
+                        <Text style={[styles.statusOptionText, { color: isActive ? item.color : theme.colors.textDark, fontWeight: isActive ? '800' : '600' }]}>
+                          {item.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
 
             <TouchableOpacity 
               style={styles.optionCard}
@@ -191,6 +291,20 @@ const styles = StyleSheet.create({
   statusRow: { flexDirection: 'row', alignItems: 'center' },
   statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
   appType: { color: theme.colors.textMuted, fontSize: 12, fontWeight: '500' },
+  notesRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  notesText: { color: theme.colors.textMuted, fontSize: 11, fontStyle: 'italic', flex: 1 },
+  statusBadgePill: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: theme.radii.full,
+    borderWidth: 1,
+    marginTop: 6,
+  },
+  statusBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 40 },
   emptyText: { color: theme.colors.textMuted, fontSize: 15 },
 
@@ -206,9 +320,18 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.cardBorder,
     ...theme.shadows.floating,
   },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   modalTitle: { fontSize: 18, fontWeight: '800', color: theme.colors.textDark },
   closeBtn: { padding: 6, backgroundColor: theme.colors.tealSoft, borderRadius: 20 },
+  appSummaryBox: { backgroundColor: theme.colors.tealSoft, padding: 12, borderRadius: theme.radii.md, marginBottom: 14, borderWidth: 1, borderColor: theme.colors.tealMint },
+  appSummaryTitle: { fontSize: 15, fontWeight: '800', color: theme.colors.primary },
+  appSummarySubtitle: { fontSize: 12, color: theme.colors.textMuted, marginTop: 2 },
+  statusSectionContainer: { marginBottom: 16 },
+  statusSectionTitle: { fontSize: 12, fontWeight: '700', color: theme.colors.textDark, marginBottom: 8 },
+  statusPillsRow: { flexDirection: 'row', gap: 8, paddingBottom: 4 },
+  statusOptionPill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: theme.radii.full, borderWidth: 1, backgroundColor: '#FFFFFF' },
+  statusOptionDot: { width: 6, height: 6, borderRadius: 3 },
+  statusOptionText: { fontSize: 12 },
   optionCard: {
     flexDirection: 'row',
     alignItems: 'center',

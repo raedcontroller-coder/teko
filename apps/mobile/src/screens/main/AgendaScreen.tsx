@@ -21,7 +21,12 @@ export interface Holiday {
 
 import { useTranslation } from '../../i18n';
 
-export function AgendaScreen() {
+interface AgendaScreenProps {
+  initialOpenCreateModal?: boolean;
+  onResetCreateModal?: () => void;
+}
+
+export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: AgendaScreenProps = {}) {
   const { t } = useTranslation();
   const getTodayDate = () => {
     const d = new Date();
@@ -51,9 +56,10 @@ export function AgendaScreen() {
           title: item.title,
           name: item.name,
           type: item.type,
-          status: item.status || 'confirmado',
+          status: item.status || 'a_confirmar',
           color: item.color || '#10B981',
-          patientId: item.patientId
+          patientId: item.patientId,
+          notes: item.notes || ''
         }));
         setAppointments(mapped);
 
@@ -114,10 +120,21 @@ export function AgendaScreen() {
   const [formTime, setFormTime] = useState('');
   const [formEnd, setFormEnd] = useState('');
   const [formType, setFormType] = useState('');
+  const [formStatus, setFormStatus] = useState<'a_confirmar' | 'confirmado' | 'concluido' | 'cancelado' | 'falta'>('a_confirmar');
+  const [formNotes, setFormNotes] = useState('');
   const [formColor, setFormColor] = useState('#10B981');
   const [recentColors, setRecentColors] = useState<string[]>(['#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#3B82F6']);
 
   // Carrega as cores recentes salvas localmente no AsyncStorage
+  useEffect(() => {
+    if (initialOpenCreateModal) {
+      handleOpenCreateModal();
+      if (onResetCreateModal) {
+        onResetCreateModal();
+      }
+    }
+  }, [initialOpenCreateModal]);
+
   useEffect(() => {
     const loadRecentColors = async () => {
       try {
@@ -313,6 +330,8 @@ export function AgendaScreen() {
     setFormTime('');
     setFormEnd('');
     setFormType('');
+    setFormStatus('a_confirmar');
+    setFormNotes('');
     setFormColor(recentColors[0] || '#10B981');
     setIsModalVisible(true);
   };
@@ -325,8 +344,24 @@ export function AgendaScreen() {
     setFormTime(app.time);
     setFormEnd(app.end);
     setFormType(app.type);
+    setFormStatus(app.status || 'a_confirmar');
+    setFormNotes(app.notes || '');
     setFormColor(app.color || '#10B981');
     setIsModalVisible(true);
+  };
+
+  const handleQuickStatusUpdate = async (id: string | number, newStatus: string) => {
+    try {
+      setIsSaving(true);
+      await api.put(`/api/appointments/${id}`, { status: newStatus });
+      showSuccess(t.agenda.updateSuccess);
+      await fetchAppointments();
+    } catch (err: any) {
+      console.error("Erro ao atualizar status:", err);
+      showError(err.response?.data?.error || t.agenda.saveError);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSave = async () => {
@@ -411,7 +446,8 @@ export function AgendaScreen() {
         title: formTitle.trim(),
         name: formName.trim(),
         type: formType.trim(),
-        status: 'confirmado',
+        status: formStatus,
+        notes: formNotes.trim(),
         color: formColor,
       };
 
@@ -485,7 +521,7 @@ export function AgendaScreen() {
             <View style={styles.headerTitleCol}>
               <Text style={styles.title}>{t.agenda.title}</Text>
               <Text style={styles.headerSubtitle}>
-                {t('agenda.scheduledAppointmentsCount', { count: appointments.length })}
+                {`${appointments.length} ${t.agenda.scheduledAppointmentsCount}`}
               </Text>
             </View>
             {viewMode !== 'Mês' && (
@@ -539,6 +575,7 @@ export function AgendaScreen() {
               holidays={holidays}
               onEdit={handleOpenEditModal} 
               onDelete={handleDelete}
+              onStatusChange={handleQuickStatusUpdate}
               onDateChange={setSelectedDate}
             />
           )}
@@ -549,6 +586,9 @@ export function AgendaScreen() {
               appointments={filteredAppointments} 
               holidays={holidays}
               onDayPress={handleDayPress}
+              onEdit={handleOpenEditModal}
+              onDelete={handleDelete}
+              onStatusChange={handleQuickStatusUpdate}
             />
           )}
 
@@ -569,12 +609,12 @@ export function AgendaScreen() {
       </TouchableOpacity>
 
       {/* MODAL CRUD */}
-      <Modal visible={isModalVisible} animationType="slide" transparent>
+      <Modal visible={isModalVisible} animationType="slide" transparent statusBarTranslucent>
         <KeyboardAvoidingView 
           style={styles.modalOverlay} 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <View style={[styles.modalContent, { maxHeight: Dimensions.get('window').height * 0.85 }]}>
+          <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editingId ? t.agenda.editAppointment : t.agenda.newAppointment}</Text>
               <TouchableOpacity 
@@ -590,8 +630,9 @@ export function AgendaScreen() {
               showsVerticalScrollIndicator={false} 
               keyboardShouldPersistTaps="handled" 
               contentContainerStyle={styles.formContainer}
+              style={{ flexShrink: 1 }}
             >
-              <Text style={styles.label}>{t.agenda.appointmentTitleLabel}</Text>
+              <Text style={styles.firstLabel}>{t.agenda.appointmentTitleLabel}</Text>
               <TextInput 
                 style={styles.input} 
                 placeholder={t.agenda.appointmentTitlePlaceholder} 
@@ -666,6 +707,62 @@ export function AgendaScreen() {
                 </View>
               </View>
 
+              <Text style={styles.label}>{t.agenda.statusLabel}</Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                contentContainerStyle={[
+                  styles.statusPillsRow,
+                  !editingId && styles.statusPillsRowCentered
+                ]}
+              >
+                {(editingId ? [
+                  { id: 'a_confirmar', label: t.agenda.statusAConfirmar, color: '#F59E0B', bgActive: '#FEF3C7', border: '#FCD34D' },
+                  { id: 'confirmado', label: t.agenda.statusConfirmado, color: '#10B981', bgActive: '#D1FAE5', border: '#6EE7B7' },
+                  { id: 'concluido', label: t.agenda.statusConcluido, color: '#0284C7', bgActive: '#E0F2FE', border: '#7DD3FC' },
+                  { id: 'cancelado', label: t.agenda.statusCancelado, color: '#EF4444', bgActive: '#FEE2E2', border: '#FCA5A5' },
+                  { id: 'falta', label: t.agenda.statusFalta, color: '#6B7280', bgActive: '#F3F4F6', border: '#D1D5DB' },
+                ] : [
+                  { id: 'a_confirmar', label: t.agenda.statusAConfirmar, color: '#F59E0B', bgActive: '#FEF3C7', border: '#FCD34D' },
+                  { id: 'confirmado', label: t.agenda.statusConfirmado, color: '#10B981', bgActive: '#D1FAE5', border: '#6EE7B7' },
+                ]).map(item => {
+                  const isActive = formStatus === item.id;
+                  return (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={[
+                        styles.statusFormPill,
+                        { borderColor: isActive ? item.color : theme.colors.cardBorder },
+                        isActive && { backgroundColor: item.bgActive }
+                      ]}
+                      onPress={() => !isSaving && setFormStatus(item.id as any)}
+                      disabled={isSaving}
+                      activeOpacity={0.8}
+                    >
+                      <View style={[styles.statusFormPillDot, { backgroundColor: item.color }]} />
+                      <Text style={[
+                        styles.statusFormPillText,
+                        { color: isActive ? item.color : theme.colors.textDark, fontWeight: isActive ? '800' : '600' }
+                      ]}>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+
+              <Text style={styles.label}>{t.agenda.notesLabel}</Text>
+              <TextInput 
+                style={[styles.input, { height: 70, textAlignVertical: 'top', paddingTop: 10 }]} 
+                placeholder={t.agenda.notesPlaceholder} 
+                placeholderTextColor={theme.colors.textMuted}
+                value={formNotes} 
+                onChangeText={setFormNotes} 
+                multiline
+                numberOfLines={3}
+                editable={!isSaving}
+              />
+
               <Text style={styles.label}>{t.agenda.highlightColorLabel}</Text>
               <View style={styles.colorPickerContainer}>
                 <TouchableOpacity 
@@ -706,7 +803,7 @@ export function AgendaScreen() {
             </ScrollView>
 
             <View style={styles.modalFooter}>
-              {editingId && (
+              {editingId !== null && (
                 <TouchableOpacity 
                   style={styles.deleteBtn} 
                   onPress={() => handleDelete(editingId)}
@@ -724,7 +821,7 @@ export function AgendaScreen() {
                 {isSaving ? (
                   <ActivityIndicator color="#181c1c" size="small" />
                 ) : (
-                  <Text style={styles.saveBtnText}>{editingId ? (t.common.saveChanges || t.common.save) : t.common.save}</Text>
+                  <Text style={styles.saveBtnText}>{t.common.save}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -846,15 +943,43 @@ const styles = StyleSheet.create({
   toggleBtnActive: { backgroundColor: theme.colors.primary, ...theme.shadows.subtle },
   toggleText: { color: theme.colors.textMuted, fontWeight: '700', fontSize: 14 },
   toggleTextActive: { color: '#FFFFFF', fontWeight: '800' },
+
+  statusPillsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  statusPillsRowCentered: { flexGrow: 1, justifyContent: 'center' },
+  statusFormPill: { 
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14, 
+    paddingVertical: 9, 
+    borderRadius: theme.radii.full, 
+    borderWidth: 1.5, 
+    backgroundColor: '#FFFFFF',
+    ...theme.shadows.subtle,
+  },
+  statusFormPillDot: { width: 8, height: 8, borderRadius: 4 },
+  statusFormPillText: { fontSize: 13 },
+
   fab: { position: 'absolute', bottom: 130, right: 20, width: 58, height: 58, borderRadius: 29, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', ...theme.shadows.floating, zIndex: 10 },
   
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: theme.colors.cardBg, borderTopLeftRadius: theme.radii.xl, borderTopRightRadius: theme.radii.xl, minHeight: '60%', padding: 24, borderWidth: 1, borderColor: theme.colors.cardBorder },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalContent: { 
+    backgroundColor: theme.colors.cardBg, 
+    borderTopLeftRadius: theme.radii.xl, 
+    borderTopRightRadius: theme.radii.xl, 
+    maxHeight: Dimensions.get('window').height * 0.85, 
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 20,
+    borderWidth: 1, 
+    borderColor: theme.colors.cardBorder 
+  },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   modalTitle: { fontSize: 20, fontWeight: '800', color: theme.colors.textDark },
   closeBtn: { padding: 4 },
-  formContainer: { paddingBottom: 20 },
+  formContainer: { paddingTop: 4, paddingBottom: 20 },
+  firstLabel: { fontSize: 13, color: theme.colors.textDark, marginTop: 4, marginBottom: 6, fontWeight: '700' },
   label: { fontSize: 13, color: theme.colors.textDark, marginBottom: 6, fontWeight: '700' },
   input: { backgroundColor: '#FFFFFF', borderRadius: theme.radii.md, borderWidth: 1, borderColor: theme.colors.cardBorder, padding: 14, marginBottom: 14, fontSize: 15, color: theme.colors.textDark },
   row: { flexDirection: 'row', justifyContent: 'space-between' },

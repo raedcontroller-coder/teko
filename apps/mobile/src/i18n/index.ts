@@ -36,10 +36,23 @@ if (!i18n.isInitialized) {
 function createProxyT(tFunc: any, resourceObj: any): any {
   const handler: ProxyHandler<any> = {
     get(target, prop: string) {
-      if (typeof prop === 'symbol' || prop === 'bind' || prop === 'apply' || prop === 'call' || prop === 'then') {
+      if (
+        typeof prop === 'symbol' || 
+        prop === 'bind' || 
+        prop === 'apply' || 
+        prop === 'call' || 
+        prop === 'then' || 
+        prop === 'displayName' || 
+        prop === 'prototype' ||
+        prop === 'toString' ||
+        prop === 'valueOf'
+      ) {
         return Reflect.get(target, prop);
       }
       const val = resourceObj ? resourceObj[prop] : undefined;
+      if (Array.isArray(val)) {
+        return val;
+      }
       if (typeof val === 'object' && val !== null) {
         return createProxyT((key: string, options?: any) => tFunc(`${prop}.${key}`, options), val);
       }
@@ -49,6 +62,9 @@ function createProxyT(tFunc: any, resourceObj: any): any {
           return val;
         }
         return res || val;
+      }
+      if (val === undefined) {
+        return undefined;
       }
       return createProxyT((key: string, options?: any) => tFunc(`${prop}.${key}`, options), {});
     }

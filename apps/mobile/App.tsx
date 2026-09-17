@@ -38,6 +38,7 @@ function MainApp() {
   const [currentTab, setCurrentTab] = useState<TabName>('Dashboard');
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [activeAlunoId, setActiveAlunoId] = useState<string | null>(null);
+  const [shouldOpenAgendaCreateModal, setShouldOpenAgendaCreateModal] = useState<boolean>(false);
   
   // Contexto Admin
   const [adminSelectedPsicologo, setAdminSelectedPsicologo] = useState<{ id: string, name: string } | null>(null);
@@ -163,11 +164,21 @@ function MainApp() {
   const renderTabContent = () => {
     switch (currentTab) {
       case 'Dashboard':
-        return <DashboardScreen onNavigateToPatients={() => setCurrentTab('Patients')} />;
+        return <DashboardScreen 
+                 onNavigateToPatients={() => setCurrentTab('Patients')} 
+                 onNavigateToAgenda={() => setCurrentTab('Agenda')} 
+                 onOpenCreateAppointment={() => {
+                   setShouldOpenAgendaCreateModal(true);
+                   setCurrentTab('Agenda');
+                 }}
+               />;
       case 'Patients':
         return <PatientsScreen />;
       case 'Agenda':
-        return <AgendaScreen />;
+        return <AgendaScreen 
+                 initialOpenCreateModal={shouldOpenAgendaCreateModal}
+                 onResetCreateModal={() => setShouldOpenAgendaCreateModal(false)}
+               />;
       
       // Admin Tabs
       case 'AdminDashboard':
@@ -216,7 +227,11 @@ function MainApp() {
       case 'Profile':
         return <ProfileScreen 
                  onLogout={handleLogout} 
-                 onUserUpdate={(newUserData) => setCurrentUser((prev: any) => ({ ...prev, ...newUserData }))} 
+                 onUserUpdate={async (newUserData) => {
+                   const updated = { ...currentUser, ...newUserData };
+                   setCurrentUser(updated);
+                   await AsyncStorage.setItem('userData', JSON.stringify(updated));
+                 }} 
                />;
       default:
         return currentUser?.role === 'GLOBAL_ADMIN' 

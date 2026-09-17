@@ -32,6 +32,7 @@ export async function GET(request: Request) {
       email: users.email,
       crp: users.crp,
       clinicName: users.clinicName,
+      avatarUrl: users.avatarUrl,
     }).from(users).where(eq(users.id, psicologoId));
 
     if (!user) {
@@ -53,7 +54,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
 
     if (updateType === "personal") {
-      const { name, email, crp, clinicName } = body;
+      const { name, email, crp, clinicName, avatarUrl } = body;
       
       const [existing] = await db.select().from(users).where(eq(users.email, email));
       if (existing && existing.id !== psicologoId) {
@@ -61,10 +62,17 @@ export async function PUT(request: Request) {
       }
 
       await db.update(users)
-        .set({ name, email, crp: crp || null, clinicName: clinicName || null, updatedAt: new Date() })
+        .set({ 
+          name, 
+          email, 
+          crp: crp || null, 
+          clinicName: clinicName || null, 
+          avatarUrl: avatarUrl !== undefined ? avatarUrl : undefined,
+          updatedAt: new Date() 
+        })
         .where(eq(users.id, psicologoId));
 
-      return NextResponse.json({ success: true, message: "Dados atualizados com sucesso." });
+      return NextResponse.json({ success: true, message: "Dados atualizados com sucesso.", data: { name, email, crp, clinicName, avatarUrl } });
       
     } else if (updateType === "security") {
       const { currentPassword, newPassword } = body;

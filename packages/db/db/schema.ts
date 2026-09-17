@@ -32,7 +32,8 @@ export const users = pgTable('users', {
   age: text('age'),
   gender: text('gender'),
   hasTdah: boolean('has_tdah').default(false),
-  guardianId: uuid('guardian_id').references((): AnyPgColumn => users.id),
+  // User profile picture / avatar URL or Base64 data URI
+  avatarUrl: text('avatar_url'),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -106,7 +107,8 @@ export const appointments = pgTable('appointments', {
   title: text('title').notNull(),
   name: text('name').notNull(), // Patient/client name
   type: text('type').notNull(), // e.g. 'Avaliação Cognitiva', 'Terapia Infantil'
-  status: text('status').notNull().default('confirmado'), // 'confirmado' | 'aguardando' | 'cancelado'
+  status: text('status').notNull().default('a_confirmar'), // 'a_confirmar' | 'confirmado' | 'concluido' | 'cancelado' | 'falta'
+  notes: text('notes'),
   color: text('color').default('#10B981'),
   
   createdAt: timestamp('created_at').defaultNow().notNull(),

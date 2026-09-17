@@ -357,8 +357,8 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
                       renderItem={({ item }) => {
                         const isGirl = item.gender?.toLowerCase().includes('fem') || item.name?.endsWith('a');
                         const avatarSource = isGirl 
-                          ? require('../assets/elementos_visuais/menina_crianca.png')
-                          : require('../assets/elementos_visuais/menino_crianca.png');
+                          ? require('../../assets/elementos_visuais/menina_crianca.png')
+                          : require('../../assets/elementos_visuais/menino_crianca.png');
 
                         return (
                           <TouchableOpacity
