@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Home, Users, Gamepad2, User, BarChart2, Calendar } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { theme } from '../theme/theme';
+import { useTranslation } from '../i18n';
 
 export type TabName = 'Dashboard' | 'Patients' | 'Agenda' | 'Games' | 'Profile' | 'AdminDashboard' | 'Psychologists' | 'AdminReports' | 'NewPsychologist' | 'AdminPatients' | 'AdminPsychologistProfile';
 
@@ -12,92 +14,107 @@ interface BottomTabBarProps {
 }
 
 export const BottomTabBar: React.FC<BottomTabBarProps> = ({ currentTab, onTabPress, userRole }) => {
+  const { t } = useTranslation();
   const isGlobalAdmin = userRole === 'GLOBAL_ADMIN';
   const insets = useSafeAreaInsets();
 
   const psychTabs: { name: TabName; label: string; Icon: any }[] = [
-    { name: 'Dashboard', label: 'Início', Icon: Home },
-    { name: 'Patients', label: 'Pacientes', Icon: Users },
-    { name: 'Agenda', label: 'Agenda', Icon: Calendar },
-    { name: 'Games', label: 'Jogos', Icon: Gamepad2 },
-    { name: 'Profile', label: 'Perfil', Icon: User },
+    { name: 'Dashboard', label: t.tabs.dashboard, Icon: Home },
+    { name: 'Patients', label: t.tabs.patients, Icon: Users },
+    { name: 'Agenda', label: t.tabs.agenda, Icon: Calendar },
+    { name: 'Games', label: t.tabs.games, Icon: Gamepad2 },
+    { name: 'Profile', label: t.tabs.profile, Icon: User },
   ];
 
   const adminTabs: { name: TabName; label: string; Icon: any }[] = [
-    { name: 'AdminDashboard', label: 'Início', Icon: Home },
-    { name: 'Psychologists', label: 'Profissionais', Icon: Users },
-    { name: 'AdminReports', label: 'Dados', Icon: BarChart2 },
-    { name: 'Games', label: 'Jogos', Icon: Gamepad2 },
-    { name: 'Profile', label: 'Perfil', Icon: User },
+    { name: 'AdminDashboard', label: t.tabs.dashboard, Icon: Home },
+    { name: 'Psychologists', label: t.tabs.psychologists, Icon: Users },
+    { name: 'AdminReports', label: t.tabs.reports, Icon: BarChart2 },
+    { name: 'Games', label: t.tabs.games, Icon: Gamepad2 },
+    { name: 'Profile', label: t.tabs.profile, Icon: User },
   ];
 
   const tabs = isGlobalAdmin ? adminTabs : psychTabs;
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-      <ScrollView 
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+    <View style={[styles.outerContainer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+      <View style={styles.floatingBar}>
         {tabs.map((tab) => {
           const isActive = currentTab === tab.name;
-          const iconColor = isActive ? '#181c1c' : 'rgba(255,246,227,0.8)';
-          const textColor = isActive ? '#181c1c' : 'rgba(255,246,227,0.8)';
+          const iconColor = isActive ? theme.colors.primary : theme.colors.textMuted;
+          const textColor = isActive ? theme.colors.primary : theme.colors.textMuted;
 
           return (
             <TouchableOpacity
               key={tab.name}
-              style={styles.tab}
+              style={styles.tabItem}
               onPress={() => onTabPress(tab.name)}
-              activeOpacity={0.7}
+              activeOpacity={0.75}
             >
               <View style={[styles.pill, isActive && styles.pillActive]}>
-                <tab.Icon color={iconColor} size={24} strokeWidth={isActive ? 2.5 : 2} />
-                <Text style={[styles.label, { color: textColor, fontWeight: isActive ? 'bold' : '500' }]}>
+                <tab.Icon color={iconColor} size={20} strokeWidth={isActive ? 2.4 : 1.8} />
+                <Text style={[styles.label, { color: textColor, fontWeight: isActive ? '700' : '500' }]}>
                   {tab.label}
                 </Text>
               </View>
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: '#0D766E',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-  scrollContent: {
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  tab: {
+  outerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 16,
+    zIndex: 50,
+  },
+  floatingBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.full,
     paddingHorizontal: 8,
+    paddingVertical: 6,
+    width: '100%',
+    maxWidth: 420,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.floating,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 2,
   },
   pill: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 6,
-    borderRadius: 100,
-    overflow: 'hidden',
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+    borderRadius: theme.radii.lg,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   pillActive: {
-    backgroundColor: '#FFC857', // Apenas a cor muda, as dimensões são estáticas
+    backgroundColor: theme.colors.tealSoft,
+    borderColor: theme.colors.tealMint,
+    ...theme.shadows.subtle,
   },
   label: {
-    fontSize: 12,
+    fontSize: 10,
     marginTop: 2,
+    letterSpacing: -0.1,
   },
 });

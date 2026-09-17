@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Plano de Tratamento - Pedro Santos</title>
+<!-- Tailwind CSS CDN with forms and container-queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              bg: '#FAF8F5',
+              teal: '#084D48',
+              'teal-dark': '#0f3834',
+              'teal-deep': '#063b37',
+              navy: '#121F42',
+              purple: '#7B61FF',
+              'purple-light': '#F1EDFF',
+              'purple-border': '#E4DBFE',
+              mint: '#E2F8EE',
+              'mint-text': '#1EA872',
+              gray: '#697386',
+              'gray-light': '#9AA4B2',
+              border: '#EEF0F3'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for specific visual requirements -->
+<style data-purpose="custom-scroll-and-layout">
+    body {
+      background-color: #FAF8F5;
+      -webkit-tap-highlight-color: transparent;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+    /* Hide scrollbars on tabs */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-app-bg text-[#121F42] min-h-screen flex justify-center selection:bg-app-purple selection:text-white">
+<!-- Main Mobile Device Wrapper -->
+<div class="w-full max-w-md bg-app-bg flex flex-col min-h-screen relative shadow-2xl overflow-x-hidden pb-24">
+<!-- BEGIN: TopBar -->
+<header class="pt-3 px-5 pb-2">
+<!-- Status Bar -->
+<div class="flex justify-between items-center text-xs font-semibold text-gray-900 tracking-tight mb-3">
+<span>9:41</span>
+<div class="flex items-center space-x-1.5">
+<!-- Cellular Signal -->
+<svg class="w-4 h-3.5 fill-current" viewbox="0 0 17 12">
+<rect height="4" rx="0.5" width="3" x="0" y="8"></rect>
+<rect height="6.5" rx="0.5" width="3" x="4.5" y="5.5"></rect>
+<rect height="9" rx="0.5" width="3" x="9" y="3"></rect>
+<rect height="12" rx="0.5" width="3" x="13.5" y="0"></rect>
+</svg>
+<!-- Wifi -->
+<svg class="w-4 h-3.5 fill-current" viewbox="0 0 16 12">
+<path d="M8 2.8C5.2 2.8 2.7 3.9 0.8 5.7L0 4.8C2.1 2.8 5 1.5 8 1.5s5.9 1.3 8 3.3l-0.8 0.9C13.3 3.9 10.8 2.8 8 2.8zm0 3.8c-1.8 0-3.4 0.8-4.6 2L2.6 7.7C4.1 6.3 6 5.4 8 5.4s3.9 0.9 5.4 2.3L12.6 8.6C11.4 7.4 9.8 6.6 8 6.6zm0 3.8a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"></path>
+</svg>
+<!-- Battery -->
+<div class="w-6 h-3 border border-gray-900 rounded-sm p-0.5 flex items-center">
+<div class="bg-gray-900 h-full w-full rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- Navigation Top Action Row -->
+<div class="flex items-center justify-between py-1">
+<button aria-label="Voltar" class="p-1 -ml-1 text-app-teal hover:opacity-80 transition-opacity">
+<svg class="w-6 h-6 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Notification Bell with Lilac Badge -->
+<button aria-label="Notificações" class="relative p-1.5 text-app-teal hover:opacity-80 transition-opacity">
+<svg class="w-6 h-6 stroke-[1.9]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-app-purple rounded-full ring-2 ring-app-bg"></span>
+</button>
+</div>
+</header>
+<!-- END: TopBar -->
+<!-- BEGIN: PatientProfileHeader -->
+<section class="px-5 pt-1 pb-4 flex items-center gap-4" data-purpose="patient-summary">
+<!-- Patient Avatar with Soft Teal Circle Backdrop -->
+<div class="relative w-16 h-16 shrink-0 bg-[#C8F0E4] rounded-full overflow-hidden flex items-center justify-center shadow-inner">
+<svg class="w-14 h-14 translate-y-1.5" fill="none" viewbox="0 0 100 100">
+<!-- Stylized Boy Face and Hair -->
+<circle cx="50" cy="50" fill="#FED8B1" r="32"></circle>
+<!-- Hair -->
+<path d="M22 46C20 30 32 15 50 15C68 15 80 30 78 46C74 38 70 34 62 34C55 34 52 38 48 38C44 38 41 33 34 34C28 35 24 40 22 46Z" fill="#A84C24"></path>
+<circle cx="28" cy="30" fill="#B95829" r="8"></circle>
+<circle cx="40" cy="22" fill="#B95829" r="9"></circle>
+<circle cx="56" cy="20" fill="#B95829" r="9"></circle>
+<circle cx="70" cy="28" fill="#B95829" r="8"></circle>
+<!-- Eyes -->
+<circle cx="40" cy="50" fill="#3D2314" r="3"></circle>
+<circle cx="60" cy="50" fill="#3D2314" r="3"></circle>
+<!-- Smile -->
+<path d="M43 62C47 66 53 66 57 62" stroke="#B85E42" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Rosy Cheeks -->
+<circle cx="34" cy="56" fill="#F8A79B" opacity="0.6" r="4"></circle>
+<circle cx="66" cy="56" fill="#F8A79B" opacity="0.6" r="4"></circle>
+<!-- Shirt -->
+<path d="M25 82C25 72 38 68 50 68C62 68 75 72 75 82V90H25V82Z" fill="#00A7A0"></path>
+</svg>
+</div>
+<!-- Info Column -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-0.5">
+<h1 class="text-xl font-bold tracking-tight text-app-navy truncate">Pedro Santos</h1>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-app-mint-text bg-app-mint px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-app-mint-text"></span>
+            Ativo
+          </span>
+</div>
+<p class="text-xs text-[#5D6B82] font-normal">
+          12 anos  •  14/03/2013
+        </p>
+<p class="text-xs text-[#5D6B82] mt-0.5">
+          Responsável: <span class="text-[#404D61]">Carla Santos</span>
+</p>
+</div>
+</section>
+<!-- END: PatientProfileHeader -->
+<!-- BEGIN: NavigationTabs -->
+<nav class="border-b border-gray-200/80 px-4 overflow-x-auto no-scrollbar flex items-center space-x-6 text-[13.5px] whitespace-nowrap font-medium text-gray-600">
+<button class="pb-2.5 hover:text-gray-900 transition-colors">Visão geral</button>
+<button class="pb-2.5 hover:text-gray-900 transition-colors">Avaliações</button>
+<button class="pb-2.5 hover:text-gray-900 transition-colors">Anamnese</button>
+<button class="pb-2.5 hover:text-gray-900 transition-colors">Notas clínicas</button>
+<!-- Selected Tab: Mais -->
+<button class="pb-2.5 text-app-navy font-bold flex items-center gap-1 border-b-2 border-app-purple text-app-purple relative -mb-[1px]">
+<span>Mais</span>
+<svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</nav>
+<!-- END: NavigationTabs -->
+<!-- BEGIN: MainContent -->
+<main class="p-5 space-y-4">
+<!-- Sub-header section -->
+<section data-purpose="section-header">
+<div class="flex items-center gap-2 mb-1">
+<button aria-label="Voltar para seções" class="p-0.5 -ml-1 text-app-teal hover:opacity-75">
+<svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<h2 class="text-xl font-bold text-app-navy tracking-tight">Plano de tratamento</h2>
+</div>
+<p class="text-[12.5px] leading-relaxed text-[#606E80] ml-5">
+          Objetivos terapêuticos, estratégias e acompanhamento do plano.
+        </p>
+</section>
+<!-- Action Button: + Novo plano -->
+<div>
+<button class="inline-flex items-center justify-center gap-1.5 bg-app-purple hover:bg-[#6c51fa] active:scale-98 transition-all text-white text-xs font-semibold px-4 py-2 rounded-full shadow-sm">
+<svg class="w-4 h-4 stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Novo plano</span>
+</button>
+</div>
+<!-- BEGIN: Card Plano de Tratamento 1 -->
+<article class="bg-white rounded-2xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100" data-purpose="treatment-plan-card">
+<!-- Card Header with Title and Action Icons -->
+<div class="flex items-start justify-between pb-3 border-b border-gray-50">
+<div>
+<h3 class="text-[15px] font-bold text-app-navy leading-tight">Plano de tratamento 1</h3>
+<span class="text-[11px] text-gray-400 font-normal">Atualizado em 13/09/2026</span>
+</div>
+<div class="flex items-center space-x-3 pt-0.5">
+<!-- Edit Icon -->
+<button class="text-app-purple hover:opacity-80 transition-opacity" title="Editar plano">
+<svg class="w-4 h-4 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Delete Icon -->
+<button class="text-[#E05252] hover:opacity-80 transition-opacity" title="Excluir plano">
+<svg class="w-4 h-4 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Collapse Icon -->
+<button class="text-app-teal hover:opacity-80 transition-opacity" title="Recolher seção">
+<svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Plan Attributes Content List -->
+<div class="space-y-4 pt-3">
+<!-- Item 1: Objetivo Principal -->
+<div class="flex items-start gap-3">
+<div class="w-7 h-7 rounded-full bg-app-purple-light flex items-center justify-center shrink-0 mt-0.5 text-app-purple">
+<!-- Target icon (concentric circles) -->
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<circle cx="12" cy="12" r="4"></circle>
+<circle cx="12" cy="12" fill="currentColor" r="1"></circle>
+</svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-app-navy">Objetivo principal</h4>
+<p class="text-xs text-[#5D6B82] leading-relaxed mt-0.5">
+                Melhorar atenção sustentada, organização de rotina e autonomia nas tarefas.
+              </p>
+</div>
+</div>
+<!-- Item 2: Estratégias -->
+<div class="flex items-start gap-3">
+<div class="w-7 h-7 rounded-full bg-app-purple-light flex items-center justify-center shrink-0 mt-0.5 text-app-purple">
+<!-- Document with list icon -->
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+<polyline points="14 2 14 8 20 8"></polyline>
+<line x1="16" x2="8" y1="13" y2="13"></line>
+<line x1="16" x2="8" y1="17" y2="17"></line>
+<polyline points="10 9 9 9 8 9"></polyline>
+</svg>
+</div>
+<div class="flex-1">
+<h4 class="text-xs font-bold text-app-navy mb-1">Estratégias</h4>
+<ul class="space-y-1 text-xs text-[#5D6B82]">
+<li class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-app-purple shrink-0 mt-1.5"></span>
+<span>Sessões psicopedagógicas semanais</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-app-purple shrink-0 mt-1.5"></span>
+<span>Atividades estruturadas com pausas programadas</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-app-purple shrink-0 mt-1.5"></span>
+<span>Orientações à responsável para rotina e acompanhamento</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Item 3: Frequência -->
+<div class="flex items-start gap-3">
+<div class="w-7 h-7 rounded-full bg-app-purple-light flex items-center justify-center shrink-0 mt-0.5 text-app-purple">
+<!-- Calendar icon -->
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<rect height="18" rx="2" ry="2" width="18" x="3" y="4"></rect>
+<line x1="16" x2="16" y1="2" y2="6"></line>
+<line x1="8" x2="8" y1="2" y2="6"></line>
+<line x1="3" x2="21" y1="10" y2="10"></line>
+</svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-app-navy">Frequência</h4>
+<p class="text-xs text-[#5D6B82] mt-0.5">
+                1 sessão por semana
+              </p>
+</div>
+</div>
+<!-- Item 4: Status -->
+<div class="flex items-start gap-3">
+<div class="w-7 h-7 rounded-full bg-app-purple-light flex items-center justify-center shrink-0 mt-0.5 text-app-purple">
+<!-- Trending upward chart icon -->
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+<polyline points="17 6 23 6 23 12"></polyline>
+</svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-app-navy mb-1">Status</h4>
+<span class="inline-block px-3 py-1 bg-app-mint text-app-mint-text text-[11px] font-medium rounded-full">
+                Em andamento
+              </span>
+</div>
+</div>
+</div>
+<!-- Outline Action Button: Editar plano -->
+<div class="mt-5 pt-1 flex justify-center">
+<button class="w-3/5 border border-app-teal text-app-teal hover:bg-teal-50 transition-colors py-1.5 rounded-full text-xs font-semibold tracking-wide text-center">
+            Editar plano
+          </button>
+</div>
+</article>
+<!-- END: Card Plano de Tratamento 1 -->
+<!-- BEGIN: Card Observações -->
+<article class="bg-white rounded-2xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100" data-purpose="notes-card">
+<div class="flex items-start gap-3">
+<!-- Lilac Chat Bubble Icon -->
+<div class="text-app-purple shrink-0 mt-0.5">
+<svg class="w-5 h-5 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-.874-.954c.26-.816.59-1.576.985-2.274C3.69 16.326 3 14.262 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-app-navy">Observações</h3>
+<p class="text-xs text-[#5D6B82] leading-relaxed mt-1">
+              Paciente apresenta melhor resposta quando as atividades possuem instruções objetivas e tempo bem delimitado.
+            </p>
+</div>
+</div>
+<!-- Add Observation Action -->
+<div class="mt-3 text-center">
+<button class="inline-flex items-center gap-1.5 text-app-purple text-xs font-medium hover:opacity-80 transition-opacity">
+<svg class="w-4 h-4 stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>Adicionar observação</span>
+</button>
+</div>
+</article>
+<!-- END: Card Observações -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigationBar -->
+<footer class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-app-teal text-white rounded-t-2xl px-5 pt-3 pb-6 shadow-2xl z-50">
+<nav class="flex justify-between items-center text-center">
+<!-- Tab: Início -->
+<a class="flex-1 flex flex-col items-center gap-1 text-teal-200/80 hover:text-white transition-colors" href="#">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-normal tracking-wide">Início</span>
+</a>
+<!-- Tab: Pacientes (Selected) -->
+<a class="flex-1 flex flex-col items-center gap-1 text-white relative" href="#">
+<svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium tracking-wide">Pacientes</span>
+<!-- Active lilac indicator line -->
+<div class="w-9 h-0.5 bg-app-purple rounded-full mt-0.5"></div>
+</a>
+<!-- Tab: Jogos -->
+<a class="flex-1 flex flex-col items-center gap-1 text-teal-200/80 hover:text-white transition-colors" href="#">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v.114l-4.147 1.382A3.75 3.75 0 004.5 11.084v5.166a3.75 3.75 0 002.584 3.565l5.25 1.75a3.75 3.75 0 002.332 0l5.25-1.75a3.75 3.75 0 002.584-3.565v-5.166a3.75 3.75 0 00-2.353-3.521L16.5 6.201V6.087z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M8.25 13.5h3m-1.5-1.5v3m6-1.5h.008v.008h-.008v-.008zm1.5-1.5h.008v.008h-.008v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-normal tracking-wide">Jogos</span>
+</a>
+<!-- Tab: Agenda -->
+<a class="flex-1 flex flex-col items-center gap-1 text-teal-200/80 hover:text-white transition-colors" href="#">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-normal tracking-wide">Agenda</span>
+</a>
+</nav>
+<!-- Home Bar Indicator -->
+<div class="w-32 h-1 bg-white/70 mx-auto rounded-full mt-3"></div>
+</footer>
+<!-- END: BottomNavigationBar -->
+</div>
+</body></html>

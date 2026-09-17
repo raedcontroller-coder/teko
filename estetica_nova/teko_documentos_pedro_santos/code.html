@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Pedro Santos - Documentos</title>
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            cream: {
+              50: '#FAF8F5',
+              100: '#FBF9F4',
+            },
+            teal: {
+              900: '#0A2540',
+              800: '#0A3B37',
+              700: '#004F44',
+              tealDark: '#084D48',
+              tealNavy: '#11223F',
+            },
+            purpleTheme: {
+              light: '#F0EBFC',
+              pill: '#EDE5FC',
+              accent: '#6E45E2',
+              active: '#582BE8',
+              badge: '#8F5FE8',
+            },
+            badgeMint: {
+              bg: '#DEF7EC',
+              text: '#0E9F6E'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scroll-and-touch">
+    /* Remove standard tap highlights and smooth scroll */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #EDECE8;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Hide scrollbars for pill navigation while retaining swipe */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center min-h-screen sm:p-4 antialiased selection:bg-purple-200">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="relative w-full max-w-[412px] h-[892px] bg-[#FAF8F5] flex flex-col justify-between overflow-hidden shadow-2xl sm:rounded-[44px] border border-stone-200" data-purpose="mobile-viewport">
+<!-- BEGIN: TopBarAndHeader -->
+<header class="w-full flex-shrink-0 pt-3 bg-[#FAF8F5] z-20">
+<!-- iOS Status Bar -->
+<div class="flex justify-between items-center px-8 text-neutral-800 text-sm font-semibold tracking-tight h-7">
+<span class="text-[15px] font-bold">9:41</span>
+<div class="flex items-center space-x-2">
+<!-- Signal Icon -->
+<svg class="w-4 h-3.5 fill-current" viewbox="0 0 16 12">
+<rect height="4" rx="0.5" width="3" x="0" y="8"></rect>
+<rect height="6.5" rx="0.5" width="3" x="4" y="5.5"></rect>
+<rect height="9" rx="0.5" width="3" x="8" y="3"></rect>
+<rect height="11.5" rx="0.5" width="3" x="12" y="0.5"></rect>
+</svg>
+<!-- Wifi Icon -->
+<svg class="w-4 h-3.5 fill-current" viewbox="0 0 16 12">
+<path d="M8 2.8c2.8 0 5.4 1.1 7.3 3.1l1.4-1.4C14.4 2.1 11.4 0.8 8 0.8 4.6 0.8 1.6 2.1-.7 4.5l1.4 1.4C2.6 3.9 5.2 2.8 8 2.8zm0 4c1.8 0 3.4.7 4.7 2l1.4-1.4c-1.7-1.7-4-2.6-6.1-2.6s-4.4.9-6.1 2.6L3.3 8.8C4.6 7.5 6.2 6.8 8 6.8zm0 4.1c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2z"></path>
+</svg>
+<!-- Battery Icon -->
+<svg class="w-6 h-3 fill-current" viewbox="0 0 24 12">
+<rect fill="none" height="10" rx="3" stroke="currentColor" stroke-width="1.8" width="19" x="1" y="1"></rect>
+<rect height="7" rx="1.5" width="14" x="2.5" y="2.5"></rect>
+<path d="M21.5 4.5C22.3 4.8 23 5.3 23 6s-.7 1.2-1.5 1.5v-3z"></path>
+</svg>
+</div>
+</div>
+<!-- Action Nav Header -->
+<div class="flex justify-between items-center px-6 pt-3 pb-2">
+<!-- Back Button -->
+<button aria-label="Voltar" class="p-1 -ml-1 text-[#004F44] active:opacity-60 transition">
+<svg class="w-6 h-6 stroke-[2.4]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Bell Notification with lilac dot -->
+<button aria-label="Notificações" class="relative p-1.5 text-[#004F44] active:opacity-60 transition">
+<svg class="w-7 h-7 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<!-- Lilac Notification Indicator Dot -->
+<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-[#8E5BF5] rounded-full border-2 border-[#FAF8F5]"></span>
+</button>
+</div>
+<!-- Patient Profile Summary Card -->
+<div class="flex items-center px-6 pt-2 pb-4 gap-4" data-purpose="patient-summary">
+<!-- Avatar Graphic (Child with aqua shirt and light teal circular bg) -->
+<div class="relative w-[72px] h-[72px] rounded-full bg-[#CEF0EB] flex-shrink-0 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+<!-- Stylized Boy Avatar Vector -->
+<svg class="w-full h-full" fill="none" viewbox="0 0 80 80">
+<!-- Background circle inside -->
+<circle cx="40" cy="40" fill="#CEF0EB" r="40"></circle>
+<!-- Hair back -->
+<path d="M22 36C20 28 24 16 38 15C52 14 58 24 58 36C60 33 62 25 57 20C52 15 45 13 36 14C27 15 20 21 19 28C18 33 20 36 22 36Z" fill="#C05C33"></path>
+<!-- Ears -->
+<circle cx="27" cy="41" fill="#FFC9A2" r="5"></circle>
+<circle cx="53" cy="41" fill="#FFC9A2" r="5"></circle>
+<!-- Face -->
+<ellipse cx="40" cy="42" fill="#FDD6BA" rx="14" ry="14"></ellipse>
+<!-- Hair Front & Curls -->
+<path d="M25 34C28 26 36 21 44 21C50 21 54 24 55 28C56 24 51 18 42 18C33 18 26 23 23 31C21 34 22 35 25 34Z" fill="#B34F26"></path>
+<circle cx="28" cy="27" fill="#B34F26" r="4.5"></circle>
+<circle cx="35" cy="24" fill="#B34F26" r="5.5"></circle>
+<circle cx="44" cy="24" fill="#B34F26" r="5.5"></circle>
+<circle cx="51" cy="28" fill="#B34F26" r="4"></circle>
+<!-- Cheeks -->
+<circle cx="32" cy="44" fill="#FCA5A5" opacity="0.6" r="2.2"></circle>
+<circle cx="48" cy="44" fill="#FCA5A5" opacity="0.6" r="2.2"></circle>
+<!-- Eyes -->
+<circle cx="34" cy="40" fill="#4B2713" r="1.8"></circle>
+<circle cx="46" cy="40" fill="#4B2713" r="1.8"></circle>
+<!-- Eyebrows -->
+<path d="M32 36C33.5 35 36 35.5 36 36" stroke="#8C3916" stroke-linecap="round" stroke-width="1.2"></path>
+<path d="M44 36C45.5 35 48 35.5 48 36" stroke="#8C3916" stroke-linecap="round" stroke-width="1.2"></path>
+<!-- Smile -->
+<path d="M37 45.5C38.5 47.2 41.5 47.2 43 45.5" stroke="#BF4F28" stroke-linecap="round" stroke-width="1.4"></path>
+<!-- Neck -->
+<rect fill="#FDD6BA" height="6" width="6" x="37" y="53"></rect>
+<!-- Shirt (Aqua Teal) -->
+<path d="M25 58C28 55 35 55 40 55C45 55 52 55 55 58L59 74H21L25 58Z" fill="#00BBA6"></path>
+<!-- Collar line -->
+<path d="M35 55C37 57.5 43 57.5 45 55" fill="none" stroke="#FFFFFF" stroke-width="1.2"></path>
+</svg>
+</div>
+<!-- Patient Details and Status Badge -->
+<div class="flex-1 flex flex-col justify-center">
+<div class="flex items-center gap-2">
+<h1 class="text-[20px] font-bold text-[#102A43] tracking-tight leading-none">Pedro Santos</h1>
+<!-- Status Badge: Ativo -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#DEF7EC] text-[#0E9F6E]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#0E9F6E]"></span>
+              Ativo
+            </span>
+</div>
+<!-- Age and Birthdate -->
+<p class="text-[13px] text-[#627D98] font-medium mt-1">
+            12 anos <span class="mx-1">•</span> 14/03/2013
+          </p>
+<!-- Parent / Guardian -->
+<p class="text-[13px] text-[#627D98] font-medium">
+            Responsável: Carla Santos
+          </p>
+</div>
+</div>
+<!-- Navigation Tabs with Lilac Border on 'Mais' -->
+<nav aria-label="Abas do paciente" class="flex items-center px-5 border-b border-neutral-200/80 overflow-x-auto no-scrollbar gap-5 text-[14px] font-medium text-[#627D98]">
+<button class="pb-2.5 whitespace-nowrap hover:text-[#102A43] transition">Visão geral</button>
+<button class="pb-2.5 whitespace-nowrap hover:text-[#102A43] transition">Avaliações</button>
+<button class="pb-2.5 whitespace-nowrap hover:text-[#102A43] transition">Anamnese</button>
+<button class="pb-2.5 whitespace-nowrap hover:text-[#102A43] transition">Notas clínicas</button>
+<!-- Active Tab: Mais (has indicator bar) -->
+<button class="relative pb-2.5 font-bold text-[#102A43] flex items-center gap-1 whitespace-nowrap">
+<span>Mais</span>
+<svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<!-- Underline Indicator in Purple/Lilac -->
+<span class="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#6536E4] rounded-full"></span>
+</button>
+</nav>
+</header>
+<!-- END: TopBarAndHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 flex flex-col px-6 pt-5 overflow-y-auto no-scrollbar" data-purpose="document-section">
+<!-- Section Header -->
+<section class="space-y-1">
+<div class="flex items-center gap-2">
+<button aria-label="Voltar para seções" class="text-[#0D3834] active:scale-95 transition">
+<svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<h2 class="text-[20px] font-extrabold text-[#0D3834] tracking-tight">Documentos</h2>
+</div>
+<p class="text-[13px] leading-relaxed text-[#627D98] font-normal pl-6">
+          Laudos, relatórios, encaminhamentos e outros anexos do paciente.
+        </p>
+</section>
+<!-- Category Filter Pills -->
+<div aria-label="Filtros de categoria" class="flex items-center gap-2 mt-5 overflow-x-auto no-scrollbar py-1" role="tablist">
+<!-- Selected Pill: Todos -->
+<button aria-selected="true" class="px-5 py-2 rounded-full text-xs font-semibold bg-[#EDE5FC] text-[#6536E4] shadow-sm whitespace-nowrap transition" role="tab">
+          Todos
+        </button>
+<!-- Pill: Laudos -->
+<button aria-selected="false" class="px-5 py-2 rounded-full text-xs font-medium bg-white text-[#486581] border border-neutral-200/90 whitespace-nowrap hover:border-neutral-300 transition" role="tab">
+          Laudos
+        </button>
+<!-- Pill: Encaminhamentos -->
+<button aria-selected="false" class="px-5 py-2 rounded-full text-xs font-medium bg-white text-[#486581] border border-neutral-200/90 whitespace-nowrap hover:border-neutral-300 transition" role="tab">
+          Encaminhamentos
+        </button>
+<!-- Pill: Outros -->
+<button aria-selected="false" class="px-5 py-2 rounded-full text-xs font-medium bg-white text-[#486581] border border-neutral-200/90 whitespace-nowrap hover:border-neutral-300 transition" role="tab">
+          Outros
+        </button>
+</div>
+<!-- BEGIN: EmptyStateSection -->
+<section class="flex-1 flex flex-col items-center justify-center text-center px-4 pb-12" data-purpose="empty-state">
+<!-- Soft Lilac Illustration Graphic -->
+<div class="relative w-36 h-36 flex items-center justify-center mb-6">
+<!-- Ambient Abstract Blob Shape in light lilac (#F2ECFC) -->
+<svg class="absolute inset-0 w-full h-full" fill="none" viewbox="0 0 140 140">
+<path d="M72.2 15.6C95.5 13.7 117.8 28.3 124.6 50.8C131.5 73.3 123 98.4 104.5 112.5C86 126.6 62.4 125.7 44.5 114.7C26.5 103.7 14.1 82.6 15.1 61.6C16.1 40.6 30.6 19.8 52.8 16.2C59.3 15.1 65.8 16.1 72.2 15.6Z" fill="#F2ECFC"></path>
+</svg>
+<!-- Little sparkle/dash accents in purple -->
+<div class="absolute -top-1 left-9">
+<span class="block w-[3px] h-3 bg-[#724EE4] rounded-full rotate-45"></span>
+</div>
+<div class="absolute top-5 left-4">
+<span class="block w-3.5 h-[3px] bg-[#724EE4] rounded-full -rotate-12"></span>
+</div>
+<!-- Document Sheet Icon Container -->
+<div class="relative z-10 w-16 h-20 bg-white rounded-lg border-2 border-[#724EE4] flex flex-col pt-3 px-2 shadow-sm">
+<!-- Folded Corner Representation -->
+<div class="absolute top-0 right-0 w-4 h-4 bg-[#EDE5FC] border-b-2 border-l-2 border-[#724EE4] rounded-bl"></div>
+<!-- Content Lines on Sheet -->
+<div class="w-4 h-1 bg-[#724EE4] rounded-full mb-2"></div>
+<div class="w-9 h-1 bg-[#724EE4] rounded-full mb-2"></div>
+<div class="w-7 h-1 bg-[#724EE4] rounded-full mb-2"></div>
+<div class="w-6 h-1 bg-[#724EE4] rounded-full"></div>
+<!-- Circular Purple Floating Add (+) Badge -->
+<div class="absolute -bottom-3 -right-3 w-8 h-8 rounded-full bg-[#724EE4] border-2 border-white flex items-center justify-center shadow-md">
+<svg class="w-4 h-4 text-white stroke-[3]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Empty State Title -->
+<h3 class="text-[17px] font-bold text-[#0D3834] leading-snug max-w-[280px]">
+          Este paciente ainda não possui documentos
+        </h3>
+<!-- Empty State Description -->
+<p class="text-[13px] text-[#627D98] leading-relaxed mt-2.5 max-w-[290px]">
+          Adicione arquivos importantes para manter as informações organizadas e acessíveis em um só lugar.
+        </p>
+</section>
+<!-- END: EmptyStateSection -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigationBar -->
+<footer class="w-full bg-[#084D48] rounded-t-3xl pt-3 pb-6 px-4 flex-shrink-0 z-30" data-purpose="bottom-nav">
+<div class="flex justify-around items-center">
+<!-- Nav Item: Início -->
+<button class="flex flex-col items-center gap-1 text-white/70 hover:text-white transition w-16">
+<svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium tracking-wide">Início</span>
+</button>
+<!-- Nav Item: Pacientes (Active with lilac highlight line) -->
+<button class="relative flex flex-col items-center gap-1 text-white w-20">
+<svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium tracking-wide">Pacientes</span>
+<!-- Active Line Indicator in Lilac -->
+<span class="absolute -bottom-2 w-12 h-[3px] bg-[#9D71FB] rounded-full"></span>
+</button>
+<!-- Nav Item: Jogos -->
+<button class="flex flex-col items-center gap-1 text-white/70 hover:text-white transition w-16">
+<svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.499-.452.779-.537.495-.151 1.077-.075 1.637.218.66.345 1.344.922 1.956 1.71 1.258 1.621 1.977 3.86 1.977 5.981 0 1.255-.262 2.457-.751 3.493-.427.904-1.053 1.66-1.808 2.164-.78.52-1.698.817-2.617.728-.865-.084-1.697-.506-2.224-1.196a5.55 5.55 0 01-.6-1.036M9.75 6.087c0-.355-.186-.676-.401-.959-.221-.29-.499-.452-.779-.537-.495-.151-1.077-.075-1.637.218-.66.345-1.344.922-1.956 1.71-1.258 1.621-1.977 3.86-1.977 5.981 0 1.255.262 2.457.751 3.493.427.904 1.053 1.66 1.808 2.164.78.52 1.698.817 2.617.728.865-.084 1.697-.506 2.224-1.196.223-.292.427-.643.6-1.036M6.75 12h3m-1.5-1.5v3M15.75 10.5h.008v.008h-.008v-.008zm1.5 2.25h.008v.008h-.008v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium tracking-wide">Jogos</span>
+</button>
+<!-- Nav Item: Agenda -->
+<button class="flex flex-col items-center gap-1 text-white/70 hover:text-white transition w-16">
+<svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium tracking-wide">Agenda</span>
+</button>
+</div>
+<!-- iOS Bottom Home Bar Indicator -->
+<div class="flex justify-center mt-4">
+<div class="w-32 h-1 bg-white/70 rounded-full"></div>
+</div>
+</footer>
+<!-- END: BottomNavigationBar -->
+</div>
+<!-- END: MobileDeviceFrame -->
+</body></html>

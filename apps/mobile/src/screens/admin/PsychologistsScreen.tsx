@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Search, Plus, UserCircle, Users, FileText, X, Key, Baby } from 'lucide-react-native';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
 
 interface PsychologistsScreenProps {
   onNavigateToNewPsychologist?: () => void;
@@ -62,11 +63,11 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
         {/* Top Actions: Search and New Button */}
         <View style={styles.actionsContainer}>
           <View style={styles.searchContainer}>
-            <Search color="rgba(255,255,255,0.5)" size={20} style={styles.searchIcon} />
+            <Search color={theme.colors.textMuted} size={18} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
               placeholder="Buscar profissional..."
-              placeholderTextColor="rgba(255,255,255,0.4)"
+              placeholderTextColor={theme.colors.textMuted}
               value={searchTerm}
               onChangeText={setSearchTerm}
             />
@@ -75,26 +76,22 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
           <Pressable 
             style={({ pressed }) => [
               styles.newButton,
-              pressed && { backgroundColor: '#7B61FF' }
+              pressed && { backgroundColor: theme.colors.primaryDark }
             ]}
             onPress={onNavigateToNewPsychologist}
           >
-            {({ pressed }) => (
-              <>
-                <Plus color={pressed ? "#FFF" : "#084D48"} size={20} />
-                <Text style={[styles.newButtonText, pressed && { color: '#FFF' }]}>Novo Profissional</Text>
-              </>
-            )}
+            <Plus color="#FFF" size={18} />
+            <Text style={styles.newButtonText}>Novo Profissional</Text>
           </Pressable>
         </View>
 
         {/* List of Psychologists */}
         <View style={styles.listSection}>
           {loading ? (
-            <ActivityIndicator color="#FFC857" size="large" style={{ marginTop: 60 }} />
+            <ActivityIndicator color={theme.colors.primary} size="large" style={{ marginTop: 60 }} />
           ) : filtered.length === 0 ? (
             <View style={styles.emptyState}>
-              <Users color="rgba(255,255,255,0.2)" size={48} />
+              <Users color={theme.colors.textMuted} size={42} />
               <Text style={styles.emptyStateText}>Nenhum profissional encontrado.</Text>
             </View>
           ) : (
@@ -103,7 +100,7 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
                 <View key={psi.id} style={styles.card}>
                   <View style={styles.cardHeader}>
                     <View style={styles.avatar}>
-                      <UserCircle color="#FFF" size={24} />
+                      <UserCircle color={theme.colors.primary} size={24} />
                     </View>
                     <View style={styles.infoContainer}>
                       <Text style={styles.itemName}>{psi.name}</Text>
@@ -118,11 +115,11 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
 
                   <View style={styles.metricsContainer}>
                     <View style={styles.metricBadge}>
-                      <Users color="#FFC857" size={14} />
+                      <Users color={theme.colors.primary} size={14} />
                       <Text style={styles.metricText}>Crianças: {psi.childrenCount || 0}</Text>
                     </View>
                     <View style={styles.metricBadge}>
-                      <FileText color="#7B61FF" size={14} />
+                      <FileText color={theme.colors.badgePurpleText} size={14} />
                       <Text style={styles.metricText}>Relatórios: {psi.reportsCount || 0}</Text>
                     </View>
                   </View>
@@ -130,13 +127,11 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
                   <Pressable 
                     style={({ pressed }) => [
                       styles.profileButton,
-                      pressed && { backgroundColor: 'rgba(255,255,255,0.2)' }
+                      pressed && { backgroundColor: theme.colors.tealSoft }
                     ]}
                     onPress={() => setSelectedActionPsi(psi)}
                   >
-                    {({ pressed }) => (
-                      <Text style={[styles.profileButtonText, pressed && { color: '#FFC857' }]}>Acessar Perfil</Text>
-                    )}
+                    <Text style={styles.profileButtonText}>Acessar Perfil</Text>
                   </Pressable>
                 </View>
               ))}
@@ -157,22 +152,21 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
           <View style={styles.modalContent}>
             
             <TouchableOpacity style={styles.modalCloseButton} onPress={() => setSelectedActionPsi(null)}>
-              <X color="#FFF" size={24} />
+              <X color={theme.colors.textDark} size={22} />
             </TouchableOpacity>
 
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Acessar Perfil</Text>
-              <Text style={styles.modalSubtitle}>O que você deseja gerenciar em <Text style={{ fontWeight: 'bold', color: '#FFF' }}>{selectedActionPsi?.name}</Text>?</Text>
+              <Text style={styles.modalSubtitle}>O que você deseja gerenciar em <Text style={{ fontWeight: '800', color: theme.colors.primary }}>{selectedActionPsi?.name}</Text>?</Text>
             </View>
 
             <View style={styles.modalCardsContainer}>
               
-              {/* Card Credenciais (Amarelo) */}
+              {/* Card Credenciais */}
               <Pressable 
                 style={({ pressed }) => [
                   styles.actionCard,
-                  styles.actionCardYellow,
-                  pressed && styles.actionCardYellowPressed
+                  pressed && { borderColor: theme.colors.primary, backgroundColor: theme.colors.tealSoft }
                 ]}
                 onPress={() => {
                   setSelectedActionPsi(null);
@@ -181,21 +175,20 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
                   }
                 }}
               >
-                <View style={styles.actionCardWatermark}>
-                  <Key color="rgba(255, 200, 87, 0.1)" size={120} />
+                <View style={[styles.actionCardIcon, { backgroundColor: theme.colors.tealSoft }]}>
+                  <Key color={theme.colors.primary} size={26} />
                 </View>
-                <View style={styles.actionCardIconYellow}>
-                  <Key color="#FFC857" size={32} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.actionCardTitle}>Credenciais do Profissional</Text>
+                  <Text style={styles.actionCardDesc}>Gerencie e-mail, senha e dados cadastrais.</Text>
                 </View>
-                <Text style={styles.actionCardTitleYellow}>Credenciais do Profissional</Text>
               </Pressable>
 
-              {/* Card Pacientes (Roxo) */}
+              {/* Card Pacientes */}
               <Pressable 
                 style={({ pressed }) => [
                   styles.actionCard,
-                  styles.actionCardPurple,
-                  pressed && styles.actionCardPurplePressed
+                  pressed && { borderColor: theme.colors.badgePurpleText, backgroundColor: theme.colors.badgePurple }
                 ]}
                 onPress={() => {
                   setSelectedActionPsi(null);
@@ -204,13 +197,13 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
                   }
                 }}
               >
-                <View style={styles.actionCardWatermark}>
-                  <Baby color="rgba(123, 97, 255, 0.1)" size={120} />
+                <View style={[styles.actionCardIcon, { backgroundColor: theme.colors.badgePurple }]}>
+                  <Baby color={theme.colors.badgePurpleText} size={26} />
                 </View>
-                <View style={styles.actionCardIconPurple}>
-                  <Baby color="#7B61FF" size={32} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.actionCardTitle}>Pacientes do Profissional</Text>
+                  <Text style={styles.actionCardDesc}>Visualize e gerencie a lista de crianças vinculadas.</Text>
                 </View>
-                <Text style={styles.actionCardTitlePurple}>Pacientes do Profissional</Text>
               </Pressable>
 
             </View>
@@ -226,61 +219,64 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#064b46',
+    backgroundColor: theme.colors.bg,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 110,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   title: {
-    color: '#FFF',
-    fontSize: 28,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.4,
   },
   subtitle: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.textMuted,
     fontSize: 14,
-    marginTop: 4,
+    marginTop: 2,
   },
   actionsContainer: {
-    gap: 16,
-    marginBottom: 32,
+    gap: 10,
+    marginBottom: 20,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,246,227,0.05)',
+    backgroundColor: theme.colors.cardBg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 100,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.full,
     paddingHorizontal: 16,
-    height: 50,
+    height: 46,
+    ...theme.shadows.subtle,
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    color: '#FFF',
-    fontSize: 16,
+    color: theme.colors.textDark,
+    fontSize: 14,
   },
   newButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFC857',
-    height: 50,
-    borderRadius: 100,
+    backgroundColor: theme.colors.primary,
+    height: 46,
+    borderRadius: theme.radii.lg,
     gap: 8,
+    ...theme.shadows.subtle,
   },
   newButtonText: {
-    color: '#084D48',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
   listSection: {
     flex: 1,
@@ -288,35 +284,39 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: 40,
     gap: 12,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
   },
   emptyStateText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 16,
-    fontStyle: 'italic',
+    color: theme.colors.textMuted,
+    fontSize: 14,
   },
   listContainer: {
-    gap: 16,
+    gap: 12,
   },
   card: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.card,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    marginBottom: 16,
+    gap: 12,
+    marginBottom: 12,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.tealSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -324,168 +324,138 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemName: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 16,
+    fontWeight: '700',
   },
   itemEmail: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
-    marginTop: 2,
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    marginTop: 1,
   },
   cardDetails: {
-    gap: 8,
-    marginBottom: 16,
+    gap: 4,
+    marginBottom: 12,
   },
   itemMeta: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontSize: 13,
   },
   metaValue: {
-    color: '#FFF',
-    fontWeight: '500',
+    color: theme.colors.textDark,
+    fontWeight: '600',
   },
   metricsContainer: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
+    gap: 8,
+    marginBottom: 14,
   },
   metricBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 100,
+    backgroundColor: theme.colors.bg,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: theme.radii.full,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
     gap: 6,
   },
   metricText: {
-    color: '#FFF',
+    color: theme.colors.textDark,
     fontSize: 12,
     fontWeight: '600',
   },
   profileButton: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 12,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
+    ...theme.shadows.subtle,
   },
   profileButtonText: {
     color: '#FFF',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
+
+  /* Modal */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: 20,
   },
   modalContent: {
     width: '100%',
-    backgroundColor: '#064b46',
-    borderRadius: 24,
-    padding: 24,
+    maxWidth: 380,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.xl,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 10,
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.floating,
     position: 'relative',
   },
   modalCloseButton: {
     position: 'absolute',
     top: 16,
     right: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.bg,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
   },
   modalHeader: {
-    marginBottom: 24,
-    marginTop: 8,
+    marginBottom: 16,
+    paddingRight: 32,
   },
   modalTitle: {
-    color: '#FFF',
-    fontSize: 24,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 18,
+    fontWeight: '800',
   },
   modalSubtitle: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 15,
-    marginTop: 8,
-    lineHeight: 22,
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    marginTop: 4,
+    lineHeight: 18,
   },
   modalCardsContainer: {
-    gap: 16,
+    gap: 12,
   },
   actionCard: {
-    borderRadius: 20,
-    padding: 24,
-    borderWidth: 2,
-    position: 'relative',
-    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: theme.radii.lg,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    backgroundColor: theme.colors.bg,
   },
-  actionCardWatermark: {
-    position: 'absolute',
-    top: -20,
-    right: -20,
-    pointerEvents: 'none',
-  },
-  actionCardYellow: {
-    backgroundColor: 'rgba(255, 200, 87, 0.05)',
-    borderColor: 'rgba(255, 200, 87, 0.3)',
-  },
-  actionCardYellowPressed: {
-    backgroundColor: 'rgba(255, 200, 87, 0.15)',
-    borderColor: '#FFC857',
-  },
-  actionCardIconYellow: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255, 200, 87, 0.1)',
+  actionCardIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 200, 87, 0.5)',
   },
-  actionCardTitleYellow: {
-    color: '#FFC857',
-    fontSize: 18,
-    fontWeight: 'bold',
+  actionCardTitle: {
+    color: theme.colors.textDark,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 2,
   },
-  actionCardPurple: {
-    backgroundColor: 'rgba(123, 97, 255, 0.05)',
-    borderColor: 'rgba(123, 97, 255, 0.3)',
-  },
-  actionCardPurplePressed: {
-    backgroundColor: 'rgba(123, 97, 255, 0.15)',
-    borderColor: '#7B61FF',
-  },
-  actionCardIconPurple: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(123, 97, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(123, 97, 255, 0.5)',
-  },
-  actionCardTitlePurple: {
-    color: '#7B61FF',
-    fontSize: 18,
-    fontWeight: 'bold',
+  actionCardDesc: {
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });
+

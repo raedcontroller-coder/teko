@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Meu Perfil - Teko</title>
+<!-- Google Fonts: Inter / Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Lucide Icons CDN -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#0B4D46',
+              dark: '#083D37',
+              teal: '#0E625A',
+              soft: '#E8F5F1'
+            },
+            cream: {
+              DEFAULT: '#FAF7F2',
+              card: '#FFFFFF',
+            },
+            purple: {
+              accent: '#8B5CF6',
+              light: '#F3E8FF',
+              badge: '#EDE9FE',
+              border: '#A78BFA'
+            },
+            text: {
+              main: '#1A3835',
+              secondary: '#6E827F',
+              muted: '#94A3B8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Layout & Utility Styles -->
+<style data-purpose="layout">
+    body {
+      background-color: #FAF7F2;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Estilização suave para a scrollbar se aplicável */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#FAF7F2] text-[#1A3835] min-h-screen flex justify-center selection:bg-teal-100">
+<!-- BEGIN: MobileContainer -->
+<div class="w-full max-w-md min-h-screen flex flex-col bg-[#FAF7F2] relative pb-28">
+<!-- BEGIN: StatusBar -->
+<header class="w-full pt-3 px-6 pb-2 flex justify-between items-center text-xs font-semibold text-[#1A3835]">
+<!-- Horário do sistema -->
+<span class="font-bold text-[13px] tracking-tight">17:45</span>
+<!-- Ícones de Status -->
+<div class="flex items-center space-x-1.5 opacity-90 text-[11px]">
+<i class="w-3.5 h-3.5 stroke-[2.2]" data-lucide="alarm-clock"></i>
+<i class="w-3.5 h-3.5 stroke-[2.2]" data-lucide="bell"></i>
+<i class="w-3.5 h-3.5 stroke-[2.2]" data-lucide="wifi"></i>
+<i class="w-3.5 h-3.5 stroke-[2.2]" data-lucide="signal"></i>
+<div class="flex items-center text-[10px] font-bold leading-none pl-0.5">
+<i class="w-4 h-4 stroke-[2]" data-lucide="battery"></i>
+</div>
+</div>
+</header>
+<!-- END: StatusBar -->
+<!-- BEGIN: NavigationHeader -->
+<nav class="px-5 py-3 flex items-center gap-3">
+<button aria-label="Voltar" class="p-1 -ml-1 text-[#0E625A] hover:opacity-75 transition-opacity active:scale-95" type="button">
+<i class="w-6 h-6 stroke-[2.5]" data-lucide="arrow-left"></i>
+</button>
+<h1 class="text-[22px] font-bold text-[#0E625A] tracking-tight">
+        Meu perfil
+      </h1>
+</nav>
+<!-- END: NavigationHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-4 pt-1 pb-4 flex flex-col space-y-6">
+<!-- BEGIN: ProfileCard -->
+<section class="flex items-center justify-between pt-2 pb-1" data-purpose="user-profile-summary">
+<div class="flex items-center gap-3.5">
+<!-- Avatar ilustrado da psicóloga -->
+<div class="relative w-[68px] h-[68px] rounded-full bg-[#CCE9E4] flex items-end justify-center overflow-hidden border-2 border-white shadow-sm shrink-0">
+<!-- Representação em vetor da psicóloga com cabelos castanhos e blusa verde -->
+<svg class="w-full h-full" fill="none" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<circle cx="50" cy="50" fill="#CCE9E4" r="50"></circle>
+<!-- Cabelo fundo -->
+<path d="M26 40C26 22 36 12 50 12C64 12 74 22 74 40C74 58 76 68 76 72C72 73 66 68 66 68L34 68C34 68 28 73 24 72C24 68 26 58 26 40Z" fill="#583120"></path>
+<!-- Pescoço -->
+<rect fill="#F4C7AE" height="15" rx="3" width="12" x="44" y="55"></rect>
+<!-- Blusa verde -->
+<path d="M25 88C25 73 34 67 50 67C66 67 75 73 75 88V100H25V88Z" fill="#1B6F68"></path>
+<path d="M42 67C42 71.4 45.6 75 50 75C54.4 75 58 71.4 58 67H42Z" fill="#F4C7AE"></path>
+<!-- Rosto -->
+<ellipse cx="50" cy="46" fill="#FFDFC9" rx="16" ry="17"></ellipse>
+<!-- Cabelo frente/franja -->
+<path d="M34 38C34 29 41 22 50 22C59 22 66 29 66 38C66 38 60 33 50 33C38 33 34 38 34 38Z" fill="#6A3D29"></path>
+<path d="M34 36C34 44 32 52 30 58C30 58 35 48 37 40" stroke="#6A3D29" stroke-linecap="round" stroke-width="2"></path>
+<path d="M66 36C66 44 68 52 70 58C70 58 65 48 63 40" stroke="#6A3D29" stroke-linecap="round" stroke-width="2"></path>
+<!-- Olhos e boca -->
+<circle cx="44" cy="46" fill="#3D2314" r="2"></circle>
+<circle cx="56" cy="46" fill="#3D2314" r="2"></circle>
+<path d="M47 52C48.5 53.5 51.5 53.5 53 52" stroke="#D37E6B" stroke-linecap="round" stroke-width="1.8"></path>
+<!-- Bochechas rosadas -->
+<circle cx="41" cy="49" fill="#FCA5A5" opacity="0.6" r="2.5"></circle>
+<circle cx="59" cy="49" fill="#FCA5A5" opacity="0.6" r="2.5"></circle>
+</svg>
+</div>
+<!-- Informações de Nome, Título e CRP -->
+<div class="flex flex-col">
+<h2 class="text-[15px] font-extrabold text-[#0D3833] leading-tight mb-1">
+              Maria Vitória Batista Oliveira
+            </h2>
+<div class="flex items-center gap-2 mb-0.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#EFEBFC] text-[#7857FF]">
+                Psicóloga
+              </span>
+</div>
+<p class="text-[12px] font-medium text-[#7C8F8C]">
+              CRP 06/123456
+            </p>
+</div>
+</div>
+<!-- Botão Editar Perfil -->
+<button class="ml-2 px-3 py-1.5 border border-[#8C6DFA] text-[#8C6DFA] rounded-full text-xs font-semibold flex items-center gap-1.5 hover:bg-[#8C6DFA]/5 transition-colors active:scale-95 shrink-0" type="button">
+<i class="w-3.5 h-3.5 stroke-[2.2]" data-lucide="pencil"></i>
+<span>Editar perfil</span>
+</button>
+</section>
+<!-- END: ProfileCard -->
+<!-- BEGIN: SectionConta -->
+<section class="space-y-2" data-purpose="account-settings">
+<header class="px-1">
+<h3 class="text-base font-bold text-[#0E625A]">Conta</h3>
+<p class="text-xs text-[#7A8E8B] mt-0.5">Gerencie suas informações e segurança da conta.</p>
+</header>
+<!-- Lista em Card Branco Agrupado -->
+<div class="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] border border-[#F0EBE1] divide-y divide-gray-100 overflow-hidden">
+<!-- Item: Dados pessoais -->
+<a class="flex items-center justify-between p-3.5 hover:bg-[#FAF8F5] transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-[#EBF7F5] flex items-center justify-center text-[#1B6F68]">
+<i class="w-5 h-5 stroke-[2]" data-lucide="user"></i>
+</div>
+<span class="text-sm font-semibold text-[#1C3633]">Dados pessoais</span>
+</div>
+<i class="w-5 h-5 text-[#8571BE] stroke-[2.2] group-hover:translate-x-0.5 transition-transform" data-lucide="chevron-right"></i>
+</a>
+<!-- Item: Alterar senha -->
+<a class="flex items-center justify-between p-3.5 hover:bg-[#FAF8F5] transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-[#EBF7F5] flex items-center justify-center text-[#1B6F68]">
+<i class="w-5 h-5 stroke-[2]" data-lucide="lock"></i>
+</div>
+<span class="text-sm font-semibold text-[#1C3633]">Alterar senha</span>
+</div>
+<i class="w-5 h-5 text-[#8571BE] stroke-[2.2] group-hover:translate-x-0.5 transition-transform" data-lucide="chevron-right"></i>
+</a>
+<!-- Item: Segurança -->
+<a class="flex items-center justify-between p-3.5 hover:bg-[#FAF8F5] transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-[#EBF7F5] flex items-center justify-center text-[#1B6F68]">
+<i class="w-5 h-5 stroke-[2]" data-lucide="shield-check"></i>
+</div>
+<span class="text-sm font-semibold text-[#1C3633]">Segurança</span>
+</div>
+<i class="w-5 h-5 text-[#8571BE] stroke-[2.2] group-hover:translate-x-0.5 transition-transform" data-lucide="chevron-right"></i>
+</a>
+</div>
+</section>
+<!-- END: SectionConta -->
+<!-- BEGIN: SectionPreferencias -->
+<section class="space-y-2" data-purpose="preferences-settings">
+<header class="px-1">
+<h3 class="text-base font-bold text-[#0E625A]">Preferências</h3>
+<p class="text-xs text-[#7A8E8B] mt-0.5">Personalize sua experiência na Teko.</p>
+</header>
+<!-- Lista de Preferências -->
+<div class="bg-white rounded-2xl border border-[#F0EBE1] shadow-[0_2px_8px_rgba(0,0,0,0.03)] divide-y divide-gray-100 overflow-hidden">
+<!-- Item: Notificações -->
+<a class="flex items-center justify-between p-3.5 hover:bg-[#FAF8F5] transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-[#EBF7F5] flex items-center justify-center text-[#1B6F68]">
+<i class="w-5 h-5 stroke-[2]" data-lucide="bell"></i>
+</div>
+<span class="text-sm font-semibold text-[#1C3633]">Notificações</span>
+</div>
+<i class="w-5 h-5 text-[#8571BE] stroke-[2.2] group-hover:translate-x-0.5 transition-transform" data-lucide="chevron-right"></i>
+</a>
+<!-- Item: Aparência -->
+<a class="flex items-center justify-between p-3.5 hover:bg-[#FAF8F5] transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-[#EBF7F5] flex items-center justify-center text-[#1B6F68]">
+<i class="w-5 h-5 stroke-[2]" data-lucide="palette"></i>
+</div>
+<span class="text-sm font-semibold text-[#1C3633]">Aparência</span>
+</div>
+<i class="w-5 h-5 text-[#8571BE] stroke-[2.2] group-hover:translate-x-0.5 transition-transform" data-lucide="chevron-right"></i>
+</a>
+</div>
+</section>
+<!-- END: SectionPreferencias -->
+<!-- BEGIN: SectionInformacoes -->
+<section class="space-y-2" data-purpose="info-settings">
+<header class="px-1">
+<h3 class="text-base font-bold text-[#0E625A]">Informações</h3>
+<p class="text-xs text-[#7A8E8B] mt-0.5">Saiba mais sobre o app e nossas políticas.</p>
+</header>
+<!-- Informações Card -->
+<div class="bg-white rounded-2xl border border-[#F0EBE1] shadow-[0_2px_8px_rgba(0,0,0,0.03)] divide-y divide-gray-100 overflow-hidden">
+<!-- Item: Termos e Privacidade -->
+<a class="flex items-center justify-between p-3.5 hover:bg-[#FAF8F5] transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-[#EBF7F5] flex items-center justify-center text-[#1B6F68]">
+<i class="w-5 h-5 stroke-[2]" data-lucide="file-text"></i>
+</div>
+<span class="text-sm font-semibold text-[#1C3633]">Termos e Privacidade</span>
+</div>
+<i class="w-5 h-5 text-[#8571BE] stroke-[2.2] group-hover:translate-x-0.5 transition-transform" data-lucide="chevron-right"></i>
+</a>
+<!-- Item: Sobre a Teko -->
+<a class="flex items-center justify-between p-3.5 hover:bg-[#FAF8F5] transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-[#EBF7F5] flex items-center justify-center text-[#1B6F68]">
+<i class="w-5 h-5 stroke-[2]" data-lucide="info"></i>
+</div>
+<span class="text-sm font-semibold text-[#1C3633]">Sobre a Teko</span>
+</div>
+<i class="w-5 h-5 text-[#8571BE] stroke-[2.2] group-hover:translate-x-0.5 transition-transform" data-lucide="chevron-right"></i>
+</a>
+</div>
+</section>
+<!-- END: SectionInformacoes -->
+<!-- BEGIN: LogoutCard -->
+<section class="pt-1" data-purpose="logout-action">
+<button class="w-full bg-white rounded-2xl border border-[#F0EBE1] shadow-[0_2px_8px_rgba(0,0,0,0.03)] p-3.5 flex items-center justify-between hover:bg-[#FDF6F8] transition-colors group text-left" type="button">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#F6EEFA] flex items-center justify-center text-[#8C6DFA]">
+<i class="w-5 h-5 stroke-[2.2]" data-lucide="log-out"></i>
+</div>
+<span class="text-sm font-semibold text-[#1C3633]">Sair da conta</span>
+</div>
+<i class="w-5 h-5 text-[#8571BE] stroke-[2.2] group-hover:translate-x-0.5 transition-transform" data-lucide="chevron-right"></i>
+</button>
+</section>
+<!-- END: LogoutCard -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigation -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0A4D46] rounded-t-[28px] px-6 pt-3 pb-3 flex justify-between items-center text-white z-50 shadow-lg">
+<!-- Tab 1: Início (Ativo com indicador) -->
+<a class="flex flex-col items-center justify-center flex-1 text-white relative" href="#">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="w-5 h-5 stroke-[2.5] fill-white" data-lucide="home"></i>
+</div>
+<span class="text-[11px] font-bold tracking-tight">Início</span>
+<!-- Indicador Lilás sob a aba ativa -->
+<span class="w-7 h-1 bg-[#B58BFF] rounded-full mt-1"></span>
+</a>
+<!-- Tab 2: Pacientes -->
+<a class="flex flex-col items-center justify-center flex-1 text-white/70 hover:text-white transition-colors" href="#">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="w-5 h-5 stroke-[2]" data-lucide="users"></i>
+</div>
+<span class="text-[11px] font-medium tracking-tight">Pacientes</span>
+<span class="w-7 h-1 bg-transparent mt-1"></span>
+</a>
+<!-- Tab 3: Jogos -->
+<a class="flex flex-col items-center justify-center flex-1 text-white/70 hover:text-white transition-colors" href="#">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="w-5 h-5 stroke-[2]" data-lucide="gamepad-2"></i>
+</div>
+<span class="text-[11px] font-medium tracking-tight">Jogos</span>
+<span class="w-7 h-1 bg-transparent mt-1"></span>
+</a>
+<!-- Tab 4: Agenda -->
+<a class="flex flex-col items-center justify-center flex-1 text-white/70 hover:text-white transition-colors" href="#">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="w-5 h-5 stroke-[2]" data-lucide="calendar"></i>
+</div>
+<span class="text-[11px] font-medium tracking-tight">Agenda</span>
+<span class="w-7 h-1 bg-transparent mt-1"></span>
+</a>
+</nav>
+<!-- END: BottomNavigation -->
+</div>
+<!-- END: MobileContainer -->
+<!-- BEGIN: ScriptInitialization -->
+<script data-purpose="lucide-icons-init">
+    // Renderiza os ícones da biblioteca Lucide
+    lucide.createIcons();
+  </script>
+<!-- END: ScriptInitialization -->
+</body></html>

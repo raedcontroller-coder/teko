@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { ArrowLeft, UserCircle, Award, User, Mail, Lock, FileText, Building, CheckCircle2, AlertTriangle, Eye, EyeOff } from 'lucide-react-native';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
 
 interface NewPsychologistScreenProps {
   onGoBack: () => void;
@@ -128,28 +129,22 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
           <Pressable 
-            style={({ pressed }) => [
-              styles.backButton,
-            ]}
+            style={styles.backButton}
             onPress={onGoBack}
           >
-            {({ pressed }) => (
-              <>
-                <ArrowLeft color={pressed ? "#FFC857" : "#FFF"} size={24} />
-                <Text style={[styles.backButtonText, pressed && { color: '#FFC857' }]}>Voltar para Meus profissionais</Text>
-              </>
-            )}
+            <ArrowLeft color={theme.colors.primary} size={20} />
+            <Text style={styles.backButtonText}>Voltar para Meus profissionais</Text>
           </Pressable>
 
           {/* Seção 1: Credenciais */}
           <View style={styles.section}>
             <View style={styles.watermarkContainer}>
-              <UserCircle color="rgba(255,255,255,0.07)" size={140} />
+              <UserCircle color={theme.colors.tealSoft} size={140} />
             </View>
             
             <View style={styles.sectionHeader}>
-              <View style={styles.iconContainerYellow}>
-                <UserCircle color="#FFC857" size={48} />
+              <View style={styles.iconContainerTeal}>
+                <UserCircle color={theme.colors.primary} size={28} />
               </View>
               <View style={styles.sectionHeaderTextContainer}>
                 <Text style={styles.sectionTitle}>Credenciais de Acesso</Text>
@@ -158,13 +153,13 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.labelYellow}>Nome Completo *</Text>
-              <View style={styles.inputContainerYellow}>
-                <User color="rgba(255,255,255,0.4)" size={20} style={styles.inputIcon} />
+              <Text style={styles.labelSection}>Nome Completo *</Text>
+              <View style={styles.inputContainer}>
+                <User color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Ex: Dra. Ana Souza"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={formData.name}
                   onChangeText={(val) => handleChange('name', val)}
                 />
@@ -172,13 +167,13 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.labelYellow}>E-mail de Acesso *</Text>
-              <View style={styles.inputContainerYellow}>
-                <Mail color="rgba(255,255,255,0.4)" size={20} style={styles.inputIcon} />
+              <Text style={styles.labelSection}>E-mail de Acesso *</Text>
+              <View style={styles.inputContainer}>
+                <Mail color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="ana@clinica.com"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor={theme.colors.textMuted}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   value={formData.email}
@@ -188,19 +183,19 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.labelYellow}>Senha Temporária *</Text>
-              <View style={styles.inputContainerYellow}>
-                <Lock color="rgba(255,255,255,0.4)" size={20} style={styles.inputIcon} />
+              <Text style={styles.labelSection}>Senha Temporária *</Text>
+              <View style={styles.inputContainer}>
+                <Lock color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="******"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor={theme.colors.textMuted}
                   secureTextEntry={!showPassword}
                   value={formData.password}
                   onChangeText={(val) => handleChange('password', val)}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
-                  {showPassword ? <EyeOff color="rgba(255,255,255,0.5)" size={20} /> : <Eye color="rgba(255,255,255,0.5)" size={20} />}
+                  {showPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
                 </TouchableOpacity>
               </View>
             </View>
@@ -209,12 +204,12 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
           {/* Seção 2: Informações Profissionais */}
           <View style={styles.section}>
             <View style={styles.watermarkContainer}>
-              <Award color="rgba(255,255,255,0.07)" size={140} />
+              <Award color={theme.colors.badgePurple} size={140} />
             </View>
             
             <View style={styles.sectionHeader}>
               <View style={styles.iconContainerPurple}>
-                <Award color="#7B61FF" size={48} />
+                <Award color={theme.colors.badgePurpleText} size={28} />
               </View>
               <View style={styles.sectionHeaderTextContainer}>
                 <Text style={styles.sectionTitle}>Informações Profissionais</Text>
@@ -223,13 +218,13 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.labelPurple}>CRP (Opcional)</Text>
-              <View style={styles.inputContainerPurple}>
-                <FileText color="rgba(255,255,255,0.4)" size={20} style={styles.inputIcon} />
+              <Text style={styles.labelSection}>CRP (Opcional)</Text>
+              <View style={styles.inputContainer}>
+                <FileText color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="00/00000"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor={theme.colors.textMuted}
                   keyboardType="numeric"
                   value={formData.crp}
                   onChangeText={(val) => handleChange('crp', val)}
@@ -238,13 +233,13 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.labelPurple}>Nome da Clínica (Opcional)</Text>
-              <View style={styles.inputContainerPurple}>
-                <Building color="rgba(255,255,255,0.4)" size={20} style={styles.inputIcon} />
+              <Text style={styles.labelSection}>Nome da Clínica (Opcional)</Text>
+              <View style={styles.inputContainer}>
+                <Building color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Ex: Clínica Evoluir"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={formData.clinicName}
                   onChangeText={(val) => handleChange('clinicName', val)}
                 />
@@ -255,18 +250,16 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
           <Pressable 
             style={({ pressed }) => [
               styles.saveButton,
-              (loading) && { opacity: 0.7 },
-              pressed && !loading && { backgroundColor: '#7B61FF' }
+              loading && { opacity: 0.7 },
+              pressed && !loading && { backgroundColor: theme.colors.primaryDark }
             ]}
             onPress={handleRegister}
             disabled={loading}
           >
-            {({ pressed }) => (
-              loading ? (
-                <ActivityIndicator color="#084D48" />
-              ) : (
-                <Text style={[styles.saveButtonText, pressed && !loading && { color: '#FFF' }]}>Cadastrar Profissional</Text>
-              )
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.saveButtonText}>Cadastrar Profissional</Text>
             )}
           </Pressable>
 
@@ -276,15 +269,15 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
       {/* Toasts Animados */}
       {showSuccessToast && (
         <Animated.View style={[styles.toast, styles.toastSuccess, { top: slideAnim }]}>
-          <CheckCircle2 color="#FFF" size={24} />
+          <CheckCircle2 color={theme.colors.primary} size={24} />
           <Text style={styles.toastText}>{successMessage}</Text>
         </Animated.View>
       )}
 
       {showErrorToast && (
         <Animated.View style={[styles.toast, styles.toastError, { top: errorSlideAnim }]}>
-          <AlertTriangle color="#FFF" size={24} />
-          <Text style={styles.toastText}>{errorMessage}</Text>
+          <AlertTriangle color="#DC2626" size={24} />
+          <Text style={[styles.toastText, { color: '#DC2626' }]}>{errorMessage}</Text>
         </Animated.View>
       )}
 
@@ -295,32 +288,34 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#064b46',
+    backgroundColor: theme.colors.bg,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 40,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
+    gap: 8,
   },
   backButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
+    color: theme.colors.primary,
+    fontSize: 14,
+    fontWeight: '700',
   },
   section: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 20,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
     overflow: 'hidden',
+    position: 'relative',
+    ...theme.shadows.card,
   },
   watermarkContainer: {
     position: 'absolute',
@@ -328,102 +323,88 @@ const styles = StyleSheet.create({
     right: -20,
     zIndex: 0,
     pointerEvents: 'none',
+    opacity: 0.5,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
-    gap: 16,
+    marginBottom: 20,
+    gap: 14,
     zIndex: 1,
   },
-  iconContainerYellow: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: 'rgba(255,246,227,0.05)',
+  iconContainerTeal: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: theme.colors.tealSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#FFC857',
+    borderWidth: 1.5,
+    borderColor: theme.colors.tealMint,
   },
   iconContainerPurple: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: 'rgba(255,246,227,0.05)',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: theme.colors.badgePurple,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#7B61FF',
+    borderWidth: 1.5,
+    borderColor: `${theme.colors.badgePurpleText}30`,
   },
   sectionHeaderTextContainer: {
     flex: 1,
   },
   sectionTitle: {
-    color: '#FFF',
-    fontSize: 22,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 18,
+    fontWeight: '800',
   },
   sectionSubtitle: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 14,
-    marginTop: 4,
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    marginTop: 2,
   },
   inputGroup: {
     marginBottom: 16,
   },
-  labelYellow: {
-    color: '#FFC857',
-    fontSize: 14,
-    fontWeight: 'bold',
+  labelSection: {
+    color: theme.colors.textDark,
+    fontSize: 13,
+    fontWeight: '700',
     marginBottom: 8,
   },
-  labelPurple: {
-    color: '#7B61FF',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  inputContainerYellow: {
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: theme.colors.bg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    height: 54,
-    paddingHorizontal: 16,
-  },
-  inputContainerPurple: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    height: 54,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
+    height: 48,
     paddingHorizontal: 16,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   input: {
     flex: 1,
-    color: '#FFF',
-    fontSize: 16,
+    color: theme.colors.textDark,
+    fontSize: 15,
   },
   saveButton: {
-    backgroundColor: '#FFC857',
-    paddingVertical: 16,
-    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    height: 52,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
+    ...theme.shadows.subtle,
   },
   saveButtonText: {
-    color: '#084D48',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   toast: {
     position: 'absolute',
@@ -432,25 +413,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-    zIndex: 999,
+    borderRadius: theme.radii.md,
+    borderWidth: 1,
+    ...theme.shadows.floating,
+    zIndex: 9999,
   },
   toastSuccess: {
-    backgroundColor: '#059669',
+    backgroundColor: theme.colors.cardBg,
+    borderColor: theme.colors.cardBorder,
+    borderLeftWidth: 6,
+    borderLeftColor: theme.colors.primary,
   },
   toastError: {
-    backgroundColor: '#EF4444',
+    backgroundColor: theme.colors.cardBg,
+    borderColor: theme.colors.cardBorder,
+    borderLeftWidth: 6,
+    borderLeftColor: '#DC2626',
   },
   toastText: {
-    color: '#FFF',
+    color: theme.colors.textDark,
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginLeft: 12,
     flex: 1,
   },
 });
+

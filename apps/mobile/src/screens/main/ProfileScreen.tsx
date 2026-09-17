@@ -16,6 +16,8 @@ import {
 } from 'react-native';
 import { UserCircle, Lock, Save, AlertTriangle, Trash2, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react-native';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
+import { useTranslation } from '../../i18n';
 
 interface ProfileScreenProps {
   onLogout: (dest: 'Login' | 'Register') => void;
@@ -23,6 +25,7 @@ interface ProfileScreenProps {
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUpdate }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [savingPersonal, setSavingPersonal] = useState(false);
   const [savingSecurity, setSavingSecurity] = useState(false);
@@ -138,10 +141,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
       const response = await api.put('/api/my-data?type=personal', personalData);
       if (response.data.success) {
         onUserUpdate(personalData);
-        showToast('Dados atualizados com sucesso!');
+        showToast(t.profileScreen.saveSuccess);
       }
     } catch (error: any) {
-      const msg = error.response?.data?.error || 'Erro ao atualizar dados.';
+      const msg = error.response?.data?.error || t.profileScreen.updatePersonalError;
       showError(msg);
     } finally {
       setSavingPersonal(false);
@@ -150,19 +153,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
 
   const handleUpdatePassword = () => {
     if (!securityData.currentPassword || !securityData.newPassword || !securityData.confirmPassword) {
-      showError('Preencha todos os campos de senha.');
+      showError(t.profileScreen.fillPasswordFields);
       return;
     }
     if (securityData.newPassword === securityData.currentPassword) {
-      showError('A nova senha não pode ser igual à atual.');
+      showError(t.profileScreen.samePasswordError);
       return;
     }
     if (securityData.newPassword !== securityData.confirmPassword) {
-      showError('A nova senha e a confirmação não conferem.');
+      showError(t.profileScreen.passwordMismatch);
       return;
     }
     if (securityData.newPassword.length < 6) {
-      showError('A nova senha deve ter no mínimo 6 caracteres.');
+      showError(t.profileScreen.passwordLengthError);
       return;
     }
 
@@ -178,12 +181,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
       });
       if (response.data.success) {
         setShowPasswordModal(false);
-        showToast('Senha atualizada! Refaça o login.');
+        showToast(t.profileScreen.passwordSuccess);
         setTimeout(() => onLogout('Login'), 2000);
       }
     } catch (error: any) {
       setShowPasswordModal(false);
-      const msg = error.response?.data?.error || 'Erro ao atualizar senha.';
+      const msg = error.response?.data?.error || t.profileScreen.passwordUpdateError;
       showError(msg);
     } finally {
       setSavingSecurity(false);
@@ -204,7 +207,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
       }
     } catch (error: any) {
       setShowDeleteModal(false);
-      const msg = error.response?.data?.error || 'Erro ao excluir conta.';
+      const msg = error.response?.data?.error || t.profileScreen.deleteAccountError;
       showError(msg);
     } finally {
       setDeletingAccount(false);
@@ -214,7 +217,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#FFC857" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -226,42 +229,41 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
     >
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.headerArea}>
-          <Text style={styles.mainTitle}>Meu Perfil</Text>
-          <Text style={styles.mainSubtitle}>Gerencie seus dados e acessos da plataforma Teko.</Text>
+          <Text style={styles.mainTitle}>{t.profileScreen.mainTitle}</Text>
+          <Text style={styles.mainSubtitle}>{t.profileScreen.mainSubtitle}</Text>
         </View>
         
-        {/* Seção Meus Dados (Amarelo) */}
+        {/* Seção Meus Dados */}
         <View style={styles.card}>
           <View style={styles.cardBgIcon}>
-            <UserCircle color="rgba(255, 255, 255, 0.05)" size={120} />
+            <UserCircle color={theme.colors.primary} size={110} />
           </View>
-          
           <View style={styles.cardHeader}>
             <View style={styles.iconCircleYellow}>
-              <UserCircle color="#FFC857" size={32} />
+              <UserCircle color={theme.colors.primary} size={28} />
             </View>
             <View style={styles.headerTexts}>
-              <Text style={styles.sectionTitle}>Meus Dados</Text>
-              <Text style={styles.sectionSubtitle}>Informações de perfil e contato.</Text>
+              <Text style={styles.sectionTitle}>{t.profileScreen.myDetails}</Text>
+              <Text style={styles.sectionSubtitle}>{t.profileScreen.myDetailsSub}</Text>
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Nome Completo</Text>
+            <Text style={styles.labelYellow}>{t.profileScreen.fullName}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Seu nome"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.auth.namePlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               value={personalData.name}
               onChangeText={(t) => handlePersonalChange('name', t)}
             />
           </View>
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Email de Acesso</Text>
+            <Text style={styles.labelYellow}>{t.profileScreen.emailAccess}</Text>
             <TextInput
               style={styles.input}
-              placeholder="seu@email.com"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.auth.emailPlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               keyboardType="email-address"
               autoCapitalize="none"
               value={personalData.email}
@@ -269,21 +271,21 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
             />
           </View>
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>CRP (Opcional)</Text>
+            <Text style={styles.labelYellow}>{t.profileScreen.crpOptional}</Text>
             <TextInput
               style={styles.input}
-              placeholder="00/00000"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.auth.crpPlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               value={personalData.crp}
               onChangeText={(t) => handlePersonalChange('crp', t)}
             />
           </View>
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Nome da Clínica (Opcional)</Text>
+            <Text style={styles.labelYellow}>{t.profileScreen.clinicOptional}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Sua clínica"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.auth.clinicPlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               value={personalData.clinicName}
               onChangeText={(t) => handlePersonalChange('clinicName', t)}
             />
@@ -295,78 +297,77 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
             onPress={handleSavePersonal}
             disabled={savingPersonal}
           >
-            {savingPersonal ? <ActivityIndicator color="#181c1c" /> : (
+            {savingPersonal ? <ActivityIndicator color="#FFF" /> : (
               <>
-                <Save color="#181c1c" size={20} />
-                <Text style={styles.saveButtonTextYellow}>Salvar Alterações</Text>
+                <Save color="#FFF" size={18} />
+                <Text style={styles.saveButtonTextYellow}>{t.profileScreen.saveChanges}</Text>
               </>
             )}
           </TouchableOpacity>
         </View>
 
-        {/* Seção Segurança (Roxo) */}
+        {/* Seção Segurança */}
         <View style={[styles.card, styles.cardPurple]}>
           <View style={styles.cardBgIcon}>
-            <Lock color="rgba(255, 255, 255, 0.05)" size={120} />
+            <Lock color={theme.colors.badgePurpleText} size={110} />
           </View>
-          
           <View style={styles.cardHeader}>
             <View style={styles.iconCirclePurple}>
-              <Lock color="#7B61FF" size={32} />
+              <Lock color={theme.colors.badgePurpleText} size={28} />
             </View>
             <View style={styles.headerTexts}>
-              <Text style={styles.sectionTitle}>Segurança e Acesso</Text>
-              <Text style={styles.sectionSubtitle}>Atualize sua senha para manter sua conta segura.</Text>
+              <Text style={styles.sectionTitle}>{t.profileScreen.securitySection}</Text>
+              <Text style={styles.sectionSubtitle}>{t.profileScreen.securitySub}</Text>
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Senha Atual</Text>
+            <Text style={styles.labelPurple}>{t.profileScreen.currentPassword}</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="••••••••"
-                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholderTextColor={theme.colors.textMuted}
                 secureTextEntry={!showCurrentPassword}
                 value={securityData.currentPassword}
                 onChangeText={(t) => setSecurityData(p => ({...p, currentPassword: t}))}
               />
               <TouchableOpacity onPress={() => setShowCurrentPassword(!showCurrentPassword)} style={styles.eyeIcon}>
-                {showCurrentPassword ? <EyeOff color="rgba(255,255,255,0.5)" size={20} /> : <Eye color="rgba(255,255,255,0.5)" size={20} />}
+                {showCurrentPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
               </TouchableOpacity>
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Nova Senha</Text>
+            <Text style={styles.labelPurple}>{t.profileScreen.newPassword}</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="••••••••"
-                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholderTextColor={theme.colors.textMuted}
                 secureTextEntry={!showNewPassword}
                 value={securityData.newPassword}
                 onChangeText={(t) => setSecurityData(p => ({...p, newPassword: t}))}
               />
               <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)} style={styles.eyeIcon}>
-                {showNewPassword ? <EyeOff color="rgba(255,255,255,0.5)" size={20} /> : <Eye color="rgba(255,255,255,0.5)" size={20} />}
+                {showNewPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
               </TouchableOpacity>
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Confirmar Nova Senha</Text>
+            <Text style={styles.labelPurple}>{t.profileScreen.confirmNewPassword}</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="••••••••"
-                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholderTextColor={theme.colors.textMuted}
                 secureTextEntry={!showConfirmPassword}
                 value={securityData.confirmPassword}
                 onChangeText={(t) => setSecurityData(p => ({...p, confirmPassword: t}))}
               />
               <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
-                {showConfirmPassword ? <EyeOff color="rgba(255,255,255,0.5)" size={20} /> : <Eye color="rgba(255,255,255,0.5)" size={20} />}
+                {showConfirmPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
               </TouchableOpacity>
             </View>
           </View>
@@ -379,26 +380,25 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
           >
             {savingSecurity ? <ActivityIndicator color="#FFF" /> : (
               <>
-                <Save color="#FFF" size={20} />
-                <Text style={styles.saveButtonTextPurple}>Atualizar Senha</Text>
+                <Save color="#FFF" size={18} />
+                <Text style={styles.saveButtonTextPurple}>{t.profileScreen.updatePasswordBtn}</Text>
               </>
             )}
           </TouchableOpacity>
         </View>
 
-        {/* Seção Exclusão (Vermelho) */}
+        {/* Seção Exclusão */}
         <View style={[styles.card, styles.cardRed]}>
           <View style={styles.cardBgIcon}>
-            <AlertTriangle color="rgba(255, 255, 255, 0.05)" size={120} />
+            <AlertTriangle color={theme.colors.accentOrange} size={110} />
           </View>
-          
           <View style={styles.cardHeader}>
             <View style={styles.iconCircleRed}>
-              <AlertTriangle color="#F87171" size={32} />
+              <AlertTriangle color={theme.colors.accentOrange} size={28} />
             </View>
             <View style={styles.headerTexts}>
-              <Text style={[styles.sectionTitle, { color: '#F87171' }]}>Exclusão de Conta</Text>
-              <Text style={styles.sectionSubtitle}>Encerre sua conta permanentemente.</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.accentOrange }]}>{t.profileScreen.dangerZone}</Text>
+              <Text style={styles.sectionSubtitle}>{t.profileScreen.dangerSub}</Text>
             </View>
           </View>
 
@@ -407,8 +407,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
             activeOpacity={0.8}
             onPress={handleDeleteAccount}
           >
-            <Trash2 color="#FFF" size={20} />
-            <Text style={styles.deleteButtonTextRed}>Excluir Conta</Text>
+            <Trash2 color="#FFF" size={18} />
+            <Text style={styles.deleteButtonTextRed}>{t.profileScreen.deleteAccountBtn}</Text>
           </TouchableOpacity>
         </View>
 
@@ -425,9 +425,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
             <View style={styles.modalIconBgPurple}>
               <Lock color="#7B61FF" size={32} />
             </View>
-            <Text style={styles.modalTitlePurple}>Atenção!</Text>
+            <Text style={styles.modalTitlePurple}>{t.profileScreen.confirmModalTitle}</Text>
             <Text style={styles.modalMessage}>
-              Você está prestes a atualizar sua senha. Para concluir essa ação com segurança, sua sessão atual será encerrada e você deverá fazer login novamente.
+              {t.profileScreen.confirmModalText}
             </Text>
             
             <View style={styles.modalActions}>
@@ -437,7 +437,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 disabled={savingSecurity}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.modalCancelText, pressed && { color: '#FFF' }]}>Cancelar</Text>
+                  <Text style={[styles.modalCancelText, pressed && { color: '#FFF' }]}>{t.common.cancel}</Text>
                 )}
               </Pressable>
               
@@ -447,7 +447,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 disabled={savingSecurity}
               >
                 {({ pressed }) => savingSecurity ? <ActivityIndicator color="#FFF" /> : (
-                  <Text style={[styles.modalConfirmTextPurple, pressed && { color: '#FFF' }]}>Confirmar e Sair</Text>
+                  <Text style={[styles.modalConfirmTextPurple, pressed && { color: '#FFF' }]}>{t.profileScreen.confirmAndLogout}</Text>
                 )}
               </Pressable>
             </View>
@@ -466,9 +466,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
             <View style={styles.modalIconBgRed}>
               <AlertTriangle color="#F87171" size={32} />
             </View>
-            <Text style={styles.modalTitleRed}>Ação Irreversível</Text>
+            <Text style={styles.modalTitleRed}>{t.profileScreen.deleteAccountModalTitle}</Text>
             <Text style={styles.modalMessage}>
-              Você está prestes a excluir permanentemente sua conta. Você perderá todos os acessos, pacientes e histórico.{"\n\n"}Tem certeza absoluta?
+              {t.profileScreen.deleteAccountModalMessage}
             </Text>
             
             <View style={styles.modalActions}>
@@ -478,7 +478,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 disabled={deletingAccount}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.modalCancelText, pressed && { color: '#FFF' }]}>Cancelar</Text>
+                  <Text style={[styles.modalCancelText, pressed && { color: '#FFF' }]}>{t.common.cancel}</Text>
                 )}
               </Pressable>
               
@@ -488,7 +488,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 disabled={deletingAccount}
               >
                 {({ pressed }) => deletingAccount ? <ActivityIndicator color="#FFF" /> : (
-                  <Text style={[styles.modalConfirmTextRed, pressed && { color: '#FFF' }]}>Sim, Excluir</Text>
+                  <Text style={[styles.modalConfirmTextRed, pressed && { color: '#FFF' }]}>{t.common.delete}</Text>
                 )}
               </Pressable>
             </View>
@@ -503,7 +503,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
             <CheckCircle2 color="#FFC857" size={28} />
           </View>
           <View style={styles.toastTextContainer}>
-            <Text style={styles.toastTitle}>Sucesso!</Text>
+            <Text style={styles.toastTitle}>{t.common.success}</Text>
             <Text style={styles.toastMessage}>{successMessage}</Text>
           </View>
         </Animated.View>
@@ -531,85 +531,89 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#064b46', // Matching dashboard bg slightly
+    backgroundColor: theme.colors.bg,
   },
   container: {
     flex: 1,
-    backgroundColor: '#064b46',
+    backgroundColor: theme.colors.bg,
   },
   headerArea: {
-    paddingHorizontal: 8,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 4,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
   mainTitle: {
-    color: '#FFF',
-    fontSize: 28,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.4,
   },
   mainSubtitle: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.textMuted,
     fontSize: 14,
-    marginTop: 4,
+    marginTop: 2,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    gap: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 110,
+    gap: 16,
   },
   card: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
     overflow: 'hidden',
+    position: 'relative',
+    ...theme.shadows.subtle,
   },
   cardPurple: {
-    borderColor: 'rgba(123,97,255,0.2)',
+    borderColor: theme.colors.cardBorder,
   },
   cardRed: {
-    borderColor: 'rgba(248,113,113,0.2)',
+    borderColor: theme.colors.cardBorder,
   },
   cardBgIcon: {
     position: 'absolute',
-    top: -20,
-    right: -20,
-    opacity: 0.8,
+    top: -10,
+    right: -10,
+    opacity: 0.12,
+    pointerEvents: 'none',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
-    gap: 16,
+    marginBottom: 20,
+    gap: 14,
   },
   iconCircleYellow: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderWidth: 2,
-    borderColor: '#FFC857',
+    width: 48,
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.tealSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconCirclePurple: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderWidth: 2,
-    borderColor: '#7B61FF',
+    width: 48,
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.purpleSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.badgePurple,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconCircleRed: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(248,113,113,0.1)',
-    borderWidth: 2,
-    borderColor: '#F87171',
+    width: 48,
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: 'rgba(224, 122, 95, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(224, 122, 95, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -617,305 +621,301 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    color: theme.colors.textDark,
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   sectionSubtitle: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontSize: 13,
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   labelYellow: {
-    color: '#FFC857',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: theme.colors.textDark,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 6,
   },
   labelPurple: {
-    color: '#7B61FF',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: theme.colors.textDark,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 6,
   },
   input: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     paddingHorizontal: 16,
-    height: 52,
-    color: '#FFF',
-    fontSize: 16,
+    height: 48,
+    color: theme.colors.textDark,
+    fontSize: 15,
   },
   passwordContainer: {
     position: 'relative',
     justifyContent: 'center',
   },
   passwordInput: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     paddingLeft: 16,
     paddingRight: 48,
-    height: 52,
-    color: '#FFF',
-    fontSize: 16,
+    height: 48,
+    color: theme.colors.textDark,
+    fontSize: 15,
   },
   eyeIcon: {
     position: 'absolute',
-    right: 16,
+    right: 14,
     padding: 4,
   },
   saveButtonYellow: {
     flexDirection: 'row',
-    backgroundColor: '#FFC857',
-    height: 56,
-    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    height: 50,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 8,
+    marginTop: 6,
+    ...theme.shadows.subtle,
   },
   saveButtonTextYellow: {
-    color: '#181c1c',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
   saveButtonPurple: {
     flexDirection: 'row',
-    backgroundColor: '#7B61FF',
-    height: 56,
-    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    height: 50,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 8,
+    marginTop: 6,
+    ...theme.shadows.subtle,
   },
   saveButtonTextPurple: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
   },
   deleteButtonRed: {
     flexDirection: 'row',
-    backgroundColor: '#F87171',
-    height: 56,
-    borderRadius: 16,
+    backgroundColor: theme.colors.accentOrange,
+    height: 50,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 8,
+    marginTop: 6,
   },
   deleteButtonTextRed: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
   },
 
   /* Toasts */
   toastContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 20 : 10,
+    top: Platform.OS === 'ios' ? 40 : 20,
     right: 16,
     left: 16,
-    backgroundColor: '#181c1c', 
+    backgroundColor: theme.colors.cardBg, 
     borderLeftWidth: 6,
-    borderLeftColor: '#FFC857',
+    borderLeftColor: theme.colors.primary,
     borderTopWidth: 1,
     borderRightWidth: 1,
     borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, 
+    padding: 16, 
+    ...theme.shadows.floating,
   },
   toastIconBg: {
-    width: 50, 
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,200,87,0.15)',
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.tealSoft,
     borderWidth: 1,
-    borderColor: 'rgba(255,200,87,0.4)',
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   toastTitle: {
-    color: '#FFC857', 
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
+    color: theme.colors.primary, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   errorToastContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 20 : 10,
+    top: Platform.OS === 'ios' ? 40 : 20,
     right: 16,
     left: 16,
-    backgroundColor: '#181c1c', 
+    backgroundColor: theme.colors.cardBg, 
     borderLeftWidth: 6,
-    borderLeftColor: '#FF4B4B',
+    borderLeftColor: theme.colors.accentOrange,
     borderTopWidth: 1,
     borderRightWidth: 1,
     borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, 
+    padding: 16, 
+    ...theme.shadows.floating,
   },
   errorToastIconBg: {
-    width: 50, 
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 75, 75, 0.15)',
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(224, 122, 95, 0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 75, 75, 0.4)',
+    borderColor: 'rgba(224, 122, 95, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   toastTextContainer: {
     flex: 1,
   },
   errorToastTitle: {
-    color: '#FF4B4B', 
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
+    color: theme.colors.accentOrange, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   toastMessage: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 15,
+    color: theme.colors.textDark,
+    fontSize: 13,
     fontWeight: '500',
   },
 
   /* Modal de Confirmação */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: 20,
   },
   modalContainer: {
     width: '100%',
-    backgroundColor: '#181c1c',
-    borderRadius: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
     padding: 24,
     borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
     alignItems: 'center',
+    ...theme.shadows.floating,
   },
   modalMessage: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 16,
+    color: theme.colors.textMuted,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
+    lineHeight: 20,
+    marginBottom: 20,
   },
   modalActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     width: '100%',
   },
   modalCancelButton: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.tealSoft,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCancelText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 15,
+    fontWeight: '700',
   },
 
   /* Modal Roxo (Senha) */
   modalContainerPurple: {
-    borderColor: 'rgba(123, 97, 255, 0.2)',
+    borderColor: theme.colors.cardBorder,
   },
   modalIconBgPurple: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(123, 97, 255, 0.1)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.purpleSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(123, 97, 255, 0.3)',
+    borderColor: theme.colors.badgePurple,
   },
   modalTitlePurple: {
-    color: '#7B61FF',
-    fontSize: 22,
-    fontWeight: '900',
-    marginBottom: 12,
+    color: theme.colors.textDark,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
   },
   modalConfirmButtonPurple: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#7B61FF',
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalConfirmTextPurple: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
   },
 
   /* Modal Vermelho (Exclusão) */
   modalContainerRed: {
-    borderColor: 'rgba(255, 75, 75, 0.2)',
+    borderColor: theme.colors.accentOrange,
   },
   modalIconBgRed: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255, 75, 75, 0.1)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(224, 122, 95, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 75, 75, 0.3)',
+    borderColor: 'rgba(224, 122, 95, 0.3)',
   },
   modalTitleRed: {
-    color: '#F87171',
-    fontSize: 22,
-    fontWeight: '900',
-    marginBottom: 12,
+    color: theme.colors.accentOrange,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
   },
   modalConfirmButtonRed: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#F87171',
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.accentOrange,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalConfirmTextRed: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
   }
 });

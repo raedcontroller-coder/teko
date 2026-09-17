@@ -4,17 +4,18 @@ import {
   Text, 
   StyleSheet, 
   SafeAreaView, 
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-  Alert,
-  Platform
+  TextInput, 
+  TouchableOpacity, 
+  FlatList, 
+  ActivityIndicator, 
+  Alert, 
+  Platform 
 } from 'react-native';
-import { Search, Download, UserCircle, Briefcase, Phone, AtSign, Fingerprint } from 'lucide-react-native';
+import { Search, Download, UserCircle, Briefcase, AtSign, Fingerprint } from 'lucide-react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
 
 interface DadosRow {
   id: string;
@@ -101,14 +102,14 @@ export const AdminReportsScreen: React.FC = () => {
           <Text style={styles.childMeta}>{item.alunoAge} anos • {item.alunoGender}</Text>
         </View>
         <View style={styles.iconBadge}>
-          <Fingerprint color="#7B61FF" size={20} />
+          <Fingerprint color={theme.colors.badgePurpleText} size={20} />
         </View>
       </View>
 
       <View style={styles.cardBody}>
         {/* Responsável */}
         <View style={styles.dataRow}>
-          <UserCircle color="#FFF" size={16} style={{ opacity: 0.5 }} />
+          <UserCircle color={theme.colors.textMuted} size={16} />
           <View style={styles.dataTextContainer}>
             <Text style={styles.dataLabel}>Responsável</Text>
             <Text style={styles.dataValue}>{item.guardianName}</Text>
@@ -118,7 +119,7 @@ export const AdminReportsScreen: React.FC = () => {
 
         {/* Psicólogo */}
         <View style={styles.dataRow}>
-          <Briefcase color="#FFF" size={16} style={{ opacity: 0.5 }} />
+          <Briefcase color={theme.colors.textMuted} size={16} />
           <View style={styles.dataTextContainer}>
             <Text style={styles.dataLabel}>Psicólogo(a)</Text>
             <Text style={styles.dataValue}>{item.psicologoName}</Text>
@@ -128,7 +129,7 @@ export const AdminReportsScreen: React.FC = () => {
 
         {/* Contato Psi */}
         <View style={styles.dataRow}>
-          <AtSign color="#FFF" size={16} style={{ opacity: 0.5 }} />
+          <AtSign color={theme.colors.textMuted} size={16} />
           <View style={styles.dataTextContainer}>
             <Text style={styles.dataLabel}>Contato (Psi)</Text>
             <Text style={styles.dataValue}>{item.psicologoEmail}</Text>
@@ -140,7 +141,7 @@ export const AdminReportsScreen: React.FC = () => {
       <View style={styles.cardFooter}>
         <View style={styles.metricBadge}>
           <Text style={styles.metricLabel}>TDAH</Text>
-          <Text style={[styles.metricValue, item.alunoTdah === 'Sim' && { color: '#FFC857' }]}>{item.alunoTdah}</Text>
+          <Text style={[styles.metricValue, item.alunoTdah === 'Sim' && { color: theme.colors.primary }]}>{item.alunoTdah}</Text>
         </View>
         <View style={styles.metricBadge}>
           <Text style={styles.metricLabel}>VTRI</Text>
@@ -167,11 +168,11 @@ export const AdminReportsScreen: React.FC = () => {
 
       <View style={styles.controls}>
         <View style={styles.searchContainer}>
-          <Search color="rgba(255,255,255,0.4)" size={20} style={styles.searchIcon} />
+          <Search color={theme.colors.textMuted} size={18} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar (criança, responsável, psicólogo...)"
-            placeholderTextColor="rgba(255,255,255,0.4)"
+            placeholderTextColor={theme.colors.textMuted}
             value={searchTerm}
             onChangeText={setSearchTerm}
           />
@@ -183,10 +184,10 @@ export const AdminReportsScreen: React.FC = () => {
           disabled={exporting}
         >
           {exporting ? (
-            <ActivityIndicator color="#084D48" size="small" />
+            <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             <>
-              <Download color="#084D48" size={20} />
+              <Download color="#FFFFFF" size={18} />
               <Text style={styles.exportButtonText}>Exportar (CSV)</Text>
             </>
           )}
@@ -195,7 +196,7 @@ export const AdminReportsScreen: React.FC = () => {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#FFC857" />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -203,8 +204,11 @@ export const AdminReportsScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           renderItem={renderCard}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+            </View>
           }
         />
       )}
@@ -215,155 +219,162 @@ export const AdminReportsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#064b46',
+    backgroundColor: theme.colors.bg,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 20 : 40,
-    paddingHorizontal: 24,
-    paddingBottom: 16,
+    paddingTop: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 12,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFF',
+    fontSize: 24,
+    fontWeight: '800',
+    color: theme.colors.textDark,
+    letterSpacing: -0.4,
   },
   subtitle: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 4,
+    fontSize: 14,
+    color: theme.colors.textMuted,
+    marginTop: 2,
   },
   controls: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
-    gap: 12,
+    gap: 10,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.full,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
     paddingHorizontal: 16,
-    height: 50,
+    height: 46,
+    ...theme.shadows.subtle,
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    color: '#FFF',
-    fontSize: 16,
+    color: theme.colors.textDark,
+    fontSize: 14,
   },
   exportButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFC857',
-    borderRadius: 12,
-    height: 50,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radii.lg,
+    height: 46,
     gap: 8,
+    ...theme.shadows.subtle,
   },
   exportButtonText: {
-    color: '#084D48',
-    fontWeight: 'bold',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
   listContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingHorizontal: 20,
+    paddingBottom: 110,
+    gap: 12,
   },
   card: {
-    backgroundColor: '#084D48',
-    borderRadius: 20,
-    marginBottom: 16,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: theme.colors.cardBorder,
     overflow: 'hidden',
+    ...theme.shadows.card,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'rgba(123, 97, 255, 0.1)',
+    backgroundColor: theme.colors.badgePurple,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    borderBottomColor: theme.colors.cardBorder,
   },
   childInfoContainer: {
     flex: 1,
   },
   childName: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 16,
+    fontWeight: '800',
   },
   childMeta: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontSize: 13,
     marginTop: 2,
   },
   iconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(123, 97, 255, 0.2)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(124, 58, 237, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardBody: {
     padding: 16,
-    gap: 16,
+    gap: 12,
   },
   dataRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: 10,
   },
   dataTextContainer: {
     flex: 1,
   },
   dataLabel: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: theme.colors.textMuted,
+    fontSize: 11,
+    fontWeight: '700',
     textTransform: 'uppercase',
     marginBottom: 2,
   },
   dataValue: {
-    color: '#FFF',
-    fontSize: 15,
+    color: theme.colors.textDark,
+    fontSize: 14,
+    fontWeight: '600',
   },
   dataSubValue: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 13,
-    marginTop: 2,
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    marginTop: 1,
   },
   cardFooter: {
     flexDirection: 'row',
-    padding: 16,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    padding: 12,
+    backgroundColor: theme.colors.bg,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
+    borderTopColor: theme.colors.cardBorder,
     justifyContent: 'space-around',
   },
   metricBadge: {
     alignItems: 'center',
   },
   metricLabel: {
-    color: '#FFC857',
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    color: theme.colors.textMuted,
+    fontSize: 11,
+    fontWeight: '700',
+    marginBottom: 2,
   },
   metricValue: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 16,
+    color: theme.colors.textDark,
+    fontSize: 14,
+    fontWeight: '800',
+    backgroundColor: theme.colors.cardBg,
+    paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: theme.radii.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
     overflow: 'hidden',
   },
   center: {
@@ -371,10 +382,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+  },
   emptyText: {
-    color: 'rgba(255,255,255,0.5)',
+    color: theme.colors.textMuted,
     textAlign: 'center',
-    marginTop: 24,
-    fontSize: 16,
+    fontSize: 14,
   },
 });
+

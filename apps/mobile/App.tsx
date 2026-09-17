@@ -24,8 +24,11 @@ import { PsychologistProfileScreen } from './src/screens/admin/PsychologistProfi
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { theme } from './src/theme/theme';
+import { LanguageProvider, useTranslation } from './src/i18n';
 
 function MainApp() {
+  const { t } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authScreen, setAuthScreen] = useState<'Login' | 'Register'>('Login');
@@ -95,14 +98,14 @@ function MainApp() {
     setCurrentUser(null);
     setIsAuthenticated(false);
     setAuthScreen(dest);
-    setCurrentTab('Dashboard'); // reset state
+    setCurrentTab('Dashboard');
   };
 
   if (isRestoringAuth) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#064b46', justifyContent: 'center', alignItems: 'center' }}>
-        <StatusBar style="light" />
-        <ActivityIndicator size="large" color="#FFC857" />
+      <View style={{ flex: 1, backgroundColor: theme.colors.bg, justifyContent: 'center', alignItems: 'center' }}>
+        <StatusBar style="dark" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -110,8 +113,8 @@ function MainApp() {
   if (!isAuthenticated) {
     if (authScreen === 'Login') {
       return (
-        <View style={{ flex: 1 }}>
-          <StatusBar style="light" />
+        <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
+          <StatusBar style="dark" />
           <LoginScreen 
             onLoginSuccess={async (token, user) => {
               await AsyncStorage.setItem('userToken', token);
@@ -127,8 +130,8 @@ function MainApp() {
       );
     }
     return (
-      <View style={{ flex: 1 }}>
-        <StatusBar style="light" />
+      <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
+        <StatusBar style="dark" />
         <RegisterScreen 
           onRegisterSuccess={async (token, user) => {
             await AsyncStorage.setItem('userToken', token);
@@ -144,11 +147,11 @@ function MainApp() {
     );
   }
 
-  // Se houver um jogo ativo, renderiza o jogo em tela cheia (sem TabBar)
+  // Se houver um jogo ativo, renderiza o jogo em tela cheia imersiva (sem TabBar e sem alterar gameplay)
   if (activeGame && activeAlunoId) {
     return (
       <View style={{ flex: 1 }}>
-        <StatusBar style="auto" />
+        <StatusBar style="light" />
         {activeGame === 'Goleiro' && <GoleiroGame alunoId={activeAlunoId} onBack={() => { setActiveGame(null); setActiveAlunoId(null); }} />}
         {activeGame === 'GoNoGo' && <GoNoGoGame alunoId={activeAlunoId} onBack={() => { setActiveGame(null); setActiveAlunoId(null); }} />}
         {activeGame === 'Puzzle' && <FotografoGame alunoId={activeAlunoId} onBack={() => { setActiveGame(null); setActiveAlunoId(null); }} />}
@@ -226,8 +229,8 @@ function MainApp() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#084D48' }}>
-      <StatusBar style="light" />
+    <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
+      <StatusBar style="dark" />
       <GlobalHeader user={currentUser} onProfilePress={() => setCurrentTab('Profile')} />
       <View style={{ flex: 1 }}>
         {renderTabContent()}
@@ -245,8 +248,8 @@ function MainApp() {
             <View style={styles.modalLogoWrapper}>
               <Image source={require('./assets/icon.jpg')} style={styles.modalLogo} />
             </View>
-            <Text style={styles.modalTitle}>Sair do Aplicativo?</Text>
-            <Text style={styles.modalSubtitle}>Tem certeza que deseja encerrar o aplicativo?</Text>
+            <Text style={styles.modalTitle}>{t.common.exitTitle}</Text>
+            <Text style={styles.modalSubtitle}>{t.common.exitSubtitle}</Text>
             
             <View style={styles.modalButtons}>
               <Pressable 
@@ -261,7 +264,7 @@ function MainApp() {
                 }}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.btnSairText, pressed && styles.btnSairTextHover]}>Sair</Text>
+                  <Text style={[styles.btnSairText, pressed && styles.btnSairTextHover]}>{t.common.exitConfirm}</Text>
                 )}
               </Pressable>
 
@@ -273,7 +276,7 @@ function MainApp() {
                 onPress={() => setShowExitModal(false)}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.btnFicarText, pressed && styles.btnTextHover]}>Ficar</Text>
+                  <Text style={[styles.btnFicarText, pressed && styles.btnTextHover]}>{t.common.exitCancel}</Text>
                 )}
               </Pressable>
             </View>
@@ -287,7 +290,9 @@ function MainApp() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <MainApp />
+      <LanguageProvider>
+        <MainApp />
+      </LanguageProvider>
     </SafeAreaProvider>
   );
 }
@@ -295,35 +300,32 @@ export default function App() {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   modalContent: {
     width: '100%',
-    borderRadius: 32,
-    paddingVertical: 48,
-    paddingHorizontal: 32,
+    borderRadius: theme.radii.xl,
+    paddingVertical: 36,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    backgroundColor: '#0F6A63', // Teko Green
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    backgroundColor: theme.colors.cardBg,
+    ...theme.shadows.floating,
   },
   modalLogoWrapper: {
     alignSelf: 'center',
-    marginBottom: 32,
-    width: 96,
-    height: 96,
-    borderRadius: 32,
-    borderWidth: 4,
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: '#2e2a1e',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 15,
-    elevation: 8,
+    marginBottom: 20,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2,
+    borderColor: theme.colors.tealSoft,
+    backgroundColor: theme.colors.cardBg,
+    ...theme.shadows.subtle,
     overflow: 'hidden',
   },
   modalLogo: {
@@ -332,60 +334,61 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   modalTitle: {
-    color: '#FFF',
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: theme.colors.textDark,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 6,
     textAlign: 'center',
   },
   modalSubtitle: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 16,
+    color: theme.colors.textMuted,
+    fontSize: 14,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
   },
   modalButtons: {
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
-    gap: 16,
+    gap: 12,
   },
   btnSair: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#FFC857',
+    paddingVertical: 12,
+    borderRadius: theme.radii.md,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: theme.colors.tealSoft,
   },
   btnSairHover: {
-    borderColor: '#7B61FF',
-    backgroundColor: 'transparent',
+    backgroundColor: theme.colors.badgePurple,
   },
   btnSairText: {
-    color: '#FFC857',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 14,
+    fontWeight: '700',
   },
   btnSairTextHover: {
-    color: '#7B61FF',
+    color: theme.colors.badgePurpleText,
   },
   btnFicar: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 16,
-    backgroundColor: '#FFC857',
+    paddingVertical: 12,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...theme.shadows.subtle,
   },
   btnFicarHover: {
-    backgroundColor: '#7B61FF',
+    backgroundColor: theme.colors.primaryDark,
   },
   btnFicarText: {
-    color: '#181c1c',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
   btnTextHover: {
     color: '#FFF',

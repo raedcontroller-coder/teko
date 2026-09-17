@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Image, Platform, StatusBar, Pressable, Modal, FlatList, ActivityIndicator, TextInput } from 'react-native';
-import { Shield, Pointer, Puzzle, Eye, Layers, Hand, User, Home, Users, BarChart2, Plus, Lock, Camera, X, Search } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Animated, Pressable, Modal, FlatList, ActivityIndicator, TextInput, Image } from 'react-native';
+import { Shield, Pointer, Camera, Eye, User, X, Search, Sparkles, ChevronRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api } from '../services/api';
+import { theme } from '../theme/theme';
+import { useTranslation } from '../i18n';
+import { SkeletonLoader } from '../components/ui/SkeletonLoader';
 
 interface GamesScreenProps {
   userRole?: string;
@@ -10,8 +13,9 @@ interface GamesScreenProps {
 }
 
 export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame }) => {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const animatedValues = useRef(Array.from({ length: 6 }).map(() => new Animated.Value(0))).current;
+  const animatedValues = useRef(Array.from({ length: 3 }).map(() => new Animated.Value(0))).current;
   const [modalVisible, setModalVisible] = useState(false);
   const [modalStep, setModalStep] = useState<'OPTIONS' | 'SELECT_PSI' | 'SELECT_CHILD'>('SELECT_CHILD');
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
@@ -103,7 +107,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
     Animated.stagger(100, animatedValues.map(anim => 
       Animated.timing(anim, {
         toValue: 1,
-        duration: 500,
+        duration: 450,
         useNativeDriver: true,
       })
     )).start();
@@ -116,7 +120,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
       transform: [{
         translateY: anim.interpolate({
           inputRange: [0, 1],
-          outputRange: [20, 0]
+          outputRange: [16, 0]
         })
       }]
     };
@@ -126,96 +130,117 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
     <>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
-        {/* Removed Header as per Dashboard alignment */}
+          <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.titleSection}>
+              <Text style={styles.mainTitle}>{t.games.title}</Text>
+              <Text style={styles.subtitle}>{t.games.subtitle}</Text>
+            </View>
 
-        {/* Main Scroll */}
-        <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.titleSection}>
-            <Text style={styles.mainTitle}>Catálogo de Jogos</Text>
-            <Text style={styles.subtitle}>Escolha uma dinâmica para iniciar a avaliação neurocognitiva.</Text>
-          </View>
+            <View style={styles.grid}>
+              {/* Game 1: Goleiro */}
+              <Animated.View style={[styles.cardWrapper, getAnimatedStyle(0)]}>
+                <View style={styles.card}>
+                  <View style={styles.bannerWrapper}>
+                    <Image 
+                      source={require('../../assets/elementos_visuais/jogo_do_goleiro.png')} 
+                      style={styles.gameBannerImage}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.badgePurpleOverlay}>
+                      <Sparkles size={12} color={theme.colors.badgePurpleText} />
+                      <Text style={styles.badgePurpleText}>Tempo de Reação</Text>
+                    </View>
+                  </View>
 
-          <View style={styles.grid}>
-            {/* Goleiro */}
-            <Animated.View style={[styles.cardWrapper, getAnimatedStyle(0)]}>
-              <View style={styles.card}>
-                <View style={styles.iconBoxLilas}>
-                  <Shield color="#FFF" size={32} />
-                </View>
-                <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitle}>Goleiro</Text>
-                  <View style={styles.pillBox}>
-                    <Text style={styles.pillText}>Tempo de Reação</Text>
+                  <View style={styles.cardBodyPadding}>
+                    <Text style={styles.cardTitle}>{t.games.goleiro}</Text>
+                    <Text style={styles.cardDesc}>{t.games.goleiroDesc}</Text>
+                    
+                    <Pressable 
+                      style={({ pressed }) => [
+                        styles.playButton, 
+                        pressed && { backgroundColor: theme.colors.primaryDark, transform: [{ scale: 0.98 }] }
+                      ]}
+                      onPress={() => handleOpenGameModal('Goleiro')}
+                    >
+                      <Text style={styles.playButtonText}>{t.games.startGame}</Text>
+                      <ChevronRight size={18} color="#FFF" />
+                    </Pressable>
                   </View>
                 </View>
-                <Text style={styles.cardDesc}>Defenda as bolas chutadas ao gol e teste seus reflexos motores.</Text>
-                
-                <Pressable 
-                  style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
-                  onPress={() => handleOpenGameModal('Goleiro')}
-                >
-                  {({ pressed }) => (
-                    <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
-                  )}
-                </Pressable>
-              </View>
-            </Animated.View>
+              </Animated.View>
 
-            {/* Go / No-Go */}
-            <Animated.View style={[styles.cardWrapper, getAnimatedStyle(1)]}>
-              <View style={styles.card}>
-                <View style={styles.iconBoxLilas}>
-                  <Pointer color="#FFF" size={32} />
-                </View>
-                <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitle}>Toca Rápido!</Text>
-                  <View style={styles.pillBox}>
-                    <Text style={styles.pillText}>Controle Inibitório</Text>
+              {/* Game 2: Go / No-Go */}
+              <Animated.View style={[styles.cardWrapper, getAnimatedStyle(1)]}>
+                <View style={styles.card}>
+                  <View style={styles.bannerWrapper}>
+                    <Image 
+                      source={require('../../assets/elementos_visuais/toca_rapido.png')} 
+                      style={styles.gameBannerImage}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.badgePurpleOverlay}>
+                      <Sparkles size={12} color={theme.colors.badgePurpleText} />
+                      <Text style={styles.badgePurpleText}>Controle Inibitório</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.cardBodyPadding}>
+                    <Text style={styles.cardTitle}>{t.games.goNoGo}</Text>
+                    <Text style={styles.cardDesc}>{t.games.goNoGoDesc}</Text>
+                    
+                    <Pressable 
+                      style={({ pressed }) => [
+                        styles.playButton, 
+                        pressed && { backgroundColor: theme.colors.primaryDark, transform: [{ scale: 0.98 }] }
+                      ]}
+                      onPress={() => handleOpenGameModal('GoNoGo')}
+                    >
+                      <Text style={styles.playButtonText}>{t.games.startGame}</Text>
+                      <ChevronRight size={18} color="#FFF" />
+                    </Pressable>
                   </View>
                 </View>
-                <Text style={styles.cardDesc}>Teste de atenção e inibição motora com estímulos positivos e negativos.</Text>
-                
-                <Pressable 
-                  style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
-                  onPress={() => handleOpenGameModal('GoNoGo')}
-                >
-                  {({ pressed }) => (
-                    <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
-                  )}
-                </Pressable>
-              </View>
-            </Animated.View>
+              </Animated.View>
 
-            {/* Quebra-Cabeça */}
-            <Animated.View style={[styles.cardWrapper, getAnimatedStyle(2)]}>
-              <View style={styles.card}>
-                <View style={styles.iconBoxLilas}>
-                  <Camera color="#FFF" size={32} />
-                </View>
-                <View style={styles.cardTitleBox}>
-                  <Text style={styles.cardTitle}>Fotógrafo da Floresta</Text>
-                  <View style={styles.pillBox}>
-                        <Text style={styles.pillText}>Atenção Sustentada</Text>
+              {/* Game 3: Fotógrafo */}
+              <Animated.View style={[styles.cardWrapper, getAnimatedStyle(2)]}>
+                <View style={styles.card}>
+                  <View style={styles.bannerWrapper}>
+                    <Image 
+                      source={require('../../assets/elementos_visuais/fotografo_floresta.png')} 
+                      style={styles.gameBannerImage}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.badgePurpleOverlay}>
+                      <Sparkles size={12} color={theme.colors.badgePurpleText} />
+                      <Text style={styles.badgePurpleText}>{t.games.sustainedAttention}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.cardBodyPadding}>
+                    <Text style={styles.cardTitle}>{t.games.puzzle}</Text>
+                    <Text style={styles.cardDesc}>{t.games.puzzleDesc}</Text>
+                    
+                    <Pressable 
+                      style={({ pressed }) => [
+                        styles.playButton, 
+                        pressed && { backgroundColor: theme.colors.primaryDark, transform: [{ scale: 0.98 }] }
+                      ]}
+                      onPress={() => handleOpenGameModal('Puzzle')}
+                    >
+                      <Text style={styles.playButtonText}>{t.games.startGame}</Text>
+                      <ChevronRight size={18} color="#FFF" />
+                    </Pressable>
                   </View>
                 </View>
-                <Text style={styles.cardDesc}>Tire fotos do pássaro e treine sua atenção inibitória na floresta.</Text>
-                
-                <Pressable 
-                  style={({ pressed }) => [styles.buttonYellow, pressed && { backgroundColor: '#7B61FF' }]}
-                  onPress={() => handleOpenGameModal('Puzzle')}
-                >
-                  {({ pressed }) => (
-                    <Text style={[styles.buttonYellowText, pressed && { color: '#FFF' }]}>INICIAR JOGO</Text>
-                  )}
-                </Pressable>
-              </View>
-            </Animated.View>
-          </View>
-        </ScrollView>
+              </Animated.View>
+            </View>
+          </ScrollView>
+        </View>
+      </SafeAreaView>
 
-        {/* Removed FAB and Bottom Nav to avoid conflicts */}
-      </View>
-    </SafeAreaView>
+      {/* Modal de Seleção de Paciente */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -224,148 +249,145 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>
-                  {modalStep === 'OPTIONS' ? 'Como deseja jogar?' : 
-                   modalStep === 'SELECT_PSI' ? 'Selecione o Psicólogo' : 
-                   'Quem vai jogar?'}
-                </Text>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <X color="#FFF" size={24} />
-                </TouchableOpacity>
+          <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {modalStep === 'OPTIONS' ? (t.games.howToPlay || 'Como deseja jogar?') : 
+                 modalStep === 'SELECT_PSI' ? (t.games.selectPsychologist || 'Selecione o Psicólogo') : 
+                 (t.games.selectChild || 'Selecione a Criança')}
+              </Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <X color={theme.colors.textDark} size={22} />
+              </TouchableOpacity>
+            </View>
+
+            {modalStep === 'OPTIONS' && (
+              <View style={styles.optionsContainer}>
+                <Pressable 
+                  style={({ pressed }) => [styles.optionCard, pressed && { borderColor: theme.colors.primary }]} 
+                  onPress={handlePlayAnonymous}
+                >
+                  <View style={[styles.iconBox, { backgroundColor: theme.colors.tealSoft, marginRight: 12 }]}>
+                    <Eye color={theme.colors.primary} size={22} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.optionTitle}>{t.games.demoModeTitle || 'Modo Demonstração'}</Text>
+                    <Text style={styles.optionDesc}>{t.games.demoModeDesc || 'Partida anônima para testes sem registrar telemétricas.'}</Text>
+                  </View>
+                </Pressable>
+
+                <Pressable 
+                  style={({ pressed }) => [styles.optionCard, pressed && { borderColor: theme.colors.primary }]} 
+                  onPress={handleSelectPsiForChild}
+                >
+                  <View style={[styles.iconBox, { backgroundColor: theme.colors.badgePurple, marginRight: 12 }]}>
+                    <User color={theme.colors.badgePurpleText} size={22} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.optionTitle}>{t.games.linkPatientTitle || 'Vincular a um Paciente'}</Text>
+                    <Text style={styles.optionDesc}>{t.games.linkPatientDesc || 'Selecione o paciente para persistir o relatório de telemetria.'}</Text>
+                  </View>
+                </Pressable>
               </View>
+            )}
 
-              {modalStep === 'OPTIONS' && (
-                <View style={styles.optionsContainer}>
-                  <Pressable 
-                    style={({ pressed }) => [styles.optionCard, pressed && { borderColor: '#FFC857' }]} 
-                    onPress={handlePlayAnonymous}
-                  >
-                    {({ pressed }) => (
-                      <>
-                        <View style={[styles.iconBoxLilas, { marginBottom: 0, marginRight: 16, width: 48, height: 48 }, pressed && { backgroundColor: '#FFC857' }]}>
-                          <Eye color={pressed ? "#181c1c" : "#FFF"} size={24} />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.optionTitle}>Jogar sem gerar dados</Text>
-                          <Text style={styles.optionDesc}>A partida será anônima e as métricas não serão salvas.</Text>
-                        </View>
-                      </>
-                    )}
-                  </Pressable>
-
-                  <Pressable 
-                    style={({ pressed }) => [styles.optionCard, pressed && { borderColor: '#FFC857' }]} 
-                    onPress={handleSelectPsiForChild}
-                  >
-                    {({ pressed }) => (
-                      <>
-                        <View style={[styles.iconBoxLilas, { marginBottom: 0, marginRight: 16, width: 48, height: 48 }, pressed && { backgroundColor: '#FFC857' }]}>
-                          <User color={pressed ? "#181c1c" : "#FFF"} size={24} />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.optionTitle}>Jogar para uma criança</Text>
-                          <Text style={styles.optionDesc}>Selecione o psicólogo e a criança para salvar as métricas.</Text>
-                        </View>
-                      </>
-                    )}
-                  </Pressable>
+            {modalStep === 'SELECT_PSI' && (
+              loadingPsi ? (
+                <View style={{ paddingVertical: 10 }}>
+                  <SkeletonLoader variant="card" />
+                  <SkeletonLoader variant="card" />
+                  <SkeletonLoader variant="card" />
                 </View>
-              )}
-
-              {modalStep === 'SELECT_PSI' && (
-                loadingPsi ? (
-                  <ActivityIndicator size="large" color="#7B61FF" style={{ marginVertical: 40 }} />
-                ) : (
-                  <FlatList
-                    data={psychologists.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.patientList}
-                    ListHeaderComponent={
-                      <View style={styles.searchContainer}>
-                        <Search color="#9CA3AF" size={20} />
-                        <TextInput
-                          style={styles.searchInput}
-                          placeholder="Buscar psicólogo..."
-                          placeholderTextColor="#9CA3AF"
-                          value={searchQuery}
-                          onChangeText={setSearchQuery}
-                        />
-                      </View>
-                    }
-                    renderItem={({ item }) => (
-                      <TouchableOpacity style={styles.patientCard} onPress={() => handlePsiSelected(item.id)}>
-                        <View style={styles.patientAvatar}>
-                          <Text style={styles.patientAvatarText}>{item.name.charAt(0).toUpperCase()}</Text>
-                        </View>
-                        <View style={styles.patientInfo}>
-                          <Text style={styles.patientName}>{item.name}</Text>
-                          <Text style={styles.patientAge}>{item.clinicName || 'Sem clínica'} • {item.crp || 'Sem CRP'}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  />
-                )
-              )}
-
-              {modalStep === 'SELECT_CHILD' && (
-                loadingPatients ? (
-                  <ActivityIndicator size="large" color="#7B61FF" style={{ marginVertical: 40 }} />
-                ) : (
-                  <>
+              ) : (
+                <FlatList
+                  data={psychologists.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))}
+                  keyExtractor={(item) => item.id}
+                  contentContainerStyle={styles.patientList}
+                  ListHeaderComponent={
                     <View style={styles.searchContainer}>
-                      <Search color="#9CA3AF" size={20} />
+                      <Search color={theme.colors.textMuted} size={18} />
                       <TextInput
                         style={styles.searchInput}
-                        placeholder="Buscar por criança ou responsável..."
-                        placeholderTextColor="#9CA3AF"
+                        placeholder={t.games.searchPsychologistPlaceholder || 'Buscar por psicólogo...'}
+                        placeholderTextColor={theme.colors.textMuted}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                       />
                     </View>
-                    {filteredPatients.length > 0 ? (
-                      <FlatList
-                        data={filteredPatients}
-                        keyExtractor={(item) => item.id}
-                        contentContainerStyle={styles.patientList}
-                        renderItem={({ item }) => (
+                  }
+                  renderItem={({ item }) => (
+                    <TouchableOpacity style={styles.patientCard} onPress={() => handlePsiSelected(item.id)}>
+                      <View style={styles.patientAvatar}>
+                        <Text style={styles.patientAvatarText}>{item.name.charAt(0).toUpperCase()}</Text>
+                      </View>
+                      <View style={styles.patientInfo}>
+                        <Text style={styles.patientName}>{item.name}</Text>
+                        <Text style={styles.patientAge}>{item.clinicName || 'Sem clínica'} • {item.crp || 'Sem CRP'}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                />
+              )
+            )}
+
+            {modalStep === 'SELECT_CHILD' && (
+              loadingPatients ? (
+                <View style={{ paddingVertical: 10 }}>
+                  <SkeletonLoader variant="card" />
+                  <SkeletonLoader variant="card" />
+                  <SkeletonLoader variant="card" />
+                </View>
+              ) : (
+                <>
+                  <View style={styles.searchContainer}>
+                    <Search color={theme.colors.textMuted} size={18} />
+                    <TextInput
+                      style={styles.searchInput}
+                      placeholder={t.games.searchChildPlaceholder || 'Buscar por criança ou responsável...'}
+                      placeholderTextColor={theme.colors.textMuted}
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                    />
+                  </View>
+                  {filteredPatients.length > 0 ? (
+                    <FlatList
+                      data={filteredPatients}
+                      keyExtractor={(item) => item.id}
+                      contentContainerStyle={styles.patientList}
+                      renderItem={({ item }) => {
+                        const isGirl = item.gender?.toLowerCase().includes('fem') || item.name?.endsWith('a');
+                        const avatarSource = isGirl 
+                          ? require('../assets/elementos_visuais/menina_crianca.png')
+                          : require('../assets/elementos_visuais/menino_crianca.png');
+
+                        return (
                           <TouchableOpacity
                             style={styles.patientCard}
                             onPress={() => handleStartGame(item.id)}
                           >
-                            <View style={styles.patientAvatar}>
-                              <Text style={styles.patientAvatarText}>
-                                {item.name.charAt(0).toUpperCase()}
-                              </Text>
+                            <View style={styles.avatarImageContainer}>
+                              <Image source={avatarSource} style={styles.avatarImage} resizeMode="cover" />
                             </View>
                             <View style={styles.patientInfo}>
                               <Text style={styles.patientName}>{item.name}</Text>
-                              <Text style={styles.patientAge}>{item.age} anos • Resp: {item.guardianName || 'Não informado'}</Text>
-                            </View>
-                            <View style={[
-                              styles.tdahBadge, 
-                              item.hasTdah ? styles.tdahBadgeYes : styles.tdahBadgeNo
-                            ]}>
-                              <Text style={[
-                                styles.tdahBadgeText,
-                                item.hasTdah ? styles.tdahBadgeTextYes : styles.tdahBadgeTextNo
-                              ]}>
-                                TDAH: {item.hasTdah ? 'Sim' : 'Não'}
+                              <Text style={styles.patientAge}>
+                                {t('common.ageAndSessions', { age: item.age, count: item.sessionCount || 0 })} • {item.guardianName || t.patients.guardianPlaceholder}
                               </Text>
                             </View>
+                            <ChevronRight size={18} color={theme.colors.primary} />
                           </TouchableOpacity>
-                        )}
-                      />
-                    ) : (
-                      <View style={styles.emptyPatients}>
-                        <Text style={styles.emptyPatientsText}>Nenhuma criança encontrada.</Text>
-                      </View>
-                    )}
-                  </>
-                )
-              )}
-            </View>
+                        );
+                      }}
+                    />
+                  ) : (
+                    <View style={styles.emptyPatients}>
+                      <Text style={styles.emptyPatientsText}>{t.games.noChildrenFound || 'Nenhuma criança cadastrada encontrada.'}</Text>
+                    </View>
+                  )}
+                </>
+              )
+            )}
+          </View>
         </View>
       </Modal>
     </>
@@ -375,389 +397,260 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#064b46', // body bg from refactor
+    backgroundColor: theme.colors.bg,
   },
   container: {
     flex: 1,
-    backgroundColor: '#064b46',
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
-    alignItems: 'center',
-    zIndex: 40,
-    backgroundColor: '#0F6A63', // header bg from refactor
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-  },
-  logoRow: {
-    height: 48, // h-12
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  logoImage: {
-    height: '100%',
-    width: 120, // sufficient width for contain
-  },
-  profileButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#0D766E',
-    borderWidth: 2,
-    borderColor: 'rgba(155,242,232,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: theme.colors.bg,
   },
   scrollArea: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 120, // space for nav and fab
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 110,
   },
   titleSection: {
-    marginTop: 40,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   mainTitle: {
-    color: '#FFF6E3',
+    color: theme.colors.textDark,
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+    marginBottom: 4,
   },
   subtitle: {
-    color: 'rgba(255,246,227,0.8)',
-    fontSize: 16,
-    lineHeight: 24,
+    color: theme.colors.textMuted,
+    fontSize: 14,
+    lineHeight: 18,
   },
   grid: {
-    flexDirection: 'column',
     gap: 16,
   },
   cardWrapper: {
     width: '100%',
   },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
+    overflow: 'hidden',
+    ...theme.shadows.card,
   },
-  iconBoxLilas: {
-    width: 64,
-    height: 64,
-    backgroundColor: '#7B61FF',
-    borderRadius: 8,
+  bannerWrapper: {
+    width: '100%',
+    height: 124,
+    position: 'relative',
+    backgroundColor: theme.colors.tealSoft,
+  },
+  gameBannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  badgePurpleOverlay: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: theme.radii.full,
+    ...theme.shadows.subtle,
+  },
+  cardBodyPadding: {
+    padding: 18,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  iconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: theme.radii.md,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
   },
-  cardTitleBox: {
-    marginBottom: 16,
-    alignItems: 'flex-start',
+  badgePurple: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: theme.colors.badgePurple,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: theme.radii.full,
+  },
+  badgePurpleText: {
+    color: theme.colors.badgePurpleText,
+    fontSize: 11,
+    fontWeight: '700',
   },
   cardTitle: {
-    color: '#FFF6E3',
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  pillBox: {
-    backgroundColor: 'rgba(255,200,87,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  pillText: {
-    color: '#FFC857',
-    fontSize: 12,
-    fontWeight: '500',
+    color: theme.colors.textDark,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 6,
+    letterSpacing: -0.3,
   },
   cardDesc: {
-    color: 'rgba(255,246,227,0.7)',
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 24,
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: 18,
   },
-  buttonYellow: {
-    backgroundColor: '#FFC857',
+  playButton: {
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonYellowText: {
-    color: '#181c1c',
-    fontWeight: 'bold',
-    fontSize: 14,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  // Locked styles
-  cardLocked: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    borderStyle: 'dashed',
-    opacity: 0.6,
-  },
-  lockIconBox: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    padding: 4,
-    borderRadius: 999,
-  },
-  iconBoxWhite: {
-    width: 64,
-    height: 64,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  cardTitleLocked: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  pillBoxLocked: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  pillTextLocked: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  cardDescLocked: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 16,
-    lineHeight: 24,
-    fontStyle: 'italic',
-  },
-  // Floating Action Button
-  fab: {
-    position: 'absolute',
-    bottom: 96,
-    right: 24,
-    width: 64,
-    height: 64,
-    backgroundColor: '#FFC857',
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
-    zIndex: 50,
-  },
-  // Bottom Navbar
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: Platform.OS === 'android' ? 90 : 100,
-    backgroundColor: '#0D766E',
-    borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'android' ? 16 : 24,
-    zIndex: 50,
-  },
-  navItemActive: {
-    backgroundColor: '#FFC857',
-    paddingHorizontal: 20,
-    paddingVertical: 6,
-    borderRadius: 999,
+    borderRadius: theme.radii.md,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 6,
+    ...theme.shadows.subtle,
   },
-  navTextActive: {
-    color: '#181c1c',
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginTop: 2,
+  playButtonText: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 14,
+    letterSpacing: -0.1,
   },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 8,
-  },
-  navText: {
-    color: 'rgba(255,246,227,0.8)',
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 2,
-  },
+
+  /* Modal */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
-
   },
   modalContent: {
-    backgroundColor: '#064b46',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 24,
-    paddingHorizontal: 24,
-    paddingBottom: Platform.OS === 'android' ? 24 : 20,
-    maxHeight: '85%',
+    backgroundColor: theme.colors.bg,
+    borderTopLeftRadius: theme.radii.xl,
+    borderTopRightRadius: theme.radii.xl,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    maxHeight: '82%',
+    ...theme.shadows.floating,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   modalTitle: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 22,
-    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '800',
+    color: theme.colors.textDark,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    marginBottom: 20,
-    height: 48,
+    backgroundColor: theme.colors.cardBg,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.full,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+    height: 44,
   },
   searchInput: {
     flex: 1,
     marginLeft: 8,
-    color: '#FFF',
-    fontFamily: 'Inter-Regular',
-    fontSize: 16,
+    color: theme.colors.textDark,
+    fontSize: 14,
   },
   patientList: {
-    paddingBottom: 0,
+    paddingBottom: 20,
   },
   patientCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    padding: 14,
+    backgroundColor: theme.colors.cardBg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
-    marginBottom: 12,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
+    marginBottom: 10,
+    gap: 12,
   },
   patientAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#7B61FF',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.tealSoft,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
   },
   patientAvatarText: {
-    color: '#FFF',
-    fontSize: 20,
-    fontFamily: 'Inter-Bold',
+    color: theme.colors.primary,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  avatarImageContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    backgroundColor: theme.colors.tealSoft,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   patientInfo: {
     flex: 1,
   },
   patientName: {
-    fontSize: 18,
-    fontFamily: 'Inter-Bold',
-    color: '#EAB308', // Teko Yellow
+    fontSize: 15,
+    fontWeight: '700',
+    color: theme.colors.textDark,
   },
   patientAge: {
-    fontSize: 13,
-    fontFamily: 'Inter-Regular',
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 4,
-  },
-  tdahBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 100,
-    borderWidth: 1,
-  },
-  tdahBadgeYes: {
-    backgroundColor: 'rgba(234,179,8,0.2)',
-    borderColor: 'rgba(234,179,8,0.3)',
-  },
-  tdahBadgeNo: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderColor: 'transparent',
-  },
-  tdahBadgeText: {
     fontSize: 12,
-    fontFamily: 'Inter-Bold',
-  },
-  tdahBadgeTextYes: {
-    color: '#EAB308',
-  },
-  tdahBadgeTextNo: {
-    color: 'rgba(255,255,255,0.8)',
+    color: theme.colors.textMuted,
+    marginTop: 2,
   },
   emptyPatients: {
-    padding: 40,
+    padding: 30,
     alignItems: 'center',
   },
   emptyPatientsText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Bold',
-    color: '#EAB308',
-    textAlign: 'center',
-  },
-  emptyPatientsSub: {
     fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.textMuted,
     textAlign: 'center',
-    marginTop: 8,
   },
   optionsContainer: {
-    paddingBottom: 0,
-    gap: 16,
+    paddingBottom: 20,
+    gap: 12,
   },
   optionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: theme.colors.cardBg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
-    padding: 16,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
+    padding: 14,
   },
   optionTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    fontFamily: 'Inter-Bold',
-    marginBottom: 4,
+    color: theme.colors.textDark,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 2,
   },
   optionDesc: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    lineHeight: 20,
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

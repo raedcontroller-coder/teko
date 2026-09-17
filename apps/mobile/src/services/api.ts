@@ -1,10 +1,26 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
-// Obtenha o IP da sua rede local (o mesmo que aparece no terminal do Expo)
-// Para testar via Expo Go (dispositivo físico Android ou iOS) na rede Wi-Fi, usamos diretamente o IP da máquina.
-export const API_URL = 'http://10.140.125.80:3000';
+// Detecta o IP da rede local dinamicamente a partir do Expo Go (ou fallback para o IP obtido via ipconfig)
+const getLocalIp = (): string => {
+  try {
+    const hostUri = Constants.expoConfig?.hostUri || (Constants as any).manifest2?.extra?.expoGo?.developer?.manifest?.debuggerHost;
+    if (hostUri) {
+      const ip = hostUri.split(':')[0];
+      if (ip && ip !== 'localhost' && ip !== '127.0.0.1') return ip;
+    }
+  } catch (e) {
+    // fallback caso ocorra erro ao acessar Constants
+  }
+  return '10.96.220.80';
+};
+
+const DEV_IP = getLocalIp();
+
+// Para testar via Expo Go (dispositivo físico Android ou iOS) na rede Wi-Fi local
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || `http://${DEV_IP}:3000`;
 
 export const api = axios.create({
   baseURL: API_URL,

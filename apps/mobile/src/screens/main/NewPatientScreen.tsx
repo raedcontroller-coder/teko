@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { ArrowLeft, Baby, User, Shield, CheckCircle2, XCircle } from 'lucide-react-native';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
+import { useTranslation } from '../../i18n';
 
 interface NewPatientScreenProps {
   onBack: () => void;
@@ -23,6 +25,7 @@ interface NewPatientScreenProps {
 }
 
 export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSuccess, adminPsicologoId }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -98,17 +101,17 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.age || !formData.gender || !formData.guardianName.trim() || !formData.guardianEmail.trim() || !formData.guardianPhone) {
-      showError('Por favor, preencha todos os campos obrigatórios.');
+      showError(t.newPatient.fillAllRequired);
       return;
     }
 
     if (!formData.guardianEmail.includes('@')) {
-      showError('Insira um e-mail válido para o responsável.');
+      showError(t.newPatient.invalidEmail);
       return;
     }
 
     if (formData.guardianPhone.replace(/\D/g, "").length < 10) {
-      showError('O telefone (WhatsApp) deve conter o DDD e o número correto.');
+      showError(t.newPatient.invalidPhone);
       return;
     }
 
@@ -125,7 +128,7 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
       }
     } catch (error: any) {
       setLoading(false);
-      const errorMsg = error.response?.data?.error || 'Erro interno ao salvar paciente.';
+      const errorMsg = error.response?.data?.error || t.common.error;
       showError(errorMsg);
     }
   };
@@ -138,9 +141,9 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
       {/* Header Fixo */}
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <ArrowLeft color="#FFF" size={24} />
+          <ArrowLeft color={theme.colors.textDark} size={24} />
         </TouchableOpacity>
-        <Text style={styles.topBarTitle}>Novo Paciente</Text>
+        <Text style={styles.topBarTitle}>{t.newPatient.title}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -150,39 +153,39 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
         keyboardShouldPersistTaps="handled"
       >
         
-        {/* Seção Criança (Amarelo) */}
+        {/* Seção Criança */}
         <View style={styles.card}>
           <View style={styles.cardBgIcon}>
-            <Baby color="rgba(255, 255, 255, 0.05)" size={120} />
+            <Baby color={theme.colors.primary} size={120} />
           </View>
           
           <View style={styles.cardHeader}>
-            <View style={styles.iconCircleYellow}>
-              <User color="#FFC857" size={32} />
+            <View style={styles.iconCircleTeal}>
+              <User color={theme.colors.primary} size={28} />
             </View>
             <View style={styles.headerTexts}>
-              <Text style={styles.sectionTitle}>Dados da Criança</Text>
-              <Text style={styles.sectionSubtitle}>Informações básicas do paciente.</Text>
+              <Text style={styles.sectionTitle}>{t.newPatient.childSectionTitle}</Text>
+              <Text style={styles.sectionSubtitle}>{t.newPatient.childSectionSubtitle}</Text>
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Nome do Paciente</Text>
+            <Text style={styles.labelSection}>{t.newPatient.nameLabel}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ex: João"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.newPatient.namePlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               value={formData.name}
               onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
             />
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Idade</Text>
+            <Text style={styles.labelSection}>{t.newPatient.ageLabel}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ex: 7"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.newPatient.agePlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               keyboardType="numeric"
               value={formData.age}
               onChangeText={(text) => setFormData(prev => ({ ...prev, age: text.replace(/\D/g, '') }))}
@@ -190,17 +193,21 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Gênero</Text>
+            <Text style={styles.labelSection}>{t.newPatient.genderLabel}</Text>
             <View style={styles.pillsContainer}>
-              {['Masculino', 'Feminino', 'Prefiro não dizer'].map((gen) => {
-                const isSelected = formData.gender === gen;
+              {[
+                { key: 'Masculino', label: t.newPatient.genderMale },
+                { key: 'Feminino', label: t.newPatient.genderFemale },
+                { key: 'Prefiro não dizer', label: t.newPatient.genderOther }
+              ].map((genItem) => {
+                const isSelected = formData.gender === genItem.key;
                 return (
                   <TouchableOpacity
-                    key={gen}
+                    key={genItem.key}
                     style={[styles.pill, isSelected && styles.pillSelected]}
-                    onPress={() => setFormData(prev => ({ ...prev, gender: gen }))}
+                    onPress={() => setFormData(prev => ({ ...prev, gender: genItem.key }))}
                   >
-                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]} numberOfLines={1} adjustsFontSizeToFit>{gen}</Text>
+                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]} numberOfLines={1} adjustsFontSizeToFit>{genItem.label}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -208,7 +215,7 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Paciente possui diagnóstico de TDAH?</Text>
+            <Text style={styles.labelSection}>{t.newPatient.tdahQuestion}</Text>
             <View style={styles.pillsContainer}>
               {[true, false].map((val) => {
                 const isSelected = formData.hasTdah === val;
@@ -218,7 +225,7 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
                     style={[styles.pill, isSelected && styles.pillSelected]}
                     onPress={() => setFormData(prev => ({ ...prev, hasTdah: val }))}
                   >
-                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]}>{val ? 'Sim' : 'Não'}</Text>
+                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]}>{val ? t.common.yes : t.common.no}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -226,39 +233,39 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
           </View>
         </View>
 
-        {/* Seção Responsável (Roxo) */}
-        <View style={[styles.card, styles.cardPurple]}>
+        {/* Seção Responsável */}
+        <View style={styles.card}>
           <View style={styles.cardBgIcon}>
-            <Shield color="rgba(255, 255, 255, 0.05)" size={120} />
+            <Shield color={theme.colors.badgePurpleText} size={120} />
           </View>
           
           <View style={styles.cardHeader}>
             <View style={styles.iconCirclePurple}>
-              <Shield color="#7B61FF" size={32} />
+              <Shield color={theme.colors.badgePurpleText} size={28} />
             </View>
             <View style={styles.headerTexts}>
-              <Text style={styles.sectionTitle}>Ficha do Responsável</Text>
-              <Text style={styles.sectionSubtitle}>Contato para vínculo do app.</Text>
+              <Text style={styles.sectionTitle}>{t.newPatient.guardianSectionTitle}</Text>
+              <Text style={styles.sectionSubtitle}>{t.newPatient.guardianSectionSubtitle}</Text>
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Nome do Responsável</Text>
+            <Text style={styles.labelSection}>{t.newPatient.guardianNameLabel}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ex: Maria Silva"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.newPatient.guardianNamePlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               value={formData.guardianName}
               onChangeText={(text) => setFormData(prev => ({ ...prev, guardianName: text }))}
             />
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Email</Text>
+            <Text style={styles.labelSection}>{t.newPatient.emailLabel}</Text>
             <TextInput
               style={styles.input}
-              placeholder="maria@email.com"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.newPatient.emailPlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               keyboardType="email-address"
               autoCapitalize="none"
               value={formData.guardianEmail}
@@ -267,11 +274,11 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Telefone (WhatsApp)</Text>
+            <Text style={styles.labelSection}>{t.newPatient.phoneLabel}</Text>
             <TextInput
               style={styles.input}
-              placeholder="(11) 99999-9999"
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholder={t.newPatient.phonePlaceholder}
+              placeholderTextColor={theme.colors.textMuted}
               keyboardType="numeric"
               value={formData.guardianPhone}
               onChangeText={handlePhoneChange}
@@ -280,44 +287,44 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
 
         </View>
 
-        {/* Botão Salvar (Amarelo) */}
+        {/* Botão Salvar */}
         <Pressable 
           style={({ pressed }) => [
             styles.saveButton,
-            pressed && { backgroundColor: '#7B61FF' }
+            pressed && { backgroundColor: theme.colors.primaryDark }
           ]} 
           onPress={handleSave}
           disabled={loading}
         >
-          {({ pressed }) => loading ? (
-            <ActivityIndicator color="#181c1c" />
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={[styles.saveButtonText, pressed && { color: '#FFF' }]}>Cadastrar Paciente</Text>
+            <Text style={styles.saveButtonText}>{t.newPatient.saveBtn}</Text>
           )}
         </Pressable>
       </ScrollView>
 
-      {/* Popup de Sucesso (Topo, grande e escuro) */}
+      {/* Popup de Sucesso */}
       {showSuccessToast && (
         <Animated.View style={[styles.toastContainer, { transform: [{ translateY: slideAnim }] }]}>
           <View style={styles.toastIconBg}>
-            <CheckCircle2 color="#FFC857" size={28} />
+            <CheckCircle2 color={theme.colors.primary} size={28} />
           </View>
           <View style={styles.toastTextContainer}>
-            <Text style={styles.toastTitle}>Sucesso!</Text>
-            <Text style={styles.toastMessage}>Paciente cadastrado. Redirecionando...</Text>
+            <Text style={styles.toastTitle}>{t.newPatient.successTitle}</Text>
+            <Text style={styles.toastMessage}>{t.newPatient.successMsg}</Text>
           </View>
         </Animated.View>
       )}
 
-      {/* Popup de Erro (Topo, vermelho) */}
+      {/* Popup de Erro */}
       {showErrorToast && (
         <Animated.View style={[styles.errorToastContainer, { transform: [{ translateY: errorSlideAnim }] }]}>
           <View style={styles.errorToastIconBg}>
-            <XCircle color="#FF4B4B" size={28} />
+            <XCircle color="#DC2626" size={28} />
           </View>
           <View style={styles.toastTextContainer}>
-            <Text style={styles.errorToastTitle}>Ops, algo deu errado!</Text>
+            <Text style={styles.errorToastTitle}>{t.newPatient.errorTitle}</Text>
             <Text style={styles.toastMessage}>{errorMessage}</Text>
           </View>
         </Animated.View>
@@ -330,70 +337,70 @@ export const NewPatientScreen: React.FC<NewPatientScreenProps> = ({ onBack, onSu
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#064b46',
+    backgroundColor: theme.colors.bg,
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   backButton: {
     padding: 8,
     marginLeft: -8,
   },
   topBarTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 20,
+    fontWeight: '800',
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    gap: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    gap: 20,
   },
   card: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
     overflow: 'hidden',
-  },
-  cardPurple: {
-    borderColor: 'rgba(123,97,255,0.2)',
+    position: 'relative',
+    ...theme.shadows.card,
   },
   cardBgIcon: {
     position: 'absolute',
-    top: -20,
-    right: -20,
-    opacity: 0.8,
+    top: -10,
+    right: -10,
+    opacity: 0.12,
+    pointerEvents: 'none',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
-    gap: 16,
+    marginBottom: 20,
+    gap: 14,
   },
-  iconCircleYellow: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderWidth: 2,
-    borderColor: '#FFC857',
+  iconCircleTeal: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: theme.colors.tealSoft,
+    borderWidth: 1.5,
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconCirclePurple: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderWidth: 2,
-    borderColor: '#7B61FF',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: theme.colors.badgePurple,
+    borderWidth: 1.5,
+    borderColor: `${theme.colors.badgePurpleText}30`,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -401,39 +408,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    color: theme.colors.textDark,
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   sectionSubtitle: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontSize: 13,
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  labelYellow: {
-    color: '#FFC857',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  labelPurple: {
-    color: '#7B61FF',
-    fontSize: 14,
-    fontWeight: 'bold',
+  labelSection: {
+    color: theme.colors.textDark,
+    fontSize: 13,
+    fontWeight: '700',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
+    backgroundColor: theme.colors.bg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     paddingHorizontal: 16,
-    height: 52,
-    color: '#FFF',
-    fontSize: 16,
+    height: 48,
+    color: theme.colors.textDark,
+    fontSize: 15,
   },
   pillsContainer: {
     flexDirection: 'row',
@@ -443,124 +444,112 @@ const styles = StyleSheet.create({
   },
   pill: {
     flex: 1,
-    backgroundColor: 'rgba(255,246,227,0.05)',
+    backgroundColor: theme.colors.bg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    height: 48, // Quase a mesma altura do input (52)
-    borderRadius: 999,
+    borderColor: theme.colors.cardBorder,
+    height: 44,
+    borderRadius: theme.radii.full,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
   },
   pillSelected: {
-    backgroundColor: '#FFC857',
-    borderColor: '#FFC857',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   pillText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 12, // Reduzido
+    color: theme.colors.textDark,
+    fontSize: 12,
     fontWeight: '600',
   },
   pillTextSelected: {
-    color: '#181c1c',
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   saveButton: {
-    backgroundColor: '#FFC857',
-    height: 56,
-    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    height: 52,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
+    ...theme.shadows.subtle,
   },
   saveButtonText: {
-    color: '#181c1c',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   toastContainer: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 20 : 10,
     right: 16,
     left: 16,
-    backgroundColor: '#181c1c', 
+    backgroundColor: theme.colors.cardBg, 
     borderLeftWidth: 6,
-    borderLeftColor: '#FFC857',
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    borderLeftColor: theme.colors.primary,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, 
+    padding: 16, 
+    ...theme.shadows.floating,
+    zIndex: 9999,
   },
   toastIconBg: {
-    width: 50, 
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,200,87,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,200,87,0.4)',
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.tealSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   toastTitle: {
-    color: '#FFC857', 
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
+    color: theme.colors.primary, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   errorToastContainer: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 20 : 10,
     right: 16,
     left: 16,
-    backgroundColor: '#181c1c', 
+    backgroundColor: theme.colors.cardBg, 
     borderLeftWidth: 6,
-    borderLeftColor: '#FF4B4B',
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    borderLeftColor: '#DC2626',
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, 
+    padding: 16, 
+    ...theme.shadows.floating,
+    zIndex: 9999,
   },
   errorToastIconBg: {
-    width: 50, 
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 75, 75, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 75, 75, 0.4)',
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(220, 38, 38, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   toastTextContainer: {
     flex: 1,
   },
   errorToastTitle: {
-    color: '#FF4B4B', 
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
+    color: '#DC2626', 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   toastMessage: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 15,
+    color: theme.colors.textDark,
+    fontSize: 13,
     fontWeight: '500',
   },
 });

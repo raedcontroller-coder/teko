@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Sparkles, MoreHorizontal, Edit3, Trash2, X } from 'lucide-react-native';
+import { theme } from '../../theme/theme';
 
 interface Appointment {
   id: string | number;
@@ -29,14 +30,18 @@ interface DailyViewProps {
   onDateChange?: (date: string) => void;
 }
 
+import { useTranslation } from '../../i18n';
+
 export function DailyView({ selectedDate, appointments, holidays = [], onEdit, onDelete }: DailyViewProps) {
+  const { t, language } = useTranslation();
   const [optionsApp, setOptionsApp] = useState<Appointment | null>(null);
   const todaysAppointments = appointments.filter(app => app.date === selectedDate);
   
-  // Format date correctly in local time
+  // Format date correctly in local time according to selected app language
   const [year, month, day] = selectedDate.split('-');
   const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  const formattedDate = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const locale = language === 'en' ? 'en-US' : 'pt-BR';
+  const formattedDate = dateObj.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
 
   const currentHoliday = holidays.find(h => h.date === selectedDate);
 
@@ -50,7 +55,7 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
             <Sparkles size={20} color="#7B61FF" />
           </View>
           <View style={{ flex: 1 }}>
-             <Text style={styles.holidayBannerTitle}>{currentHoliday.type === 'nacional' ? 'Feriado Nacional' : 'Data Comemorativa'}</Text>
+             <Text style={styles.holidayBannerTitle}>{currentHoliday.type === 'nacional' ? t.agenda.nationalHoliday : t.agenda.commemorativeDate}</Text>
              <Text style={styles.holidayBannerText}>{currentHoliday.name}</Text>
           </View>
         </View>
@@ -88,14 +93,14 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
                   setOptionsApp(app);
                 }}
               >
-                <MoreHorizontal size={20} color="rgba(255,255,255,0.8)" />
+                <MoreHorizontal size={20} color={theme.colors.primary} />
               </TouchableOpacity>
             </TouchableOpacity>
           </View>
         ))}
         {todaysAppointments.length === 0 && (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Sem agendamentos para este dia.</Text>
+            <Text style={styles.emptyText}>{t.agenda.noAppointmentsDay}</Text>
           </View>
         )}
       </ScrollView>
@@ -107,11 +112,11 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
             <View style={styles.modalBackground} />
           </TouchableWithoutFeedback>
 
-          <View style={[styles.optionsModalContent, { borderColor: optionsApp ? `${optionsApp.color}50` : 'rgba(255,255,255,0.1)' }]}>
+          <View style={[styles.optionsModalContent, { borderColor: optionsApp ? `${optionsApp.color}50` : theme.colors.cardBorder }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Opções do Agendamento</Text>
+              <Text style={styles.modalTitle}>{t.agenda.appointmentOptions}</Text>
               <TouchableOpacity onPress={() => setOptionsApp(null)} style={styles.closeBtn}>
-                <X size={22} color="#fff" />
+                <X size={20} color={theme.colors.primary} />
               </TouchableOpacity>
             </View>
 
@@ -124,12 +129,12 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
                 if (target) onEdit(target);
               }}
             >
-              <View style={[styles.optionIconBox, { backgroundColor: 'rgba(255, 200, 87, 0.1)', borderColor: 'rgba(255, 200, 87, 0.3)' }]}>
-                <Edit3 size={22} color="#FFC857" />
+              <View style={[styles.optionIconBox, { backgroundColor: theme.colors.tealSoft, borderColor: theme.colors.tealMint }]}>
+                <Edit3 size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.optionTextColumn}>
-                <Text style={styles.optionTitle}>Editar Agendamento</Text>
-                <Text style={styles.optionDesc}>Altere o horário, paciente, título ou cor da consulta.</Text>
+                <Text style={styles.optionTitle}>{t.agenda.editAppointment}</Text>
+                <Text style={styles.optionDesc}>{t.agenda.editAppointmentDesc}</Text>
               </View>
             </TouchableOpacity>
 
@@ -142,12 +147,12 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
                 if (target) onDelete(target.id);
               }}
             >
-              <View style={[styles.optionIconBox, { backgroundColor: 'rgba(248, 113, 113, 0.1)', borderColor: 'rgba(248, 113, 113, 0.3)' }]}>
-                <Trash2 size={22} color="#F87171" />
+              <View style={[styles.optionIconBox, { backgroundColor: 'rgba(224, 122, 95, 0.15)', borderColor: 'rgba(224, 122, 95, 0.3)' }]}>
+                <Trash2 size={20} color={theme.colors.accentOrange} />
               </View>
               <View style={styles.optionTextColumn}>
-                <Text style={[styles.optionTitle, { color: '#F87171' }]}>Excluir Agendamento</Text>
-                <Text style={styles.optionDesc}>Remova permanentemente este agendamento da agenda.</Text>
+                <Text style={[styles.optionTitle, { color: theme.colors.accentOrange }]}>{t.agenda.deleteAppointment}</Text>
+                <Text style={styles.optionDesc}>{t.agenda.deleteAppointmentDesc}</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -159,77 +164,75 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  sectionTitle: { color: 'rgba(255,255,255,0.7)', fontSize: 16, fontWeight: 'bold', paddingHorizontal: 24, marginBottom: 16, textTransform: 'capitalize' },
-  holidayBanner: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(123, 97, 255, 0.1)', marginHorizontal: 24, marginBottom: 20, padding: 16, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(123, 97, 255, 0.3)' },
-  holidayIconBg: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(123, 97, 255, 0.2)', alignItems: 'center', justifyContent: 'center', marginRight: 16 },
-  holidayBannerTitle: { color: 'rgba(255,255,255,0.6)', fontSize: 12, textTransform: 'uppercase', fontWeight: 'bold', marginBottom: 2 },
-  holidayBannerText: { color: '#B4A2FF', fontWeight: 'bold', fontSize: 16 },
-  appointmentList: { paddingHorizontal: 24 },
-  appointmentCard: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 16, marginBottom: 16, padding: 16, alignItems: 'center', overflow: 'hidden' },
+  sectionTitle: { color: theme.colors.textDark, fontSize: 16, fontWeight: '800', paddingHorizontal: 20, marginBottom: 14, textTransform: 'capitalize' },
+  holidayBanner: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.purpleSoft, marginHorizontal: 20, marginBottom: 16, padding: 14, borderRadius: theme.radii.lg, borderWidth: 1, borderColor: theme.colors.badgePurple },
+  holidayIconBg: { width: 38, height: 38, borderRadius: 19, backgroundColor: theme.colors.badgePurple, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+  holidayBannerTitle: { color: theme.colors.badgePurpleText, fontSize: 11, textTransform: 'uppercase', fontWeight: '800', marginBottom: 2 },
+  holidayBannerText: { color: theme.colors.badgePurpleText, fontWeight: '700', fontSize: 15 },
+  appointmentList: { paddingHorizontal: 20 },
+  appointmentCard: { flexDirection: 'row', backgroundColor: theme.colors.cardBg, borderRadius: theme.radii.lg, marginBottom: 12, padding: 16, alignItems: 'center', overflow: 'hidden', borderWidth: 1, borderColor: theme.colors.cardBorder, ...theme.shadows.subtle },
   cardBorder: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 6 },
   threeDotsBtn: {
     width: 36,
     height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: theme.radii.sm,
+    backgroundColor: theme.colors.tealSoft,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
   },
-  timeCol: { marginRight: 16, alignItems: 'center', paddingLeft: 8 },
-  timeStart: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-  timeEnd: { color: 'rgba(255,255,255,0.6)', fontSize: 14 },
+  timeCol: { marginRight: 14, alignItems: 'center', paddingLeft: 6 },
+  timeStart: { color: theme.colors.textDark, fontSize: 17, fontWeight: '800' },
+  timeEnd: { color: theme.colors.textMuted, fontSize: 13, fontWeight: '500' },
   infoCol: { flex: 1 },
-  appName: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
+  appName: { color: theme.colors.textDark, fontSize: 15, fontWeight: '700', marginBottom: 2 },
   statusRow: { flexDirection: 'row', alignItems: 'center' },
   statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
-  appType: { color: 'rgba(255,255,255,0.7)', fontSize: 12 },
+  appType: { color: theme.colors.textMuted, fontSize: 12, fontWeight: '500' },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 40 },
-  emptyText: { color: 'rgba(255,255,255,0.5)', fontSize: 16 },
+  emptyText: { color: theme.colors.textMuted, fontSize: 15 },
 
   /* Options Modal Styles */
-  modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.75)', padding: 24 },
+  modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: 20 },
   modalBackground: { ...StyleSheet.absoluteFillObject },
   optionsModalContent: {
     width: '100%',
-    backgroundColor: '#1c2222',
-    borderRadius: 24,
-    padding: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 20,
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 10,
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.floating,
   },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
-  closeBtn: { padding: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: theme.colors.textDark },
+  closeBtn: { padding: 6, backgroundColor: theme.colors.tealSoft, borderRadius: 20 },
   optionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
+    padding: 14,
+    marginBottom: 10,
   },
   optionCardDanger: {
-    borderColor: 'rgba(248, 113, 113, 0.2)',
+    borderColor: 'rgba(224, 122, 95, 0.3)',
+    backgroundColor: 'rgba(224, 122, 95, 0.05)',
   },
   optionIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: theme.radii.md,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   optionTextColumn: { flex: 1 },
-  optionTitle: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 2 },
-  optionDesc: { color: 'rgba(255,255,255,0.6)', fontSize: 12 },
+  optionTitle: { color: theme.colors.textDark, fontSize: 15, fontWeight: '700', marginBottom: 2 },
+  optionDesc: { color: theme.colors.textMuted, fontSize: 12 },
 });

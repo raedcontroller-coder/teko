@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Teko - Histórico do Paciente</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#131252',
+              teal: '#0A7067',
+              darkTeal: '#00544E',
+              mint: '#E2F7F2',
+              mintText: '#10B981',
+              lavender: '#EFEBFD',
+              lavenderLight: '#F3EFFE',
+              purple: '#6E48E5',
+              subtleGray: '#8B8BA7',
+              bgLight: '#FCFAFA',
+              cardBg: '#FFFFFF',
+              lineGray: '#E9ECF2'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scrollbars-and-reset">
+    /* Remove scrollbars while allowing smooth scrolling */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#FCFAFA] font-sans antialiased text-slate-800 flex justify-center items-start min-h-screen">
+<!-- Mobile Viewport Container (Device: Mobile iOS) -->
+<main class="w-full max-w-[430px] min-h-screen bg-[#FCFAFA] flex flex-col relative pb-24 select-none">
+<!-- BEGIN: TopBarAndProfile -->
+<header class="w-full pt-3 px-5">
+<!-- iOS Status Bar -->
+<div class="flex justify-between items-center text-xs font-semibold text-slate-900 tracking-tight mb-3 px-1">
+<span>9:41</span>
+<div class="flex items-center space-x-1.5">
+<!-- Signal Icons -->
+<svg class="w-4 h-3.5 fill-current" viewbox="0 0 16 12"><path d="M1 9.5a1 1 0 011-1h1.5a1 1 0 011 1V11a1 1 0 01-1 1H2a1 1 0 01-1-1v-1.5zm4.5-3a1 1 0 011-1H8a1 1 0 011 1V11a1 1 0 01-1 1H6.5a1 1 0 01-1-1V6.5zm4.5-3a1 1 0 011-1H12a1 1 0 011 1V11a1 1 0 01-1 1h-1.5a1 1 0 01-1-1V3.5zm4.5-3a1 1 0 011-1H16a1 1 0 011 1V11a1 1 0 01-1 1h-1.5a1 1 0 01-1-1V.5z"></path></svg>
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 16 12"><path d="M8 2.5C4.9 2.5 2.2 3.8.3 5.9a.75.75 0 00.1 1.05l1.6 1.45a.75.75 0 001.03-.07C4.4 6.9 6.1 6 8 6s3.6.9 4.97 2.33a.75.75 0 001.03.07l1.6-1.45a.75.75 0 00.1-1.05C13.8 3.8 11.1 2.5 8 2.5zM8 8a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"></path></svg>
+<!-- Battery -->
+<div class="w-5 h-2.5 border border-slate-900 rounded-[3px] p-[1px] flex items-center">
+<div class="w-full h-full bg-slate-900 rounded-px"></div>
+</div>
+</div>
+</div>
+<!-- Action Nav Header (Back button and Notifications) -->
+<nav aria-label="Navegação secundária" class="flex justify-between items-center py-2 mb-2">
+<!-- Voltar -->
+<button aria-label="Voltar" class="p-1 -ml-1 text-teal-800 hover:opacity-80 transition-opacity" type="button">
+<svg class="w-6 h-6 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Sino com notificação lilás -->
+<div class="relative">
+<button aria-label="Notificações" class="text-teal-800 hover:opacity-80 transition-opacity p-1" type="button">
+<svg class="w-6 h-6 fill-none stroke-[2]" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Lilac badge point -->
+<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-[#8E52F6] rounded-full ring-2 ring-white"></span>
+</div>
+</nav>
+<!-- Patient Profile Header Card -->
+<section aria-label="Dados do Paciente" class="flex items-center gap-3.5 mb-5">
+<!-- Avatar ilustrado recortado da imagem fornecida -->
+<div class="w-16 h-16 rounded-full overflow-hidden shrink-0 border border-teal-50 bg-[#c7eae5] relative">
+<img alt="Pedro Santos" class="w-[500%] max-w-none absolute -top-[100%] -left-[20%] object-cover pointer-events-none" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCANYomHtj1NVbuLTs6n2Zym--Ld3mEskqESIfeR1D3cprMHr6izyuVLxAwiZIXJJwzCtf81oZBmjZglTEce3go9t1LdygLy7fj9Bciw5X15ZizxURCIIojRJ7dsLKH0OM0kH-a8iv5tjTkeX02ep8ip3BB2LmvDIpbnUZch-IQeBtIQqpJkyTdbIY7gq9jRLLj7Yh2EM5cqlI62yVsJBRsQ018k3W4TQZH_oUxeVRueQ00Ga81nhUhr94sEvGrpdvGdw"/>
+</div>
+<div class="flex flex-col">
+<!-- Nome e Tag de Status -->
+<div class="flex items-center gap-2 mb-1">
+<h1 class="text-[21px] font-bold text-brand-navy tracking-tight leading-none">Pedro Santos</h1>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-[11px] font-medium text-emerald-600">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Ativo
+            </span>
+</div>
+<!-- Dados complementares -->
+<p class="text-[13px] text-slate-500 font-normal leading-tight">
+            12 anos <span class="mx-1">•</span> 14/03/2013
+          </p>
+<p class="text-[13px] text-slate-500 font-normal leading-tight mt-0.5">
+            Responsável: Carla Santos
+          </p>
+</div>
+</section>
+<!-- Horizontal Tabs Section -->
+<nav aria-label="Abas de navegação do prontuário" class="flex items-center justify-between border-b border-slate-100 text-[13px] text-slate-500 font-medium px-0 pb-0 overflow-x-auto no-scrollbar gap-4">
+<button class="pb-2 hover:text-brand-navy whitespace-nowrap">Visão geral</button>
+<button class="pb-2 hover:text-brand-navy whitespace-nowrap">Avaliações</button>
+<button class="pb-2 hover:text-brand-navy whitespace-nowrap">Anamnese</button>
+<button class="pb-2 hover:text-brand-navy whitespace-nowrap">Notas clínicas</button>
+<div class="relative pb-2 flex items-center gap-0.5 font-bold text-brand-navy cursor-pointer whitespace-nowrap">
+<span>Mais</span>
+<svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<!-- Active Tab Indicator -->
+<span class="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#6E48E5] rounded-full"></span>
+</div>
+</nav>
+</header>
+<!-- END: TopBarAndProfile -->
+<!-- BEGIN: SubHeaderAndFilters -->
+<section class="px-5 pt-4">
+<!-- Title: < Histórico do paciente -->
+<div class="flex items-center gap-1.5 mb-1">
+<svg class="w-4 h-4 text-brand-navy stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<h2 class="text-lg font-bold text-brand-navy tracking-tight">Histórico do paciente</h2>
+</div>
+<!-- Description subtitle -->
+<p class="text-[12.5px] text-slate-500 leading-relaxed max-w-[340px] pl-0.5 mb-4">
+        Alterações e eventos importantes relacionados ao cadastro e à trajetória do paciente.
+      </p>
+<!-- Pill Filters -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+<button class="px-5 py-1.5 rounded-full text-xs font-semibold bg-[#EFEBFC] text-[#6E48E5] shadow-xs" type="button">
+          Todos
+        </button>
+<button class="px-4 py-1.5 rounded-full text-xs font-medium border border-slate-200 text-slate-600 bg-white hover:bg-slate-50" type="button">
+          Avaliações
+        </button>
+<button class="px-4 py-1.5 rounded-full text-xs font-medium border border-slate-200 text-slate-600 bg-white hover:bg-slate-50" type="button">
+          Clínico
+        </button>
+<button class="px-4 py-1.5 rounded-full text-xs font-medium border border-slate-200 text-slate-600 bg-white hover:bg-slate-50" type="button">
+          Cadastro
+        </button>
+</div>
+</section>
+<!-- END: SubHeaderAndFilters -->
+<!-- BEGIN: TimelineCard -->
+<section aria-label="Linha do tempo dos eventos" class="px-4 mt-3 flex-1">
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100/80">
+<div class="relative flex flex-col space-y-7 pl-1">
+<!-- Timeline Vertical Connecting Line -->
+<div class="absolute left-[20px] top-6 bottom-6 w-[1.5px] bg-slate-200 z-0"></div>
+<!-- Item 1: Relatório gerado -->
+<article class="relative flex items-start justify-between z-10" data-purpose="timeline-item">
+<div class="flex items-start gap-3">
+<!-- Icon with Lilac Background -->
+<div class="w-10 h-10 rounded-full bg-[#EFEBFC] flex items-center justify-center shrink-0 text-[#6E48E5] ring-4 ring-white">
+<svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-brand-navy leading-snug">Relatório gerado</h3>
+<p class="text-xs text-slate-400 mt-0.5">Avaliação do jogo Goleiro</p>
+</div>
+</div>
+<time class="text-[11px] text-slate-400 whitespace-nowrap mt-0.5" datetime="2026-09-05">05 de set. de 2026</time>
+</article>
+<!-- Item 2: Sessão concluída -->
+<article class="relative flex items-start justify-between z-10" data-purpose="timeline-item">
+<div class="flex items-start gap-3">
+<!-- Gamepad Icon -->
+<div class="w-10 h-10 rounded-full bg-[#EFEBFC] flex items-center justify-center shrink-0 text-[#6E48E5] ring-4 ring-white">
+<svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.59 14.37a6 6 0 01-5.84 0M12 11V9m-1.5 1h3m2.25 1.5h.008v.008h-.008v-.008zm1.5-1.5h.008v.008h-.008v-.008zM6 16.5l-1.5 1.5a2.25 2.25 0 01-3.182-3.182l1.5-1.5M18 16.5l1.5 1.5a2.25 2.25 0 003.182-3.182l-1.5-1.5M3 9a6 6 0 0110.292-4.243A6 6 0 0121 9a6 6 0 01-1.708 4.243l-1.5 1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-brand-navy leading-snug">Sessão concluída</h3>
+<p class="text-xs text-slate-400 mt-0.5">Goleiro</p>
+</div>
+</div>
+<time class="text-[11px] text-slate-400 whitespace-nowrap mt-0.5" datetime="2026-09-05">05 de set. de 2026</time>
+</article>
+<!-- Item 3: Nota clínica adicionada -->
+<article class="relative flex items-start justify-between z-10" data-purpose="timeline-item">
+<div class="flex items-start gap-3">
+<!-- Document Notes Icon -->
+<div class="w-10 h-10 rounded-full bg-[#EFEBFC] flex items-center justify-center shrink-0 text-[#6E48E5] ring-4 ring-white">
+<svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5-3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-brand-navy leading-snug">Nota clínica adicionada</h3>
+<p class="text-xs text-slate-400 mt-0.5">Observações sobre atenção sustentada</p>
+</div>
+</div>
+<time class="text-[11px] text-slate-400 whitespace-nowrap mt-0.5" datetime="2026-08-28">28 de ago. de 2026</time>
+</article>
+<!-- Item 4: Anamnese atualizada -->
+<article class="relative flex items-start justify-between z-10" data-purpose="timeline-item">
+<div class="flex items-start gap-3">
+<!-- Clipboard Anamnese Icon -->
+<div class="w-10 h-10 rounded-full bg-[#EFEBFC] flex items-center justify-center shrink-0 text-[#6E48E5] ring-4 ring-white">
+<svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-brand-navy leading-snug">Anamnese atualizada</h3>
+<p class="text-xs text-slate-400 mt-0.5">Responsável: Carla Santos</p>
+</div>
+</div>
+<time class="text-[11px] text-slate-400 whitespace-nowrap mt-0.5" datetime="2026-08-12">12 de ago. de 2026</time>
+</article>
+<!-- Item 5: Cadastro do responsável atualizado -->
+<article class="relative flex items-start justify-between z-10" data-purpose="timeline-item">
+<div class="flex items-start gap-3">
+<!-- Users Group Icon -->
+<div class="w-10 h-10 rounded-full bg-[#EFEBFC] flex items-center justify-center shrink-0 text-[#6E48E5] ring-4 ring-white">
+<svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-brand-navy leading-snug">Cadastro do responsável atualizado</h3>
+<p class="text-xs text-slate-400 mt-0.5">Telefone e e-mail revisados</p>
+</div>
+</div>
+<time class="text-[11px] text-slate-400 whitespace-nowrap mt-0.5" datetime="2026-08-10">10 de ago. de 2026</time>
+</article>
+<!-- Item 6: Paciente cadastrado -->
+<article class="relative flex items-start justify-between z-10" data-purpose="timeline-item">
+<div class="flex items-start gap-3">
+<!-- User Profile Add Icon -->
+<div class="w-10 h-10 rounded-full bg-[#EFEBFC] flex items-center justify-center shrink-0 text-[#6E48E5] ring-4 ring-white">
+<svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 7.5v3m1.5-1.5h-3m-4.5 9A6 6 0 006 12.75a6 6 0 00-6 6V21h12v-2.25zM12 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-brand-navy leading-snug">Paciente cadastrado</h3>
+<p class="text-xs text-slate-400 mt-0.5">Cadastro inicial do prontuário</p>
+</div>
+</div>
+<time class="text-[11px] text-slate-400 whitespace-nowrap mt-0.5" datetime="2026-07-22">22 de jul. de 2026</time>
+</article>
+</div>
+</div>
+</section>
+<!-- END: TimelineCard -->
+<!-- BEGIN: BottomNavigation -->
+<nav aria-label="Navegação Principal" class="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-[#00544E] text-white/70 py-2 px-6 rounded-t-3xl flex justify-between items-center shadow-xl z-50">
+<!-- Aba Início -->
+<a class="flex flex-col items-center justify-center py-1 group w-16" href="#">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1">Início</span>
+</a>
+<!-- Aba Pacientes (Ativa) -->
+<a class="flex flex-col items-center justify-center py-1 text-white relative w-20" href="#">
+<svg class="w-6 h-6 fill-current" viewbox="0 0 24 24">
+<path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.75H1.5v-.75zM14.25 19.875a6.375 6.375 0 016.75-5.625c1.238 0 2.378.351 3.338.962a4.875 4.875 0 01-1.838 4.663h-8.25z"></path>
+</svg>
+<span class="text-[11px] font-semibold mt-1">Pacientes</span>
+<!-- Linha lilás sob o item ativo -->
+<span class="w-10 h-[3px] bg-[#BFA3F8] rounded-full mt-1"></span>
+</a>
+<!-- Aba Jogos -->
+<a class="flex flex-col items-center justify-center py-1 group w-16" href="#">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.59 14.37a6 6 0 01-5.84 0M12 11V9m-1.5 1h3m2.25 1.5h.008v.008h-.008v-.008zm1.5-1.5h.008v.008h-.008v-.008zM6 16.5l-1.5 1.5a2.25 2.25 0 01-3.182-3.182l1.5-1.5M18 16.5l1.5 1.5a2.25 2.25 0 003.182-3.182l-1.5-1.5M3 9a6 6 0 0110.292-4.243A6 6 0 0121 9a6 6 0 01-1.708 4.243l-1.5 1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1">Jogos</span>
+</a>
+<!-- Aba Agenda -->
+<a class="flex flex-col items-center justify-center py-1 group w-16" href="#">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1">Agenda</span>
+</a>
+</nav>
+<!-- END: BottomNavigation -->
+</main>
+</body></html>

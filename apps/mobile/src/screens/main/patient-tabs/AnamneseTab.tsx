@@ -1,112 +1,18 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, UIManager, LayoutAnimation, Pressable, ActivityIndicator, Alert, Modal } from 'react-native';
-import { Save, ChevronDown, ChevronUp, User, Baby, Activity, TrendingUp, Moon, Heart, Shield, Users, Book, Pill, FileText, Stethoscope, CheckCircle2, Circle, CircleDashed, Trash2, AlertTriangle } from 'lucide-react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, UIManager, LayoutAnimation, Pressable, ActivityIndicator, Modal } from 'react-native';
+import { Save, ChevronDown, ChevronUp, User, Baby, Activity, TrendingUp, Moon, Heart, Shield, Users, Book, Pill, FileText, Stethoscope, CheckCircle2, Circle, CircleDashed, Trash2, AlertTriangle, XCircle } from 'lucide-react-native';
 import { api } from '../../../services/api';
+import { theme } from '../../../theme/theme';
+import { useTranslation } from '../../../i18n';
 
-if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
-
-const ThemeContext = createContext('#7B61FF');
-
-interface AnamneseTabProps {
-  patientId?: string;
-  adminPsicologoId?: string;
-}
-
-export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
-  const [expandedSection, setExpandedSection] = useState<string | null>('Motivo da Consulta');
-  const [formData, setFormData] = useState<any>({});
-  const [loading, setLoading] = useState<boolean>(false);
-  const [saving, setSaving] = useState<boolean>(false);
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-
-  // Carregamento inicial da Anamnese
-  useEffect(() => {
-    if (!patientId) return;
-    const fetchAnamnese = async () => {
-      try {
-        setLoading(true);
-        const url = adminPsicologoId 
-          ? `/api/patients/${patientId}/anamnese?psicologoId=${adminPsicologoId}`
-          : `/api/patients/${patientId}/anamnese`;
-        const response = await api.get(url);
-        if (response.data?.success && response.data?.data?.content) {
-          setFormData(response.data.data.content);
-        } else {
-          setFormData({});
-        }
-      } catch (err) {
-        console.error("Erro ao carregar anamnese:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAnamnese();
-  }, [patientId, adminPsicologoId]);
-
-  const handleSave = async () => {
-    if (!patientId) {
-      Alert.alert("Aviso", "Identificador do paciente não informado.");
-      return;
-    }
-    try {
-      setSaving(true);
-      const url = adminPsicologoId 
-        ? `/api/patients/${patientId}/anamnese?psicologoId=${adminPsicologoId}`
-        : `/api/patients/${patientId}/anamnese`;
-      
-      const response = await api.put(url, {
-        content: formData,
-        status: Object.keys(formData).length > 0 ? 'completed' : 'draft'
-      });
-
-      if (response.data?.success) {
-        Alert.alert("Sucesso", "Anamnese salva com sucesso no banco!");
-      }
-    } catch (err: any) {
-      console.error("Erro ao salvar anamnese:", err);
-      Alert.alert("Erro", err.response?.data?.error || "Falha ao salvar anamnese no servidor.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const confirmDelete = async () => {
-    if (!patientId) return;
-    try {
-      setSaving(true);
-      setShowDeleteModal(false);
-      const url = adminPsicologoId 
-        ? `/api/patients/${patientId}/anamnese?psicologoId=${adminPsicologoId}`
-        : `/api/patients/${patientId}/anamnese`;
-      await api.delete(url);
-      
-      // Reset completo de todos os campos da anamnese
-      setFormData({});
-    } catch (err: any) {
-      console.error("Erro ao excluir anamnese:", err);
-      Alert.alert("Erro", err.response?.data?.error || "Falha ao excluir anamnese.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleFieldChange = React.useCallback((field: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [field]: value }));
-  }, []);
-
-  const toggleSection = (section: string) => {
-    setExpandedSection(prev => prev === section ? null : section);
-  };
+const ThemeContext = createContext(theme.colors.primary);
 
 // ------------------------------------------------------------------------------
-// Componentes Auxiliares Declarados no Top-Level (Evita remount e fechamento do teclado)
+// Componentes Auxiliares Declarados FORA da função principal (Evita remount e fechamento do teclado)
 // ------------------------------------------------------------------------------
 
 interface AccordionProps {
+  id: string;
   title: string;
   icon: any;
   color?: string;
@@ -117,8 +23,9 @@ interface AccordionProps {
   children: React.ReactNode;
 }
 
-function Accordion({ title, icon: Icon, color = "#7B61FF", fields = [], expandedSection, toggleSection, formData, children }: AccordionProps) {
-  const isExpanded = expandedSection === title;
+function Accordion({ id, title, icon: Icon, color = "#7B61FF", fields = [], expandedSection, toggleSection, formData, children }: AccordionProps) {
+  const { t } = useTranslation();
+  const isExpanded = expandedSection === id;
 
   const totalFields = fields.length;
   const filledCount = fields.filter((f: string) => {
@@ -134,11 +41,11 @@ function Accordion({ title, icon: Icon, color = "#7B61FF", fields = [], expanded
   return (
     <ThemeContext.Provider value={color}>
       <View style={[styles.accordionContainer, { borderColor: `${color}30` }, isExpanded && { borderColor: color }]}>
-        <View style={[styles.cardBgIcon, { opacity: 0.15 }]}>
+        <View style={styles.cardBgIcon}>
           <Icon size={160} color={color} />
         </View>
         
-        <TouchableOpacity style={styles.accordionHeader} onPress={() => toggleSection(title)} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.accordionHeader} onPress={() => toggleSection(id)} activeOpacity={0.7}>
           <View style={styles.accordionTitleRow}>
             <View style={[styles.iconBox, { backgroundColor: `${color}15`, borderColor: `${color}40` }]}>
               <Icon size={20} color={color} />
@@ -148,16 +55,16 @@ function Accordion({ title, icon: Icon, color = "#7B61FF", fields = [], expanded
               
               {totalFields > 0 && (
                 <View style={styles.progressRow}>
-                  {isComplete && <CheckCircle2 size={12} color={color} />}
-                  {isPartial && <CircleDashed size={12} color={`${color}90`} />}
-                  {isEmpty && <Circle size={12} color="rgba(255,255,255,0.3)" />}
+                  {isComplete && <CheckCircle2 key="complete" size={12} color={color} />}
+                  {isPartial && <CircleDashed key="partial" size={12} color={`${color}90`} />}
+                  {isEmpty && <Circle key="empty" size={12} color="rgba(255,255,255,0.3)" />}
                   
                   <Text style={[
                     styles.progressText,
                     isComplete && { color: color, fontWeight: 'bold' },
                     isPartial && { color: `${color}90` }
                   ]}>
-                    {isComplete ? 'Concluído' : `${filledCount}/${totalFields} respondidos`}
+                    {isComplete ? t.anamnese.completedBadge : t('anamnese.answeredCount', { filled: filledCount, total: totalFields })}
                   </Text>
                 </View>
               )}
@@ -171,7 +78,7 @@ function Accordion({ title, icon: Icon, color = "#7B61FF", fields = [], expanded
   );
 }
 
-function CustomTextInput({ style, field, value, onChangeField, ...props }: any) {
+const CustomTextInput = React.memo(function CustomTextInput({ style, field, value, onChangeField, ...props }: any) {
   const color = useContext(ThemeContext);
   return (
     <TextInput 
@@ -189,9 +96,10 @@ function CustomTextInput({ style, field, value, onChangeField, ...props }: any) 
       {...props} 
     />
   );
-}
+});
 
 function BooleanPill({ label, field, formData, setFormData }: { label: string, field: string, formData: any, setFormData: any }) {
+  const { t } = useTranslation();
   const color = useContext(ThemeContext);
   const value = formData[field];
   return (
@@ -202,13 +110,13 @@ function BooleanPill({ label, field, formData, setFormData }: { label: string, f
           style={[styles.pill, { borderColor: `${color}40` }, value === true && { backgroundColor: color, borderColor: color }]}
           onPress={() => setFormData((prev: any) => ({ ...prev, [field]: true }))}
         >
-          <Text style={[styles.pillText, value === true && styles.pillTextActive]}>Sim</Text>
+          <Text style={[styles.pillText, value === true && styles.pillTextActive]}>{t.common.yes}</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.pill, { borderColor: `${color}40` }, value === false && { backgroundColor: color, borderColor: color }]}
           onPress={() => setFormData((prev: any) => ({ ...prev, [field]: false }))}
         >
-          <Text style={[styles.pillText, value === false && styles.pillTextActive]}>Não</Text>
+          <Text style={[styles.pillText, value === false && styles.pillTextActive]}>{t.common.no}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -267,22 +175,137 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
   );
 }
 
+interface AnamneseTabProps {
+  patientId?: string;
+  adminPsicologoId?: string;
+}
+
+export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
+  const { t } = useTranslation();
+  const [expandedSection, setExpandedSection] = useState<string | null>('motivo');
+  const [formData, setFormData] = useState<any>({});
+  const [loading, setLoading] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+
+  // Toast States
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const triggerSuccessToast = (msg: string) => {
+    setSuccessMessage(msg);
+    setShowSuccessToast(true);
+    setTimeout(() => {
+      setShowSuccessToast(false);
+    }, 3500);
+  };
+
+  const triggerErrorToast = (msg: string) => {
+    setErrorMessage(msg);
+    setShowErrorToast(true);
+    setTimeout(() => {
+      setShowErrorToast(false);
+    }, 3500);
+  };
+
+  // Carregamento inicial da Anamnese
+  useEffect(() => {
+    if (!patientId) return;
+    const fetchAnamnese = async () => {
+      try {
+        setLoading(true);
+        const url = adminPsicologoId 
+          ? `/api/patients/${patientId}/anamnese?psicologoId=${adminPsicologoId}`
+          : `/api/patients/${patientId}/anamnese`;
+        const response = await api.get(url);
+        if (response.data?.success && response.data?.data?.content) {
+          setFormData(response.data.data.content);
+        } else {
+          setFormData({});
+        }
+      } catch (err) {
+        console.error("Erro ao carregar anamnese:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnamnese();
+  }, [patientId, adminPsicologoId]);
+
+  const handleSave = async () => {
+    if (!patientId) {
+      triggerErrorToast(t.anamnese.patientIdRequired);
+      return;
+    }
+    try {
+      setSaving(true);
+      const url = adminPsicologoId 
+        ? `/api/patients/${patientId}/anamnese?psicologoId=${adminPsicologoId}`
+        : `/api/patients/${patientId}/anamnese`;
+      
+      const response = await api.put(url, {
+        content: formData,
+        status: Object.keys(formData).length > 0 ? 'completed' : 'draft'
+      });
+
+      if (response.data?.success) {
+        triggerSuccessToast(t.anamnese.saveSuccess);
+      }
+    } catch (err: any) {
+      console.error("Erro ao salvar anamnese:", err);
+      triggerErrorToast(err.response?.data?.error || t.anamnese.saveError);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!patientId) return;
+    try {
+      setSaving(true);
+      setShowDeleteModal(false);
+      const url = adminPsicologoId 
+        ? `/api/patients/${patientId}/anamnese?psicologoId=${adminPsicologoId}`
+        : `/api/patients/${patientId}/anamnese`;
+      await api.delete(url);
+      
+      // Reset completo de todos os campos da anamnese
+      setFormData({});
+      triggerSuccessToast(t.anamnese.deleteSuccess);
+    } catch (err: any) {
+      console.error("Erro ao excluir anamnese:", err);
+      triggerErrorToast(err.response?.data?.error || t.anamnese.deleteError);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleFieldChange = React.useCallback((field: string, value: any) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(prev => prev === section ? null : section);
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent} 
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         keyboardDismissMode="none"
       >
         
-        <Accordion title="Motivo da Consulta" icon={FileText} color="#FFC857" fields={['queixa']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <Text style={styles.inputLabel}>Queixa Principal</Text>
+        <Accordion key="motivo" id="motivo" title={t.anamnese.motivoTitle} icon={FileText} color="#FFC857" fields={['queixa']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <Text style={styles.inputLabel}>{t.anamnese.queixaLabel}</Text>
           <CustomTextInput
             style={styles.textArea}
             multiline
             numberOfLines={4}
-            placeholder="Descreva detalhadamente a queixa que motivou a consulta..."
+            placeholder={t.anamnese.queixaPlaceholder}
             placeholderTextColor="rgba(255,255,255,0.4)"
             field="queixa"
             value={formData.queixa || ''}
@@ -290,35 +313,35 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
           />
         </Accordion>
 
-        <Accordion title="Gestação e Concepção" icon={Baby} color="#EC4899" fields={['desejada', 'idadeMae', 'idadePai', 'prenatal', 'complGestacao', 'doencasGestacao']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <BooleanPill label="Criança planejada/desejada?" field="desejada" formData={formData} setFormData={setFormData} />
-          <CustomTextInput style={styles.inputField} field="idadeMae" placeholder="Idade da mãe na concepção" placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.idadeMae} onChangeField={handleFieldChange} />
-          <CustomTextInput style={styles.inputField} field="idadePai" placeholder="Idade do pai na concepção" placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.idadePai} onChangeField={handleFieldChange} />
-          <BooleanPill label="Acompanhamento pré-natal?" field="prenatal" formData={formData} setFormData={setFormData} />
+        <Accordion key="gestacao" id="gestacao" title={t.anamnese.gestacaoTitle} icon={Baby} color="#EC4899" fields={['desejada', 'idadeMae', 'idadePai', 'prenatal', 'complGestacao', 'doencasGestacao']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <BooleanPill label={t.anamnese.desejadaLabel} field="desejada" formData={formData} setFormData={setFormData} />
+          <CustomTextInput style={styles.inputField} field="idadeMae" placeholder={t.anamnese.idadeMaePlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.idadeMae} onChangeField={handleFieldChange} />
+          <CustomTextInput style={styles.inputField} field="idadePai" placeholder={t.anamnese.idadePaiPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.idadePai} onChangeField={handleFieldChange} />
+          <BooleanPill label={t.anamnese.prenatalLabel} field="prenatal" formData={formData} setFormData={setFormData} />
           
           <MultiSelectPillGroup 
-            label="Complicações na Gestação" 
+            label={t.anamnese.complGestacaoLabel} 
             field="complGestacao" 
-            options={['Sangramento', 'Enjoo intenso', 'Febre', 'Ameaça aborto', 'Medicamentos', 'Uso de Álcool/Drogas']} 
+            options={t.anamnese.complGestacaoOptions} 
             formData={formData} 
             setFormData={setFormData} 
           />
-          <CustomTextInput style={styles.textArea} multiline field="doencasGestacao" placeholder="Doenças durante a gestação (ex: Diabetes, Rubéola, Hipertensão)..." placeholderTextColor="rgba(255,255,255,0.4)" value={formData.doencasGestacao} onChangeField={handleFieldChange} />
+          <CustomTextInput style={styles.textArea} multiline field="doencasGestacao" placeholder={t.anamnese.doencasGestacaoPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.doencasGestacao} onChangeField={handleFieldChange} />
         </Accordion>
         
-        <Accordion title="Parto" icon={Activity} color="#34D399" fields={['tipoParto', 'chorouAoNascer', 'uti', 'ictericia', 'pesoNascer', 'alturaNascer']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <SelectPillGroup label="Tipo de Parto" field="tipoParto" options={['Normal', 'Cesariana', 'Fórceps']} formData={formData} setFormData={setFormData} />
-          <BooleanPill label="Bebê chorou logo que nasceu?" field="chorouAoNascer" formData={formData} setFormData={setFormData} />
-          <BooleanPill label="Precisou de oxigênio ou UTI?" field="uti" formData={formData} setFormData={setFormData} />
-          <BooleanPill label="Teve icterícia?" field="ictericia" formData={formData} setFormData={setFormData} />
+        <Accordion key="parto" id="parto" title={t.anamnese.partoTitle} icon={Activity} color="#34D399" fields={['tipoParto', 'chorouAoNascer', 'uti', 'ictericia', 'pesoNascer', 'alturaNascer']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <SelectPillGroup label={t.anamnese.tipoPartoLabel} field="tipoParto" options={t.anamnese.tipoPartoOptions} formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.chorouLabel} field="chorouAoNascer" formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.utiLabel} field="uti" formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.ictericiaLabel} field="ictericia" formData={formData} setFormData={setFormData} />
           
-          <Text style={styles.sectionSubtitle}>Medidas físicas do recém-nascido:</Text>
+          <Text style={styles.sectionSubtitle}>{t.anamnese.physicalMeasuresTitle}</Text>
           <View style={styles.pillGroupContainer}>
-            <Text style={styles.pillGroupLabel}>Peso ao nascer (em kilos / kg)</Text>
+            <Text style={styles.pillGroupLabel}>{t.anamnese.pesoNascerLabel}</Text>
             <CustomTextInput 
               style={styles.inputField} 
               field="pesoNascer"
-              placeholder="Ex: 3.4 kg" 
+              placeholder={t.anamnese.pesoNascerPlaceholder} 
               placeholderTextColor="rgba(255,255,255,0.4)" 
               keyboardType="numeric" 
               value={formData.pesoNascer} 
@@ -327,11 +350,11 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
           </View>
 
           <View style={styles.pillGroupContainer}>
-            <Text style={styles.pillGroupLabel}>Comprimento/Altura ao nascer (em centímetros / cm)</Text>
+            <Text style={styles.pillGroupLabel}>{t.anamnese.alturaNascerLabel}</Text>
             <CustomTextInput 
               style={styles.inputField} 
               field="alturaNascer"
-              placeholder="Ex: 50 cm" 
+              placeholder={t.anamnese.alturaNascerPlaceholder} 
               placeholderTextColor="rgba(255,255,255,0.4)" 
               keyboardType="numeric" 
               value={formData.alturaNascer} 
@@ -340,100 +363,99 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
           </View>
         </Accordion>
 
-        <Accordion title="Marcos do Desenvolvimento" icon={TrendingUp} color="#60A5FA" fields={['sentar', 'andar', 'primeirasPalavras', 'desfralde', 'tiques']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <Text style={styles.sectionSubtitle}>Idade (em meses) que começou a:</Text>
+        <Accordion key="desenvolvimento" id="desenvolvimento" title={t.anamnese.desenvolvimentoTitle} icon={TrendingUp} color="#60A5FA" fields={['sentar', 'andar', 'primeirasPalavras', 'desfralde', 'tiques']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <Text style={styles.sectionSubtitle}>{t.anamnese.idadeMesesHeader}</Text>
           <View style={styles.row}>
-            <CustomTextInput style={[styles.inputField, { flex: 1, marginRight: 8 }]} field="sentar" placeholder="Sentar" placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.sentar} onChangeField={handleFieldChange} />
-            <CustomTextInput style={[styles.inputField, { flex: 1, marginLeft: 8 }]} field="andar" placeholder="Andar" placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.andar} onChangeField={handleFieldChange} />
+            <CustomTextInput style={[styles.inputField, { flex: 1, marginRight: 8 }]} field="sentar" placeholder={t.anamnese.sentarPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.sentar} onChangeField={handleFieldChange} />
+            <CustomTextInput style={[styles.inputField, { flex: 1, marginLeft: 8 }]} field="andar" placeholder={t.anamnese.andarPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.andar} onChangeField={handleFieldChange} />
           </View>
           <View style={styles.row}>
-            <CustomTextInput style={[styles.inputField, { flex: 1, marginRight: 8 }]} field="primeirasPalavras" placeholder="Primeiras palavras" placeholderTextColor="rgba(255,255,255,0.4)" value={formData.primeirasPalavras} onChangeField={handleFieldChange} />
-            <CustomTextInput style={[styles.inputField, { flex: 1, marginLeft: 8 }]} field="desfralde" placeholder="Desfralde" placeholderTextColor="rgba(255,255,255,0.4)" value={formData.desfralde} onChangeField={handleFieldChange} />
+            <CustomTextInput style={[styles.inputField, { flex: 1, marginRight: 8 }]} field="primeirasPalavras" placeholder={t.anamnese.primeirasPalavrasPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.primeirasPalavras} onChangeField={handleFieldChange} />
+            <CustomTextInput style={[styles.inputField, { flex: 1, marginLeft: 8 }]} field="desfralde" placeholder={t.anamnese.desfraldePlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.desfralde} onChangeField={handleFieldChange} />
           </View>
 
-          <BooleanPill label="Apresenta ou já apresentou tiques?" field="tiques" formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.tiquesLabel} field="tiques" formData={formData} setFormData={setFormData} />
         </Accordion>
 
-        <Accordion title="Sono & Alimentação" icon={Moon} color="#A855F7" fields={['alimentacaoInfancia', 'alimentacaoAtual', 'sonoTranquilo', 'horasSono', 'dormeSozinho', 'disturbiosSono']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <SelectPillGroup label="Alimentação na infância" field="alimentacaoInfancia" options={['Materna', 'Mamadeira', 'Mista']} formData={formData} setFormData={setFormData} />
-          <SelectPillGroup label="Alimentação atual" field="alimentacaoAtual" options={['Boa', 'Recusa alimentos', 'Muito seletiva', 'Compulsiva']} formData={formData} setFormData={setFormData} />
+        <Accordion key="sonoAlimentacao" id="sonoAlimentacao" title={t.anamnese.sonoAlimentacaoTitle} icon={Moon} color="#A855F7" fields={['alimentacaoInfancia', 'alimentacaoAtual', 'sonoTranquilo', 'horasSono', 'dormeSozinho', 'disturbiosSono']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <SelectPillGroup label={t.anamnese.alimentacaoInfanciaLabel} field="alimentacaoInfancia" options={t.anamnese.alimentacaoInfanciaOptions} formData={formData} setFormData={setFormData} />
+          <SelectPillGroup label={t.anamnese.alimentacaoAtualLabel} field="alimentacaoAtual" options={t.anamnese.alimentacaoAtualOptions} formData={formData} setFormData={setFormData} />
           
-          <BooleanPill label="Sono tranquilo?" field="sonoTranquilo" formData={formData} setFormData={setFormData} />
-          <CustomTextInput style={styles.inputField} field="horasSono" placeholder="Quantas horas de sono por noite?" placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.horasSono} onChangeField={handleFieldChange} />
-          <BooleanPill label="Dorme sozinho no próprio quarto?" field="dormeSozinho" formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.sonoTranquiloLabel} field="sonoTranquilo" formData={formData} setFormData={setFormData} />
+          <CustomTextInput style={styles.inputField} field="horasSono" placeholder={t.anamnese.horasSonoPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.horasSono} onChangeField={handleFieldChange} />
+          <BooleanPill label={t.anamnese.dormeSozinhoLabel} field="dormeSozinho" formData={formData} setFormData={setFormData} />
           
           <MultiSelectPillGroup 
-            label="Distúrbios noturnos" 
+            label={t.anamnese.disturbiosSonoLabel} 
             field="disturbiosSono" 
-            options={['Fala dormindo', 'Sonambulismo', 'Terror Noturno', 'Bruxismo (range dentes)', 'Enurese (xixi na cama)']} 
+            options={t.anamnese.disturbiosSonoOptions} 
             formData={formData} 
             setFormData={setFormData} 
           />
         </Accordion>
 
-        <Accordion title="Sexualidade" icon={Heart} color="#F43F5E" fields={['curiosidadeSexual', 'manipulacao', 'orientacaoSexual', 'relatosSex']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <BooleanPill label="Curiosidade sexual excessiva?" field="curiosidadeSexual" formData={formData} setFormData={setFormData} />
-          <BooleanPill label="Manipulação frequente?" field="manipulacao" formData={formData} setFormData={setFormData} />
-          <BooleanPill label="Já recebeu orientação sexual em casa?" field="orientacaoSexual" formData={formData} setFormData={setFormData} />
-          <CustomTextInput style={styles.textArea} multiline field="relatosSex" placeholder="Para adolescentes: Relatos sobre menarca, cólicas, etc..." placeholderTextColor="rgba(255,255,255,0.4)" value={formData.relatosSex} onChangeField={handleFieldChange} />
+        <Accordion key="sexualidade" id="sexualidade" title={t.anamnese.sexualidadeTitle} icon={Heart} color="#F43F5E" fields={['curiosidadeSexual', 'manipulacao', 'orientacaoSexual', 'relatosSex']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <BooleanPill label={t.anamnese.curiosidadeSexualLabel} field="curiosidadeSexual" formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.manipulacaoLabel} field="manipulacao" formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.orientacaoSexualLabel} field="orientacaoSexual" formData={formData} setFormData={setFormData} />
+          <CustomTextInput style={styles.textArea} multiline field="relatosSex" placeholder={t.anamnese.relatosSexPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.relatosSex} onChangeField={handleFieldChange} />
         </Accordion>
 
-        <Accordion title="História Médica" icon={Shield} color="#3B82F6" fields={['doencasAnteriores', 'traumatismo', 'enxaqueca', 'convulsao', 'detalhesMedicos']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+        <Accordion key="historiaMedica" id="historiaMedica" title={t.anamnese.historiaMedicaTitle} icon={Shield} color="#3B82F6" fields={['doencasAnteriores', 'traumatismo', 'enxaqueca', 'convulsao', 'detalhesMedicos']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
           <MultiSelectPillGroup 
-            label="Doenças Anteriores" 
+            label={t.anamnese.doencasAnterioresLabel} 
             field="doencasAnteriores" 
-            options={['Meningite', 'Pneumonia', 'Sarampo', 'Infecção Urinária', 'Alergias severas']} 
+            options={t.anamnese.doencasAnterioresOptions} 
             formData={formData} 
             setFormData={setFormData} 
           />
-          <BooleanPill label="Traumatismo Craniano ou Perda de consciência?" field="traumatismo" formData={formData} setFormData={setFormData} />
-          <BooleanPill label="Dores de cabeça frequentes / Enxaqueca?" field="enxaqueca" formData={formData} setFormData={setFormData} />
-          <BooleanPill label="Episódios de crises convulsivas?" field="convulsao" formData={formData} setFormData={setFormData} />
-          <CustomTextInput style={styles.textArea} multiline field="detalhesMedicos" placeholder="Detalhes sobre problemas neurológicos, gastrointestinais ou cardiovasculares..." placeholderTextColor="rgba(255,255,255,0.4)" value={formData.detalhesMedicos} onChangeField={handleFieldChange} />
+          <BooleanPill label={t.anamnese.traumatismoLabel} field="traumatismo" formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.enxaquecaLabel} field="enxaqueca" formData={formData} setFormData={setFormData} />
+          <BooleanPill label={t.anamnese.convulsaoLabel} field="convulsao" formData={formData} setFormData={setFormData} />
+          <CustomTextInput style={styles.textArea} multiline field="detalhesMedicos" placeholder={t.anamnese.detalhesMedicosPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.detalhesMedicos} onChangeField={handleFieldChange} />
         </Accordion>
 
-        <Accordion title="Ambiente Familiar e Social" icon={Users} color="#10B981" fields={['situacaoPais', 'relacionamentos', 'interacaoSocial']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <SelectPillGroup label="Situação dos pais" field="situacaoPais" options={['Vivem juntos', 'Separados', 'Viúvo(a)']} formData={formData} setFormData={setFormData} />
-          <CustomTextInput style={styles.textArea} multiline field="relacionamentos" placeholder="Relacionamento com o pai, mãe e irmãos..." placeholderTextColor="rgba(255,255,255,0.4)" value={formData.relacionamentos} onChangeField={handleFieldChange} />
+        <Accordion key="ambienteFamiliar" id="ambienteFamiliar" title={t.anamnese.ambienteFamiliarTitle} icon={Users} color="#10B981" fields={['situacaoPais', 'relacionamentos', 'interacaoSocial']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <SelectPillGroup label={t.anamnese.situacaoPaisLabel} field="situacaoPais" options={t.anamnese.situacaoPaisOptions} formData={formData} setFormData={setFormData} />
+          <CustomTextInput style={styles.textArea} multiline field="relacionamentos" placeholder={t.anamnese.relacionamentosPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.relacionamentos} onChangeField={handleFieldChange} />
           
           <MultiSelectPillGroup 
-            label="Interação Social" 
+            label={t.anamnese.interacaoSocialLabel} 
             field="interacaoSocial" 
-            options={['Evita contato social', 'Agressivo com colegas', 'Muito submisso', 'Boa interação', 'Evita grupos']} 
+            options={t.anamnese.interacaoSocialOptions} 
             formData={formData} 
             setFormData={setFormData} 
           />
         </Accordion>
 
-        <Accordion title="Escolaridade" icon={Book} color="#F59E0B" fields={['gostaEscola', 'dificuldadeEscolar', 'historicoEscolar']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <BooleanPill label="Gosta de ir à escola?" field="gostaEscola" formData={formData} setFormData={setFormData} />
+        <Accordion key="escolaridade" id="escolaridade" title={t.anamnese.escolaridadeTitle} icon={Book} color="#F59E0B" fields={['gostaEscola', 'dificuldadeEscolar', 'historicoEscolar']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <BooleanPill label={t.anamnese.gostaEscolaLabel} field="gostaEscola" formData={formData} setFormData={setFormData} />
           <MultiSelectPillGroup 
-            label="Dificuldades aparentes" 
+            label={t.anamnese.dificuldadeEscolarLabel} 
             field="dificuldadeEscolar" 
-            options={['Leitura', 'Aritmética', 'Ortografia', 'Socialização', 'Concentração']} 
+            options={t.anamnese.dificuldadeEscolarOptions} 
             formData={formData} 
             setFormData={setFormData} 
           />
-          <CustomTextInput style={styles.textArea} multiline field="historicoEscolar" placeholder="Resumo do histórico escolar, reprovações, reclamações da escola..." placeholderTextColor="rgba(255,255,255,0.4)" value={formData.historicoEscolar} onChangeField={handleFieldChange} />
+          <CustomTextInput style={styles.textArea} multiline field="historicoEscolar" placeholder={t.anamnese.historicoEscolarPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.historicoEscolar} onChangeField={handleFieldChange} />
         </Accordion>
 
-        <Accordion title="Tratamentos & Medicação" icon={Pill} color="#EF4444" fields={['tratamentos', 'usoMedicacao', 'medicacoes']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <CustomTextInput style={styles.textArea} multiline field="tratamentos" placeholder="Tratamentos anteriores ou atuais (Neurologista, Psiquiatra, Fono, etc)..." placeholderTextColor="rgba(255,255,255,0.4)" value={formData.tratamentos} onChangeField={handleFieldChange} />
+        <Accordion key="tratamentos" id="tratamentos" title={t.anamnese.tratamentosTitle} icon={Pill} color="#EF4444" fields={['tratamentos', 'usoMedicacao', 'medicacoes']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <CustomTextInput style={styles.textArea} multiline field="tratamentos" placeholder={t.anamnese.tratamentosPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.tratamentos} onChangeField={handleFieldChange} />
           
-          <BooleanPill label="Uso frequente de medicação?" field="usoMedicacao" formData={formData} setFormData={setFormData} />
-          <CustomTextInput style={styles.inputField} field="medicacoes" placeholder="Quais medicações? (Nome e dosagem)" placeholderTextColor="rgba(255,255,255,0.4)" value={formData.medicacoes} onChangeField={handleFieldChange} />
+          <BooleanPill label={t.anamnese.usoMedicacaoLabel} field="usoMedicacao" formData={formData} setFormData={setFormData} />
+          <CustomTextInput style={styles.inputField} field="medicacoes" placeholder={t.anamnese.medicacoesPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.medicacoes} onChangeField={handleFieldChange} />
         </Accordion>
 
-        <Accordion title="Observações Finais" icon={Stethoscope} color="#8B5CF6" fields={['impressaoGeral', 'planoIntervencao']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <CustomTextInput style={styles.textArea} multiline field="impressaoGeral" placeholder="Impressão geral do psicólogo sobre a família e a criança..." placeholderTextColor="rgba(255,255,255,0.4)" value={formData.impressaoGeral} onChangeField={handleFieldChange} />
-          <CustomTextInput style={styles.textArea} multiline field="planoIntervencao" placeholder="Plano inicial de intervenção e tratamento..." placeholderTextColor="rgba(255,255,255,0.4)" value={formData.planoIntervencao} onChangeField={handleFieldChange} />
+        <Accordion key="observacoesFinais" id="observacoesFinais" title={t.anamnese.observacoesFinaisTitle} icon={Stethoscope} color="#8B5CF6" fields={['impressaoGeral', 'planoIntervencao']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <CustomTextInput style={styles.textArea} multiline field="impressaoGeral" placeholder={t.anamnese.impressaoGeralPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.impressaoGeral} onChangeField={handleFieldChange} />
+          <CustomTextInput style={styles.textArea} multiline field="planoIntervencao" placeholder={t.anamnese.planoIntervencaoPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.planoIntervencao} onChangeField={handleFieldChange} />
         </Accordion>
 
-        {/* Seção Fixa de Exclusão (Sempre Aberta, não minimizável, com SVG no canto superior direito) */}
+        {/* Seção Fixa de Exclusão */}
         {Object.keys(formData).length > 0 && (
           <View style={styles.dangerCardFixed}>
-            {/* Fundo SVG Watermark no canto superior direito igual aos outros tópicos */}
-            <View style={[styles.cardBgIcon, { opacity: 0.15 }]}>
+            <View style={styles.cardBgIcon}>
               <Trash2 size={160} color="#EF4444" />
             </View>
 
@@ -443,14 +465,14 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
               </View>
 
               <View style={styles.titleColumn}>
-                <Text style={styles.dangerCardTitle}>Excluir Anamnese</Text>
-                <Text style={styles.dangerCardSubtitle}>Zona de Perigo</Text>
+                <Text style={styles.dangerCardTitle}>{t.anamnese.deleteTitle}</Text>
+                <Text style={styles.dangerCardSubtitle}>{t.anamnese.dangerZone}</Text>
               </View>
             </View>
 
             <View style={styles.dangerCardContent}>
               <Text style={styles.dangerZoneText}>
-                Atenção: Ao confirmar a exclusão, todos os dados da anamnese serão desativados no banco de dados e os campos deste formulário serão completamente limpos.
+                {t.anamnese.dangerZoneWarning}
               </Text>
 
               <TouchableOpacity 
@@ -459,7 +481,7 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
                 disabled={saving}
               >
                 <Trash2 size={18} color="#FFF" style={{ marginRight: 8 }} />
-                <Text style={styles.dangerCardButtonText}>Excluir e Resetar Anamnese</Text>
+                <Text style={styles.dangerCardButtonText}>{t.anamnese.deleteResetBtn}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -468,7 +490,7 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Modal de Confirmação de Exclusão da Anamnese (Estilo Teko) */}
+      {/* Modal de Confirmação de Exclusão da Anamnese */}
       <Modal
         visible={showDeleteModal}
         transparent={true}
@@ -480,9 +502,9 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
             <View style={styles.modalIconBgRed}>
               <Trash2 color="#FF4B4B" size={32} />
             </View>
-            <Text style={styles.modalTitleRed}>Excluir Anamnese?</Text>
+            <Text style={styles.modalTitleRed}>{t.anamnese.deleteConfirmTitle}</Text>
             <Text style={styles.modalMessage}>
-              Tem certeza que deseja excluir todos os dados da anamnese deste paciente? Esta ação desativará as informações no banco de dados e resetará todos os campos.
+              {t.anamnese.deleteConfirmModalMessage}
             </Text>
             
             <View style={styles.modalActions}>
@@ -491,7 +513,7 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
                 onPress={() => setShowDeleteModal(false)}
                 disabled={saving}
               >
-                <Text style={styles.modalCancelText}>Cancelar</Text>
+                <Text style={styles.modalCancelText}>{t.common.cancel}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -502,7 +524,7 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
                 {saving ? (
                   <ActivityIndicator color="#FFF" />
                 ) : (
-                  <Text style={styles.modalConfirmTextRed}>Sim, Excluir</Text>
+                  <Text style={styles.modalConfirmTextRed}>{t.anamnese.confirmDeleteBtn}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -517,41 +539,69 @@ function MultiSelectPillGroup({ label, field, options, formData, setFormData }: 
           disabled={saving}
         >
           {saving ? (
-            <ActivityIndicator color="#181c1c" style={{ marginRight: 8 }} />
+            <ActivityIndicator color="#FFF" style={{ marginRight: 8 }} />
           ) : (
-            <Save size={20} color="#181c1c" style={{ marginRight: 8 }} />
+            <Save size={20} color="#FFF" style={{ marginRight: 8 }} />
           )}
-          <Text style={styles.saveText}>{saving ? "Salvando..." : "Salvar Anamnese"}</Text>
+          <Text style={styles.saveText}>{saving ? t.anamnese.savingText : t.anamnese.saveBtn}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Popup Toast de Sucesso Teko Style */}
+      {showSuccessToast && (
+        <View style={styles.toastContainer}>
+          <View style={styles.toastIconBg}>
+            <CheckCircle2 color={theme.colors.primary} size={28} />
+          </View>
+          <View style={styles.toastTextContainer}>
+            <Text style={styles.toastTitle}>{t.common.success}</Text>
+            <Text style={styles.toastMessage}>{successMessage}</Text>
+          </View>
+        </View>
+      )}
+
+      {/* Popup Toast de Erro Teko Style */}
+      {showErrorToast && (
+        <View style={styles.errorToastContainer}>
+          <View style={styles.errorToastIconBg}>
+            <XCircle color="#DC2626" size={28} />
+          </View>
+          <View style={styles.toastTextContainer}>
+            <Text style={styles.errorToastTitle}>{t.common.error}</Text>
+            <Text style={styles.toastMessage}>{errorMessage}</Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: 16, paddingBottom: 90 },
   
   accordionContainer: { 
-    backgroundColor: 'rgba(255,255,255,0.03)', 
-    borderRadius: 16, 
-    marginBottom: 16, 
+    backgroundColor: theme.colors.cardBg, 
+    borderRadius: theme.radii.lg, 
+    marginBottom: 12, 
     borderWidth: 1, 
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: theme.colors.cardBorder,
     overflow: 'hidden',
-    position: 'relative'
+    position: 'relative',
+    ...theme.shadows.subtle,
   },
   cardBgIcon: {
     position: 'absolute',
-    top: -30,
+    top: -20,
     right: -20,
-    pointerEvents: 'none'
+    opacity: 0.12,
+    pointerEvents: 'none',
   },
   accordionHeader: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     alignItems: 'center', 
-    padding: 16,
+    padding: 14,
     zIndex: 1
   },
   accordionTitleRow: { 
@@ -562,20 +612,20 @@ const styles = StyleSheet.create({
   iconBox: { 
     width: 36, 
     height: 36, 
-    borderRadius: 12, 
+    borderRadius: theme.radii.md, 
     borderWidth: 1,
     alignItems: 'center', 
     justifyContent: 'center', 
-    marginRight: 12 
+    marginRight: 10 
   },
   titleColumn: {
     flexDirection: 'column',
     justifyContent: 'center',
   },
   accordionTitle: { 
-    fontSize: 16, 
-    fontWeight: 'bold', 
-    color: '#fff',
+    fontSize: 15, 
+    fontWeight: '800', 
+    color: theme.colors.textDark,
     flexShrink: 1,
   },
   progressRow: {
@@ -585,44 +635,48 @@ const styles = StyleSheet.create({
     gap: 4
   },
   progressText: {
-    color: 'rgba(255,255,255,0.4)',
+    color: theme.colors.textMuted,
     fontSize: 12,
   },
   accordionContent: { 
-    padding: 16, 
+    padding: 14, 
     paddingTop: 0,
     zIndex: 1
   },
   
   inputLabel: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 14,
-    marginBottom: 8,
-    fontWeight: '500',
+    color: theme.colors.textDark,
+    fontSize: 13,
+    marginBottom: 6,
+    fontWeight: '700',
   },
   sectionSubtitle: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
-    marginBottom: 12,
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    marginBottom: 10,
   },
   inputField: { 
-    borderRadius: 12, 
-    paddingHorizontal: 16,
-    height: 52,
-    color: '#fff', 
-    fontSize: 15, 
-    marginBottom: 12,
-    borderWidth: 1
+    borderRadius: theme.radii.md, 
+    paddingHorizontal: 14,
+    height: 46,
+    backgroundColor: '#FFFFFF',
+    color: theme.colors.textDark, 
+    fontSize: 14, 
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
   },
   textArea: { 
-    borderRadius: 12, 
-    padding: 16, 
-    color: '#fff', 
-    fontSize: 15, 
-    minHeight: 120, 
+    borderRadius: theme.radii.md, 
+    padding: 14, 
+    backgroundColor: '#FFFFFF',
+    color: theme.colors.textDark, 
+    fontSize: 14, 
+    minHeight: 110, 
     textAlignVertical: 'top',
     borderWidth: 1,
-    marginBottom: 12,
+    borderColor: theme.colors.cardBorder,
+    marginBottom: 10,
   },
   row: {
     flexDirection: 'row',
@@ -630,13 +684,13 @@ const styles = StyleSheet.create({
   },
   
   pillGroupContainer: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
   pillGroupLabel: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 14,
-    marginBottom: 10,
-    fontWeight: '500',
+    color: theme.colors.textDark,
+    fontSize: 13,
+    marginBottom: 8,
+    fontWeight: '700',
   },
   pillsRow: {
     flexDirection: 'row',
@@ -649,181 +703,270 @@ const styles = StyleSheet.create({
   },
   pill: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: theme.colors.tealSoft,
+    borderColor: theme.colors.tealMint,
     borderWidth: 1,
-    height: 44,
-    borderRadius: 999,
+    height: 40,
+    borderRadius: theme.radii.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pillWrap: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: theme.colors.tealSoft,
+    borderColor: theme.colors.tealMint,
     borderWidth: 1,
-    height: 40,
-    borderRadius: 20,
-    paddingHorizontal: 16,
+    height: 38,
+    borderRadius: theme.radii.full,
+    paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pillText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontSize: 13,
     fontWeight: '600',
   },
   pillTextActive: {
-    color: '#181c1c',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
 
   /* Card Fixo de Exclusão (Sempre Aberto) */
   dangerCardFixed: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 16,
-    marginBottom: 16,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.35)',
+    borderColor: 'rgba(224, 122, 95, 0.3)',
     overflow: 'hidden',
     position: 'relative',
+    ...theme.shadows.subtle,
   },
   dangerCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 14,
     zIndex: 1,
   },
   dangerCardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FF4D4D',
+    fontSize: 15,
+    fontWeight: '800',
+    color: theme.colors.accentOrange,
   },
   dangerCardSubtitle: {
     fontSize: 12,
-    color: 'rgba(255,77,77,0.7)',
+    color: theme.colors.textMuted,
     marginTop: 2,
   },
   dangerCardContent: {
-    padding: 16,
+    padding: 14,
     paddingTop: 0,
     zIndex: 1,
   },
   dangerZoneText: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: theme.colors.textMuted,
     fontSize: 13,
-    marginBottom: 14,
+    marginBottom: 12,
     lineHeight: 18,
   },
   dangerCardButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EF4444',
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: theme.colors.accentOrange,
+    paddingVertical: 12,
+    borderRadius: theme.radii.md,
   },
   dangerCardButtonText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
     fontSize: 14,
   },
 
   /* Modal Estilo Teko */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: 20,
   },
   modalContainerRed: {
     width: '100%',
     maxWidth: 400,
-    backgroundColor: '#0c2423',
-    borderRadius: 24,
-    padding: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 75, 75, 0.3)',
+    borderColor: theme.colors.cardBorder,
     alignItems: 'center',
+    ...theme.shadows.floating,
   },
   modalIconBgRed: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255, 75, 75, 0.1)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(224, 122, 95, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 75, 75, 0.3)',
+    borderColor: 'rgba(224, 122, 95, 0.3)',
   },
   modalTitleRed: {
-    color: '#FF4B4B',
-    fontSize: 22,
-    fontWeight: '900',
-    marginBottom: 12,
+    color: theme.colors.accentOrange,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
   },
   modalMessage: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 15,
+    color: theme.colors.textMuted,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
+    lineHeight: 20,
+    marginBottom: 20,
   },
   modalActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     width: '100%',
   },
   modalCancelButton: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.tealSoft,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCancelText: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.textDark,
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   modalConfirmButtonRed: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#FF4B4B',
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.accentOrange,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalConfirmTextRed: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
 
   fabContainer: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 130,
     alignSelf: 'center',
     zIndex: 10,
   },
   saveFab: { 
     flexDirection: 'row', 
-    backgroundColor: '#FFC857', 
-    paddingHorizontal: 28, 
-    paddingVertical: 16, 
-    borderRadius: 32, 
+    backgroundColor: theme.colors.primary, 
+    paddingHorizontal: 24, 
+    paddingVertical: 14, 
+    borderRadius: theme.radii.full, 
     alignItems: 'center', 
-    shadowColor: '#FFC857',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8 
+    ...theme.shadows.floating,
   },
   saveText: { 
-    color: '#181c1c', 
-    fontWeight: 'bold', 
-    fontSize: 16 
+    color: '#FFFFFF', 
+    fontWeight: '700', 
+    fontSize: 15 
+  },
+
+  /* Teko Toast Banners */
+  toastContainer: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? -105 : -110,
+    right: 0,
+    left: 0,
+    backgroundColor: theme.colors.cardBg, 
+    borderLeftWidth: 6,
+    borderLeftColor: theme.colors.primary,
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16, 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 20,
+    zIndex: 99999,
+  },
+  toastIconBg: {
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: `${theme.colors.primary}15`,
+    borderWidth: 1,
+    borderColor: `${theme.colors.primary}30`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  toastTextContainer: {
+    flex: 1,
+  },
+  toastTitle: {
+    color: theme.colors.primary, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  toastMessage: {
+    color: theme.colors.textDark,
+    fontSize: 13,
+  },
+  errorToastContainer: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? -105 : -110,
+    right: 0,
+    left: 0,
+    backgroundColor: theme.colors.cardBg, 
+    borderLeftWidth: 6,
+    borderLeftColor: '#DC2626',
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16, 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 20,
+    zIndex: 99999,
+  },
+  errorToastIconBg: {
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(220, 38, 38, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(220, 38, 38, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  errorToastTitle: {
+    color: '#DC2626', 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   }
 });

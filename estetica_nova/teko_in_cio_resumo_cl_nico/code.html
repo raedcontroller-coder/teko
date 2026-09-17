@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Teko - Resumo Clínico</title>
+<!-- Tailwind CSS CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts for typography -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            app: {
+              bg: '#FAF8F5',
+              teal: '#084D48',
+              tealLight: '#0D766E',
+              tealSoft: '#E6F4F1',
+              purpleSoft: '#F3EEFF',
+              blueSoft: '#EBF8FA',
+              badgePurple: '#EFE7FC',
+              badgeText: '#7C3AED',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layout">
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    /* Safe area and custom scroll */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#FAF8F5] text-stone-800 font-sans min-h-screen flex justify-center items-start antialiased">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="w-full max-w-md bg-[#FAF8F5] min-h-screen flex flex-col justify-between relative shadow-2xl overflow-hidden pb-24">
+<!-- BEGIN: StatusBar -->
+<header class="w-full pt-3 px-6 pb-2 flex justify-between items-center text-xs font-semibold text-stone-800 select-none z-10" data-purpose="status-bar">
+<!-- Left: Clock -->
+<div class="flex items-center gap-1.5 font-bold">
+<span>17:45</span>
+<!-- Small app icons mock -->
+<svg class="w-3.5 h-3.5 text-stone-700 inline ml-1" fill="currentColor" viewbox="0 0 24 24">
+<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"></path>
+</svg>
+</div>
+<!-- Right: System Status Icons -->
+<div class="flex items-center space-x-2 text-stone-800">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 7v5l3 2"></path>
+</svg>
+<span class="text-[10px] font-bold tracking-tight">VIVO LTE</span>
+<svg class="w-3.5 h-3.5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"></path>
+</svg>
+<div class="w-5 h-2.5 border border-stone-800 rounded-sm p-0.5 flex items-center">
+<div class="h-full bg-stone-800 w-3/4 rounded-2xs"></div>
+</div>
+</div>
+</header>
+<!-- END: StatusBar -->
+<!-- BEGIN: TopBar -->
+<div class="px-6 pt-3 pb-4 flex justify-between items-center" data-purpose="user-header">
+<!-- Notification Icon with subtle purple badge -->
+<button aria-label="Notificações" class="relative p-1 focus:outline-none" type="button">
+<div class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#E5D7FD] opacity-90"></div>
+<svg class="w-7 h-7 text-stone-900 relative z-10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+</svg>
+</button>
+<!-- User Greeting & Profile Pill -->
+<div class="flex items-center gap-3 text-right">
+<div>
+<div class="text-[19px] font-bold text-stone-900 leading-tight">Olá, Maria</div>
+<span class="inline-block mt-0.5 px-2.5 py-0.5 bg-[#EFE7FC] text-[#7C3AED] font-semibold text-[10px] tracking-wider uppercase rounded-full">
+            Psicólogo
+          </span>
+</div>
+<!-- Profile Avatar -->
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm flex-shrink-0 bg-[#F5E6DD]">
+<img alt="Avatar Maria" class="w-full h-full object-cover object-top scale-150 translate-y-1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJbfxVWcRKswpNFOv3d4pbUuo7MmB4MFQPB06x5AMKP-n8DkGDVcEb6WDyK_ohnSTvbc-50YZpRH1jTViXg3Gleht0DukYaQuoKMAEGCU2gvoN0buMMWs3AKkzlRJ62NHISfZrwaCfvbyrJCofbLFg9bFCKAgsx12rQAxqAk4oIYRnOFsDr7PO2XyCSGbyywLSsqoRgA7RgGSK-lAKxQGzJgbme6O8XG-rMUKhCNW_y1Bz-gEhlAj7rCF0flm_ykqfqA"/>
+</div>
+</div>
+</div>
+<!-- END: TopBar -->
+<!-- BEGIN: MainContent -->
+<main class="px-6 flex-1 flex flex-col space-y-5" data-purpose="clinical-summary">
+<!-- Title & Subtitle -->
+<div class="space-y-1">
+<h1 class="text-3xl font-extrabold text-[#084D48] tracking-tight leading-none">
+          Resumo Clínico
+        </h1>
+<p class="text-stone-500 text-sm font-normal leading-snug max-w-[280px]">
+          Acompanhe o progresso dos seus pacientes em tempo real.
+        </p>
+</div>
+<!-- Action Button: Novo Paciente -->
+<div>
+<button class="w-full py-3 px-5 bg-[#084D48] hover:bg-[#063c38] transition-colors rounded-xl flex items-center justify-center gap-2 text-white font-semibold text-base shadow-sm" type="button">
+<svg class="w-5 h-5 stroke-[2.2]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24">
+<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+<circle cx="9" cy="7" r="4"></circle>
+<line x1="19" x2="19" y1="8" y2="14"></line>
+<line x1="22" x2="16" y1="11" y2="11"></line>
+</svg>
+<span>Novo Paciente</span>
+</button>
+</div>
+<!-- BEGIN: MetricsCards -->
+<!-- 3 Column Cards Layout -->
+<div class="grid grid-cols-3 gap-2.5" data-purpose="metrics-grid">
+<!-- Card 1: Pacientes Ativos -->
+<div class="bg-[#E6F4F1] rounded-2xl p-3 flex flex-col justify-between min-h-[145px] shadow-sm border border-[#daf0eb]">
+<div>
+<div class="w-8 h-8 rounded-lg flex items-center justify-center text-teal-900 mb-1">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24">
+<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+<circle cx="9" cy="7" r="4"></circle>
+<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+</svg>
+</div>
+<span class="text-3xl font-extrabold text-stone-900 block leading-tight">5</span>
+<div class="text-[12px] font-bold text-stone-800 leading-tight mt-0.5">Pacientes Ativos</div>
+</div>
+<p class="text-[10px] text-stone-500 font-normal leading-3 mt-1">
+            Em acompanhamento atualmente.
+          </p>
+</div>
+<!-- Card 2: Sessões Concluídas -->
+<div class="bg-[#F3EEFF] rounded-2xl p-3 flex flex-col justify-between min-h-[145px] shadow-sm border border-[#ece4fc]">
+<div>
+<div class="w-8 h-8 rounded-lg flex items-center justify-center text-purple-600 mb-1">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24">
+<rect height="12" rx="2" width="20" x="2" y="6"></rect>
+<path d="M6 12h4m-2-2v4"></path>
+<line x1="15" x2="15" y1="11" y2="11"></line>
+<line x1="18" x2="18" y1="13" y2="13"></line>
+</svg>
+</div>
+<span class="text-3xl font-extrabold text-stone-900 block leading-tight">2</span>
+<div class="text-[12px] font-bold text-stone-800 leading-tight mt-0.5">Sessões Concluídas</div>
+</div>
+<p class="text-[10px] text-stone-500 font-normal leading-3 mt-1">
+            Consultas e atendimentos já registrados.
+          </p>
+</div>
+<!-- Card 3: Relatórios Prontos -->
+<div class="bg-[#EBF8FA] rounded-2xl p-3 flex flex-col justify-between min-h-[145px] shadow-sm border border-[#dff4f7]">
+<div>
+<div class="w-8 h-8 rounded-lg flex items-center justify-center text-cyan-800 mb-1">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+<polyline points="14 2 14 8 20 8"></polyline>
+<line x1="16" x2="8" y1="13" y2="13"></line>
+<line x1="16" x2="8" y1="17" y2="17"></line>
+</svg>
+</div>
+<span class="text-3xl font-extrabold text-stone-900 block leading-tight">0</span>
+<div class="text-[12px] font-bold text-stone-800 leading-tight mt-0.5">Relatórios Prontos</div>
+</div>
+<p class="text-[10px] text-stone-500 font-normal leading-3 mt-1">
+            Disponíveis para visualização.
+          </p>
+</div>
+</div>
+<!-- END: MetricsCards -->
+<!-- BEGIN: NextSessionsSection -->
+<section class="space-y-3 pt-1" data-purpose="upcoming-sessions">
+<h2 class="text-xl font-bold text-stone-900">Próximas Sessões</h2>
+<!-- Filter Pills Tabs -->
+<div class="flex items-center space-x-2 text-xs font-semibold text-stone-600">
+<button class="px-5 py-1.5 rounded-full bg-[#E6F4F1] text-[#084D48] font-bold focus:outline-none" type="button">
+            Hoje
+          </button>
+<button class="px-4 py-1.5 rounded-full bg-stone-100 text-stone-500 hover:bg-stone-200 transition-colors focus:outline-none" type="button">
+            Amanhã
+          </button>
+<button class="px-4 py-1.5 rounded-full bg-stone-100 text-stone-500 hover:bg-stone-200 transition-colors focus:outline-none" type="button">
+            Esta semana
+          </button>
+</div>
+<!-- Patient Sessions List Card -->
+<div class="bg-white rounded-2xl border border-stone-200/60 p-4 shadow-sm space-y-4">
+<!-- Item 1: Igor -->
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<!-- Avatar Circle -->
+<div class="w-10 h-10 rounded-full bg-[#E6F4F1] flex items-center justify-center text-[#084D48] flex-shrink-0">
+<svg class="w-5 h-5 fill-[#084D48]" viewbox="0 0 24 24">
+<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-stone-900 leading-tight">Igor Nascimento Gondim</h3>
+<p class="text-xs text-stone-400 font-normal">Consulta presencial</p>
+</div>
+</div>
+<!-- Session Time -->
+<div class="flex items-center space-x-1.5 text-stone-800 font-bold text-sm">
+<svg class="w-4 h-4 text-stone-700 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<polyline points="12 7 12 12 14 14"></polyline>
+</svg>
+<span>09:00</span>
+</div>
+</div>
+<div class="h-[1px] bg-stone-100 w-full"></div>
+<!-- Item 2: Ana Luiza -->
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<!-- Avatar Circle -->
+<div class="w-10 h-10 rounded-full bg-[#E6F4F1] flex items-center justify-center text-[#084D48] flex-shrink-0">
+<svg class="w-5 h-5 fill-[#084D48]" viewbox="0 0 24 24">
+<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-stone-900 leading-tight">Ana Luiza Paulino de Deus</h3>
+<p class="text-xs text-stone-400 font-normal">Devolutiva online</p>
+</div>
+</div>
+<!-- Session Time -->
+<div class="flex items-center space-x-1.5 text-stone-800 font-bold text-sm">
+<svg class="w-4 h-4 text-stone-700 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<polyline points="12 7 12 12 14 14"></polyline>
+</svg>
+<span>14:30</span>
+</div>
+</div>
+<div class="h-[1px] bg-stone-100 w-full"></div>
+<!-- Item 3: Erick -->
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<!-- Avatar Circle -->
+<div class="w-10 h-10 rounded-full bg-[#E6F4F1] flex items-center justify-center text-[#084D48] flex-shrink-0">
+<svg class="w-5 h-5 fill-[#084D48]" viewbox="0 0 24 24">
+<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-stone-900 leading-tight">Erick Pennino Ferraz</h3>
+<p class="text-xs text-stone-400 font-normal">Acompanhamento clínico</p>
+</div>
+</div>
+<!-- Session Time -->
+<div class="flex items-center space-x-1.5 text-stone-800 font-bold text-sm">
+<svg class="w-4 h-4 text-stone-700 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<polyline points="12 7 12 12 14 14"></polyline>
+</svg>
+<span>16:00</span>
+</div>
+</div>
+</div>
+<!-- Button: Ver agenda completa -->
+<button class="w-full py-2.5 px-4 bg-transparent border border-[#084D48] text-[#084D48] rounded-xl flex items-center justify-center space-x-2 font-semibold text-sm hover:bg-[#E6F4F1]/30 transition-colors" type="button">
+<svg class="w-4 h-4 stroke-[2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<rect height="18" rx="2" ry="2" width="18" x="3" y="4"></rect>
+<line x1="16" x2="16" y1="2" y2="6"></line>
+<line x1="8" x2="8" y1="2" y2="6"></line>
+<line x1="3" x2="21" y1="10" y2="10"></line>
+<circle cx="8" cy="14" fill="currentColor" r="0.8"></circle>
+<circle cx="12" cy="14" fill="currentColor" r="0.8"></circle>
+<circle cx="16" cy="14" fill="currentColor" r="0.8"></circle>
+</svg>
+<span>Ver agenda completa</span>
+</button>
+</section>
+<!-- END: NextSessionsSection -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigation -->
+<nav class="fixed bottom-0 max-w-md w-full bg-[#084D48] rounded-t-3xl pt-3 pb-5 px-6 flex justify-between items-center z-50 text-white shadow-lg" data-purpose="bottom-navigation">
+<!-- Tab 1: Início (Active) -->
+<button class="flex flex-col items-center justify-center flex-1 text-white relative" type="button">
+<svg class="w-6 h-6 fill-white" viewbox="0 0 24 24">
+<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+</svg>
+<span class="text-xs font-medium mt-1">Início</span>
+<!-- Active underline bar -->
+<div class="w-6 h-1 bg-[#E8D4FF] rounded-full mt-1.5"></div>
+</button>
+<!-- Tab 2: Pacientes -->
+<button class="flex flex-col items-center justify-center flex-1 text-[#9FC2BE] hover:text-white transition-colors" type="button">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24">
+<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+<circle cx="9" cy="7" r="4"></circle>
+<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+</svg>
+<span class="text-xs font-medium mt-1">Pacientes</span>
+<div class="w-6 h-1 bg-transparent mt-1.5"></div>
+</button>
+<!-- Tab 3: Jogos -->
+<button class="flex flex-col items-center justify-center flex-1 text-[#9FC2BE] hover:text-white transition-colors" type="button">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24">
+<rect height="12" rx="2" width="20" x="2" y="6"></rect>
+<path d="M6 12h4m-2-2v4"></path>
+<circle cx="15" cy="11" fill="currentColor" r="0.75"></circle>
+<circle cx="17.5" cy="13.5" fill="currentColor" r="0.75"></circle>
+</svg>
+<span class="text-xs font-medium mt-1">Jogos</span>
+<div class="w-6 h-1 bg-transparent mt-1.5"></div>
+</button>
+<!-- Tab 4: Agenda -->
+<button class="flex flex-col items-center justify-center flex-1 text-[#9FC2BE] hover:text-white transition-colors" type="button">
+<svg class="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24">
+<rect height="18" rx="2" ry="2" width="18" x="3" y="4"></rect>
+<line x1="16" x2="16" y1="2" y2="6"></line>
+<line x1="8" x2="8" y1="2" y2="6"></line>
+<line x1="3" x2="21" y1="10" y2="10"></line>
+</svg>
+<span class="text-xs font-medium mt-1">Agenda</span>
+<div class="w-6 h-1 bg-transparent mt-1.5"></div>
+</button>
+</nav>
+<!-- END: BottomNavigation -->
+</div>
+<!-- END: MobileDeviceFrame -->
+</body></html>

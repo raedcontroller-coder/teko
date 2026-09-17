@@ -10,12 +10,17 @@ import {
   Platform,
   Pressable,
   Animated,
-  Easing
+  Easing,
+  Image
 } from 'react-native';
-import { Search, UserPlus, FileText, CheckCircle2, ArrowLeft } from 'lucide-react-native';
+import { Search, UserPlus, FileText, CheckCircle2, ArrowLeft, ChevronRight } from 'lucide-react-native';
 import { api } from '../../services/api';
 import { NewPatientScreen } from './NewPatientScreen';
 import { PatientProfileScreen } from './PatientProfileScreen';
+import { theme } from '../../theme/theme';
+import { SkeletonLoader } from '../../components/ui/SkeletonLoader';
+
+import { useTranslation } from '../../i18n';
 
 interface PatientsScreenProps {
   adminPsicologoId?: string;
@@ -24,6 +29,7 @@ interface PatientsScreenProps {
 }
 
 export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId, adminPsicologoName, onGoBack }) => {
+  const { t } = useTranslation();
   const [currentView, setCurrentView] = useState<'List' | 'New' | 'Profile'>('List');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,36 +86,46 @@ export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId
     patient.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const renderPatientCard = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View>
-          <Text style={styles.patientName}>{item.name}</Text>
-          <Text style={styles.patientAge}>{item.age} anos</Text>
+  const renderPatientCard = ({ item }: { item: any }) => {
+    const isGirl = item.gender?.toLowerCase().includes('fem') || item.name?.endsWith('a');
+    const avatarSource = isGirl 
+      ? require('../../../assets/elementos_visuais/menina_crianca.png')
+      : require('../../../assets/elementos_visuais/menino_crianca.png');
+
+    return (
+      <TouchableOpacity 
+        style={styles.card}
+        activeOpacity={0.8}
+        onPress={() => {
+          setSelectedPatientId(item.id);
+          setCurrentView('Profile');
+        }}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.avatarImageContainer}>
+            <Image source={avatarSource} style={styles.avatarImage} resizeMode="cover" />
+          </View>
+          <View style={styles.patientInfo}>
+            <Text style={styles.patientName}>{item.name}</Text>
+            <Text style={styles.patientAge}>{t('common.ageAndSessions', { age: item.age, count: item.sessionCount || 0 })}</Text>
+          </View>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>
+              {item.lastSessionDate 
+                ? new Date(item.lastSessionDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) 
+                : t.common.new
+              }
+            </Text>
+          </View>
         </View>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>
-            {item.lastSessionDate 
-              ? new Date(item.lastSessionDate).toLocaleDateString('pt-BR') 
-              : 'Nenhuma'
-            }
-          </Text>
+        
+        <View style={styles.cardFooter}>
+          <Text style={styles.profileActionText}>{t.patients.viewRecord}</Text>
+          <ChevronRight size={16} color={theme.colors.primary} />
         </View>
-      </View>
-      <View style={styles.cardFooter}>
-        <TouchableOpacity 
-          style={styles.profileButton} 
-          activeOpacity={0.7}
-          onPress={() => {
-            setSelectedPatientId(item.id);
-            setCurrentView('Profile');
-          }}
-        >
-          <Text style={styles.profileButtonText}>Acessar Perfil</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   if (currentView === 'New') {
     return (
@@ -135,7 +151,7 @@ export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId
         onDeleteSuccess={() => {
           setSelectedPatientId(null);
           setCurrentView('List');
-          showToast('Paciente excluído com sucesso.');
+          showToast(t.patients.deleteSuccess);
         }}
       />
     );
@@ -145,8 +161,8 @@ export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId
     <View style={styles.container}>
       {/* Header Info */}
       <View style={styles.header}>
-        <Text style={styles.title}>{adminPsicologoName ? `Pacientes de ${adminPsicologoName}` : 'Meus Pacientes'}</Text>
-        <Text style={styles.subtitle}>Pesquise e acesse os relatórios e perfis de todos {adminPsicologoName ? 'estes pacientes' : 'os seus pacientes'}.</Text>
+        <Text style={styles.title}>{adminPsicologoName ? t('patients.adminTitle', { name: adminPsicologoName }) : t.patients.title}</Text>
+        <Text style={styles.subtitle}>{t.patients.subtitle}</Text>
       </View>
 
       {onGoBack && (
@@ -154,47 +170,43 @@ export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId
           style={styles.backButton}
           onPress={onGoBack}
         >
-          {({ pressed }) => (
-            <>
-              <ArrowLeft color={pressed ? "#FFC857" : "#FFF"} size={24} />
-              <Text style={[styles.backButtonText, pressed && { color: '#FFC857' }]}>Voltar para Meus Profissionais</Text>
-            </>
-          )}
+          <ArrowLeft color={theme.colors.primary} size={20} />
+          <Text style={styles.backButtonText}>{t.patients.backToPsychologists}</Text>
         </Pressable>
       )}
 
       {/* Search & Actions */}
       <View style={styles.actionsContainer}>
         <View style={styles.searchBox}>
-          <Search color="rgba(255,255,255,0.5)" size={18} style={styles.searchIcon} />
+          <Search color={theme.colors.textMuted} size={18} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar paciente..."
-            placeholderTextColor="rgba(255,255,255,0.4)"
+            placeholder={t.patients.searchPlaceholder}
+            placeholderTextColor={theme.colors.textMuted}
             value={searchTerm}
             onChangeText={setSearchTerm}
           />
         </View>
-          <Pressable 
-            style={({ pressed }) => [
-              styles.newPatientButton,
-              pressed && { backgroundColor: '#7B61FF' }
-            ]}
-            onPress={() => setCurrentView('New')}
-          >
-            {({ pressed }) => (
-              <>
-                <UserPlus color={pressed ? "#FFF" : "#181c1c"} size={20} />
-                <Text style={[styles.newPatientText, pressed && { color: '#FFF' }]}>Novo Paciente</Text>
-              </>
-            )}
-          </Pressable>
+        <Pressable 
+          style={({ pressed }) => [
+            styles.newPatientButton,
+            pressed && { backgroundColor: theme.colors.primaryDark }
+          ]}
+          onPress={() => setCurrentView('New')}
+        >
+          <UserPlus color="#FFF" size={18} />
+          <Text style={styles.newPatientText}>{t.patients.newPatientBtn}</Text>
+        </Pressable>
       </View>
 
       {/* Patient List */}
       {loading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#E6A800" />
+        <View style={styles.listContent}>
+          <SkeletonLoader variant="card" />
+          <SkeletonLoader variant="card" />
+          <SkeletonLoader variant="card" />
+          <SkeletonLoader variant="card" />
+          <SkeletonLoader variant="card" />
         </View>
       ) : (
         <FlatList
@@ -205,18 +217,18 @@ export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <FileText color="rgba(255,255,255,0.2)" size={48} style={{ marginBottom: 16 }} />
+              <FileText color={theme.colors.textMuted} size={42} style={{ marginBottom: 12, opacity: 0.6 }} />
               <Text style={styles.emptyText}>Nenhum paciente encontrado.</Text>
             </View>
           }
         />
       )}
 
-      {/* Popup de Sucesso (Topo, grande e escuro) */}
+      {/* Popup de Sucesso */}
       {showSuccessToast && (
         <Animated.View style={[styles.toastContainer, { transform: [{ translateY: slideAnim }] }]}>
           <View style={styles.toastIconBg}>
-            <CheckCircle2 color="#FFC857" size={28} />
+            <CheckCircle2 color={theme.colors.primary} size={24} />
           </View>
           <View style={styles.toastTextContainer}>
             <Text style={styles.toastTitle}>Sucesso!</Text>
@@ -231,57 +243,58 @@ export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#064b46', // body bg
+    backgroundColor: theme.colors.bg,
   },
   header: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFF',
+    fontSize: 24,
+    fontWeight: '800',
+    color: theme.colors.textDark,
+    letterSpacing: -0.4,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.7)',
-    lineHeight: 20,
+    color: theme.colors.textMuted,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-    paddingHorizontal: 24,
+    marginBottom: 12,
+    paddingHorizontal: 20,
+    gap: 8,
   },
   backButtonText: {
-    color: '#FFF',
-    fontSize: 16,
+    color: theme.colors.primary,
+    fontSize: 14,
     fontWeight: '600',
-    marginLeft: 8,
   },
   actionsContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    gap: 10,
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: theme.colors.cardBg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 999,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.full,
     paddingHorizontal: 16,
-    height: 48,
+    height: 46,
+    ...theme.shadows.subtle,
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    color: '#FFF',
+    color: theme.colors.textDark,
     fontSize: 14,
     height: '100%',
   },
@@ -289,72 +302,86 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFC857',
-    borderRadius: 12,
-    height: 48,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radii.lg,
+    height: 46,
     gap: 8,
+    ...theme.shadows.subtle,
   },
   newPatientText: {
-    color: '#181c1c',
+    color: '#FFF',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   listContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 24, // padding normal
-    gap: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 110,
+    gap: 12,
   },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: theme.colors.cardBg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 16,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.lg,
     padding: 16,
+    ...theme.shadows.subtle,
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  avatarImageContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.tealSoft,
+    borderWidth: 1.5,
+    borderColor: theme.colors.tealMint,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  patientInfo: {
+    flex: 1,
   },
   patientName: {
-    color: '#FFF',
+    color: theme.colors.textDark,
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontWeight: '700',
+    marginBottom: 2,
   },
   patientAge: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontSize: 13,
   },
   badge: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    paddingHorizontal: 8,
+    backgroundColor: theme.colors.badgePurple,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: theme.radii.full,
   },
   badgeText: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 10,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
+    color: theme.colors.badgePurpleText,
+    fontSize: 11,
+    fontWeight: '700',
   },
   cardFooter: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
-    paddingTop: 16,
-    alignItems: 'flex-end',
+    borderTopColor: theme.colors.cardBorder,
+    paddingTop: 12,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 4,
   },
-  profileButton: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  profileButtonText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '600',
+  profileActionText: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: '700',
   },
   centerContainer: {
     flex: 1,
@@ -365,9 +392,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 40,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
   },
   emptyText: {
-    color: 'rgba(255,255,255,0.5)',
+    color: theme.colors.textMuted,
     fontSize: 14,
   },
 
@@ -377,46 +408,38 @@ const styles = StyleSheet.create({
     top: Platform.OS === 'ios' ? 20 : 10,
     right: 16,
     left: 16,
-    backgroundColor: '#181c1c', 
-    borderLeftWidth: 6,
-    borderLeftColor: '#FFC857',
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    backgroundColor: theme.colors.cardBg, 
+    borderLeftWidth: 5,
+    borderLeftColor: theme.colors.primary,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, 
+    padding: 16, 
+    ...theme.shadows.floating,
   },
   toastIconBg: {
-    width: 50, 
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,200,87,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,200,87,0.4)',
+    width: 40, 
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.tealSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 12,
   },
   toastTitle: {
-    color: '#FFC857', 
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
+    color: theme.colors.textDark, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   toastTextContainer: {
     flex: 1,
   },
   toastMessage: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 15,
+    color: theme.colors.textMuted,
+    fontSize: 13,
     fontWeight: '500',
   }
 });

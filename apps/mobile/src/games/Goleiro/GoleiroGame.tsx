@@ -36,7 +36,8 @@ console.log = (...args) => {
 // --- COMPONENTE DA BOLA 3D ---
 const Bola3D = ({ targetRotations, duration, startTime, globalStartSize }: { targetRotations: any, duration: number, startTime: number, globalStartSize: number }) => {
   // O Metro agora consegue dar require() no arquivo .glb!
-  const { scene } = useGLTF(require('../../../assets/assets_goleiro/bola_futebol_3D.glb') as any);
+  const gltf = useGLTF(require('../../../assets/assets_goleiro/bola_futebol_3D.glb') as any) as any;
+  const scene = gltf.scene;
   const meshRef = useRef<any>(null);
 
   // Clonamos a malha (scene) e forçamos o tamanho/pivô exato para bater 1:1 com a bola 2D
@@ -92,6 +93,7 @@ useGLTF.preload(require('../../../assets/assets_goleiro/bola_futebol_3D.glb') as
 
 
 interface GoleiroGameProps {
+  alunoId?: string;
   onBack: () => void;
 }
 
@@ -1115,7 +1117,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
     if (!activeSlot) return null;
 
     const steps = 50;
-    const inputRange = [];
+    const inputRange: number[] = [];
     for (let i = 0; i <= steps; i++) inputRange.push(i / steps);
 
     const { z: targetZ, x: targetX, y: targetY } = targetRotationsRef.current;

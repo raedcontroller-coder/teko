@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { theme } from '../../theme/theme';
 
 interface Appointment {
   id: string | number;
@@ -27,7 +28,10 @@ interface WeeklyViewProps {
   onDayPress: (date: string) => void;
 }
 
+import { useTranslation } from '../../i18n';
+
 export function WeeklyView({ currentDate, appointments, holidays = [], onDayPress }: WeeklyViewProps) {
+  const { t, language } = useTranslation();
   const [viewDate, setViewDate] = useState(new Date((currentDate || new Date().toISOString().split('T')[0]) + 'T00:00:00'));
 
   useEffect(() => {
@@ -59,7 +63,7 @@ export function WeeklyView({ currentDate, appointments, holidays = [], onDayPres
   const startOfWeek = getStartOfWeek(new Date(viewDate));
   const weekDays = [];
   
-  const weekdaysBR = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+  const weekdaysList = t.agenda.shortWeekdays || ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(startOfWeek);
@@ -70,7 +74,7 @@ export function WeeklyView({ currentDate, appointments, holidays = [], onDayPres
     const dayNum = String(d.getDate()).padStart(2, '0');
     const isoDate = `${year}-${month}-${dayNum}`;
     
-    const label = weekdaysBR[d.getDay()];
+    const label = weekdaysList[d.getDay()];
     const number = d.getDate();
     const dayApps = appointments.filter(app => app.date === isoDate);
     
@@ -82,21 +86,22 @@ export function WeeklyView({ currentDate, appointments, holidays = [], onDayPres
     weekDays.push({ isoDate, label, number, apps: dayApps, isWeekend, isHoliday });
   }
 
-  const monthName = startOfWeek.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const locale = language === 'en' ? 'en-US' : 'pt-BR';
+  const formattedMonth = startOfWeek.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 
   return (
     <View style={styles.container}>
       
       {/* Month Navigation */}
       <View style={styles.navHeader}>
-        <TouchableOpacity style={styles.navBtn} onPress={handlePrevWeek} activeOpacity={0.7}>
-          <ChevronLeft color="#FFC857" size={24} />
+        <TouchableOpacity style={styles.navBtn} onPress={handlePrevWeek}>
+          <ChevronLeft color={theme.colors.primary} size={20} />
         </TouchableOpacity>
         
-        <Text style={styles.sectionTitle}>{monthName}</Text>
+        <Text style={styles.sectionTitle}>{formattedMonth}</Text>
         
-        <TouchableOpacity style={styles.navBtn} onPress={handleNextWeek} activeOpacity={0.7}>
-          <ChevronRight color="#FFC857" size={24} />
+        <TouchableOpacity style={styles.navBtn} onPress={handleNextWeek}>
+          <ChevronRight color={theme.colors.primary} size={20} />
         </TouchableOpacity>
       </View>
 
@@ -134,7 +139,7 @@ export function WeeklyView({ currentDate, appointments, holidays = [], onDayPres
                   ))
                 ) : (
                   <View style={styles.emptyCard}>
-                    <Text style={styles.emptyText}>Sem agendamentos</Text>
+                    <Text style={styles.emptyText}>{t.agenda.noAppointments}</Text>
                   </View>
                 )}
               </View>
@@ -147,26 +152,26 @@ export function WeeklyView({ currentDate, appointments, holidays = [], onDayPres
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 24 },
+  container: { flex: 1, paddingHorizontal: 20 },
   navHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  navBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 12 },
-  sectionTitle: { color: 'rgba(255,255,255,0.9)', fontSize: 16, fontWeight: 'bold', textTransform: 'capitalize' },
+  navBtn: { padding: 8, backgroundColor: theme.colors.tealSoft, borderRadius: theme.radii.md },
+  sectionTitle: { color: theme.colors.textDark, fontSize: 16, fontWeight: '800', textTransform: 'capitalize' },
   list: { flex: 1 },
-  dayRow: { flexDirection: 'row', backgroundColor: 'rgba(13, 118, 110, 0.4)', borderRadius: 16, marginBottom: 12, padding: 12, minHeight: 90, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  dayRowWeekend: { backgroundColor: 'rgba(255, 200, 87, 0.15)', borderColor: 'transparent' },
-  dayRowActive: { backgroundColor: 'rgba(8, 77, 72, 0.5)', borderWidth: 2, borderColor: '#FFC857' },
-  dateCol: { width: 60, alignItems: 'center', justifyContent: 'center', borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.1)', marginRight: 12, paddingRight: 12 },
-  dayLabel: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 'bold' },
-  dayNumber: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginTop: 4 },
-  holidayMarker: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#7B61FF', marginTop: 6, shadowColor: '#7B61FF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.8, shadowRadius: 4 },
-  weekendText: { color: 'rgba(255, 200, 87, 0.8)' },
-  activeText: { color: '#FFC857' },
+  dayRow: { flexDirection: 'row', backgroundColor: theme.colors.cardBg, borderRadius: theme.radii.lg, marginBottom: 10, padding: 12, minHeight: 84, borderWidth: 1, borderColor: theme.colors.cardBorder, ...theme.shadows.subtle },
+  dayRowWeekend: { backgroundColor: theme.colors.tealSoft, borderColor: theme.colors.tealMint },
+  dayRowActive: { backgroundColor: theme.colors.cardBg, borderWidth: 2, borderColor: theme.colors.primary },
+  dateCol: { width: 56, alignItems: 'center', justifyContent: 'center', borderRightWidth: 1, borderRightColor: theme.colors.cardBorder, marginRight: 12, paddingRight: 10 },
+  dayLabel: { color: theme.colors.textMuted, fontSize: 11, fontWeight: '700' },
+  dayNumber: { color: theme.colors.textDark, fontSize: 22, fontWeight: '800', marginTop: 2 },
+  holidayMarker: { width: 6, height: 6, borderRadius: 3, backgroundColor: theme.colors.badgePurpleText, marginTop: 4 },
+  weekendText: { color: theme.colors.textMuted },
+  activeText: { color: theme.colors.primary },
   appsCol: { flex: 1, justifyContent: 'center' },
-  miniAppCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.25)', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, marginBottom: 6 },
+  miniAppCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', paddingVertical: 8, paddingHorizontal: 10, borderRadius: theme.radii.sm, marginBottom: 6, borderWidth: 1, borderColor: theme.colors.cardBorder },
   colorLine: { width: 4, height: '100%', borderRadius: 2, marginRight: 8 },
-  miniAppTime: { color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: 'bold', marginRight: 8, width: 40 },
-  miniAppName: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
-  miniAppSubtitle: { color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 2 },
+  miniAppTime: { color: theme.colors.textDark, fontSize: 12, fontWeight: '700', marginRight: 8, width: 40 },
+  miniAppName: { color: theme.colors.textDark, fontSize: 13, fontWeight: '700' },
+  miniAppSubtitle: { color: theme.colors.textMuted, fontSize: 11, marginTop: 1 },
   emptyCard: { flex: 1, justifyContent: 'center' },
-  emptyText: { color: 'rgba(255,255,255,0.3)', fontSize: 14, fontStyle: 'italic' }
+  emptyText: { color: theme.colors.textMuted, fontSize: 13, fontStyle: 'italic' }
 });

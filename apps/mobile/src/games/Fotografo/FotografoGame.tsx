@@ -217,7 +217,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
   // Telemetry ref para Queda de Atenção
   const telemetryRef = useRef<{
     spawnTimeGameSeconds: number;
-    result: 'success' | 'omission';
+    result: 'success' | 'omission' | 'commission';
     reactionTimeMs: number | null;
     spawnTimestamp: number;
   }[]>([]);

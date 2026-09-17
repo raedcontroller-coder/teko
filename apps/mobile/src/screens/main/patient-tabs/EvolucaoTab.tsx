@@ -3,13 +3,15 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Activ
 import { LineChart } from 'react-native-gifted-charts';
 import { Sparkles, Activity, Camera, Zap, PlayCircle, X, Calendar, Clock, BarChart2, CheckCircle2, Crosshair } from 'lucide-react-native';
 import { api } from '../../../services/api';
+import { theme } from '../../../theme/theme';
+import { useTranslation } from '../../../i18n';
 
 const { width } = Dimensions.get('window');
 
 const GAMES = [
-  { id: 'fotografo', label: 'Fotógrafo', subtitle: 'Variação de Foco (ms)', icon: Camera, color: '#7B61FF' },
-  { id: 'goleiro', label: 'Goleiro', subtitle: 'Tempo de Reação (ms)', icon: Activity, color: '#64C6BE' },
-  { id: 'toca_rapido', label: 'Toca Rápido', subtitle: 'Controle de Impulsividade', icon: Zap, color: '#FFC857' },
+  { id: 'fotografo', labelKey: 'fotografo', subKey: 'fotografoSub', icon: Camera, color: '#7C3AED' },
+  { id: 'goleiro', labelKey: 'goleiro', subKey: 'goleiroSub', icon: Activity, color: theme.colors.primary },
+  { id: 'toca_rapido', labelKey: 'tocaRapido', subKey: 'tocaRapidoSub', icon: Zap, color: '#D97706' },
 ];
 
 interface EvolucaoTabProps {
@@ -18,6 +20,7 @@ interface EvolucaoTabProps {
 }
 
 export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
+  const { t } = useTranslation();
   const [selectedGame, setSelectedGame] = useState<'fotografo' | 'goleiro' | 'toca_rapido'>('fotografo');
   const [loading, setLoading] = useState<boolean>(true);
   const [evolutionData, setEvolutionData] = useState<any>(null);
@@ -52,26 +55,26 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
     dataPointsRadius: 7,
     dataPointsColor: color,
     color: color,
-    textColor: '#fff',
+    textColor: theme.colors.textDark,
     textFontSize: 11,
-    yAxisTextStyle: { color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: 'bold' as const },
-    xAxisLabelTextStyle: { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 4, fontWeight: 'bold' as const },
+    yAxisTextStyle: { color: theme.colors.textMuted, fontSize: 10, fontWeight: 'bold' as const },
+    xAxisLabelTextStyle: { color: theme.colors.textDark, fontSize: 12, marginTop: 4, fontWeight: 'bold' as const },
     
     // Efeito Area Gradient
     areaChart: true,
     startFillColor: color,
-    startOpacity: 0.35,
+    startOpacity: 0.25,
     endFillColor: color,
     endOpacity: 0.02,
     
     // Grids Transparentes (X e Y)
     hideRules: false,
     rulesType: 'solid' as const,
-    rulesColor: 'rgba(255,255,255,0.06)',
+    rulesColor: theme.colors.cardBorder,
     showVerticalLines: true,
-    verticalLinesColor: 'rgba(255,255,255,0.06)',
-    yAxisColor: 'rgba(255,255,255,0.2)',
-    xAxisColor: 'rgba(255,255,255,0.2)',
+    verticalLinesColor: theme.colors.cardBorder,
+    yAxisColor: theme.colors.cardBorder,
+    xAxisColor: theme.colors.cardBorder,
     yAxisThickness: 1,
     xAxisThickness: 1,
     
@@ -99,6 +102,7 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
           {GAMES.map((game) => {
             const isSelected = selectedGame === game.id;
             const Icon = game.icon;
+            const label = t.evolucao[game.labelKey as keyof typeof t.evolucao] || game.id;
             return (
               <TouchableOpacity
                 key={game.id}
@@ -108,12 +112,12 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
                   styles.pillBtn,
                   isSelected 
                     ? { backgroundColor: game.color, borderColor: game.color } 
-                    : { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }
+                    : { backgroundColor: theme.colors.cardBg, borderColor: theme.colors.cardBorder }
                 ]}
               >
-                <Icon size={16} color={isSelected ? '#000' : 'rgba(255,255,255,0.5)'} style={{ marginRight: 8 }} />
-                <Text style={[styles.pillText, isSelected && { color: '#000', fontWeight: 'bold' }]}>
-                  {game.label}
+                <Icon size={16} color={isSelected ? '#FFFFFF' : theme.colors.textMuted} style={{ marginRight: 8 }} />
+                <Text style={[styles.pillText, isSelected ? { color: '#FFFFFF', fontWeight: 'bold' } : { color: theme.colors.textDark }]}>
+                  {label}
                 </Text>
               </TouchableOpacity>
             );
@@ -125,23 +129,23 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
         
         {loading ? (
           <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color="#FFC857" />
-            <Text style={styles.loadingText}>Carregando métricas da telemetria...</Text>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={styles.loadingText}>{t.evolucao.loadingTelemetry}</Text>
           </View>
         ) : !hasEnoughData ? (
           /* ESTADO CONDICIONAL: MENOS DE 3 PARTIDAS (Gráfico Oculto) */
           <View style={styles.insufficientCard}>
             <View style={styles.insufficientIconBg}>
-              <PlayCircle size={36} color="#FFC857" />
+              <PlayCircle size={36} color={theme.colors.primary} />
             </View>
-            <Text style={styles.insufficientTitle}>Gráfico em Construção</Text>
+            <Text style={styles.insufficientTitle}>{t.evolucao.chartBuilding}</Text>
             <Text style={styles.insufficientSub}>
-              Para construir uma linha de tendência consistente e evitar pontos isolados, são necessárias no mínimo <Text style={{ fontWeight: 'bold', color: '#FFF' }}>3 partidas ininterruptas</Text> deste jogo.
+              {t.evolucao.insufficientText}
             </Text>
 
             <View style={styles.progressTracker}>
               <View style={styles.progressTextRow}>
-                <Text style={styles.progressLabel}>Progresso das Partidas</Text>
+                <Text style={styles.progressLabel}>{t.evolucao.progressLabel}</Text>
                 <Text style={styles.progressCount}>{currentSessionsCount} / 3</Text>
               </View>
               <View style={styles.progressBarTrack}>
@@ -155,45 +159,50 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
             {selectedGame === 'fotografo' && (
               <View style={styles.gameSection}>
                 <View style={styles.sectionHeader}>
-                  <Camera color="#7B61FF" size={24} style={{ marginRight: 8 }} />
-                  <Text style={styles.gameTitle}>Fotógrafo da Floresta</Text>
+                  <View style={[styles.headerIconBox, { backgroundColor: 'rgba(124, 58, 237, 0.15)', borderColor: 'rgba(124, 58, 237, 0.3)' }]}>
+                    <Camera color="#7C3AED" size={22} />
+                  </View>
+                  <View style={styles.headerTitleCol}>
+                    <Text style={styles.gameTitle}>{t.evolucao.fotografo}</Text>
+                    <Text style={styles.gameSubtitle}>{t.evolucao.fotografoSub}</Text>
+                  </View>
                 </View>
 
-                <View style={[styles.chartCard, { borderColor: 'rgba(123, 97, 255, 0.3)' }]}>
+                <View style={[styles.chartCard, { borderColor: 'rgba(124, 58, 237, 0.3)' }]}>
                   <View style={styles.statsRow}>
                     <View style={styles.statBox}>
-                      <Text style={styles.statLabel}>Variação Inicial (Sessão 1)</Text>
+                      <Text style={styles.statLabel}>{t.evolucao.initialVariationSession1}</Text>
                       <Text style={styles.statValue}>
                         {currentGameData.stats?.firstVal}<Text style={styles.statUnit}> ms</Text>
                       </Text>
                     </View>
                     <View style={styles.statBox}>
-                      <Text style={styles.statLabel}>Variação Atual (Sessão {currentSessionsCount})</Text>
-                      <Text style={[styles.statValueHighlight, { color: '#7B61FF' }]}>
+                      <Text style={styles.statLabel}>{t('evolucao.currentVariationSession', { count: currentSessionsCount })}</Text>
+                      <Text style={[styles.statValueHighlight, { color: '#7C3AED' }]}>
                         {currentGameData.stats?.lastVal}
-                        <Text style={[styles.statUnitHighlight, { color: '#7B61FF' }]}> ms</Text>
+                        <Text style={[styles.statUnitHighlight, { color: '#7C3AED' }]}> ms</Text>
                       </Text>
                     </View>
                   </View>
 
                   {/* RÓTULOS DOS EIXOS Y E X */}
-                  <Text style={styles.axisYLabel}>▲ Tempo (MS)</Text>
+                  <Text style={styles.axisYLabel}>{t.evolucao.yAxisTime}</Text>
                   
                   <View style={styles.chartWrapper}>
                     <LineChart 
                       data={currentGameData.chartData} 
-                      {...getChartConfig('#7B61FF', currentGameData.chartData.length)} 
+                      {...getChartConfig('#7C3AED', currentGameData.chartData.length)} 
                     />
                   </View>
 
-                  <Text style={styles.axisXLabel}>Sessões ►</Text>
+                  <Text style={styles.axisXLabel}>{t.evolucao.xAxisSessions}</Text>
 
-                  <View style={[styles.aiCard, { backgroundColor: 'rgba(123, 97, 255, 0.1)', borderColor: 'rgba(123, 97, 255, 0.3)' }]}>
-                    <View style={[styles.aiIconBox, { backgroundColor: 'rgba(123, 97, 255, 0.2)' }]}>
-                      <Sparkles color="#7B61FF" size={16} />
+                  <View style={[styles.aiCard, { backgroundColor: 'rgba(124, 58, 237, 0.08)', borderColor: 'rgba(124, 58, 237, 0.2)' }]}>
+                    <View style={[styles.aiIconBox, { backgroundColor: 'rgba(124, 58, 237, 0.15)' }]}>
+                      <Sparkles color="#7C3AED" size={16} />
                     </View>
                     <View style={styles.aiTextCol}>
-                      <Text style={[styles.aiTitle, { color: '#7B61FF' }]}>Análise Assistida</Text>
+                      <Text style={[styles.aiTitle, { color: '#7C3AED' }]}>{t.evolucao.aiAnalysisTitle}</Text>
                       <Text style={styles.aiDesc}>{currentGameData.aiAnalysis}</Text>
                     </View>
                   </View>
@@ -205,45 +214,50 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
             {selectedGame === 'goleiro' && (
               <View style={styles.gameSection}>
                 <View style={styles.sectionHeader}>
-                  <Activity color="#64C6BE" size={24} style={{ marginRight: 8 }} />
-                  <Text style={styles.gameTitle}>Jogo do Goleiro</Text>
+                  <View style={[styles.headerIconBox, { backgroundColor: `${theme.colors.primary}18`, borderColor: `${theme.colors.primary}35` }]}>
+                    <Activity color={theme.colors.primary} size={22} />
+                  </View>
+                  <View style={styles.headerTitleCol}>
+                    <Text style={styles.gameTitle}>{t.evolucao.goleiro}</Text>
+                    <Text style={styles.gameSubtitle}>{t.evolucao.goleiroSub}</Text>
+                  </View>
                 </View>
 
-                <View style={[styles.chartCard, { borderColor: 'rgba(100, 198, 190, 0.3)' }]}>
+                <View style={[styles.chartCard, { borderColor: `${theme.colors.primary}40` }]}>
                   <View style={styles.statsRow}>
                     <View style={styles.statBox}>
-                      <Text style={styles.statLabel}>Oscilação Inicial (Sessão 1)</Text>
+                      <Text style={styles.statLabel}>{t.evolucao.initialOscillationSession1}</Text>
                       <Text style={styles.statValue}>
                         {currentGameData.stats?.firstVal}<Text style={styles.statUnit}> ms</Text>
                       </Text>
                     </View>
                     <View style={styles.statBox}>
-                      <Text style={styles.statLabel}>Oscilação Atual (Sessão {currentSessionsCount})</Text>
-                      <Text style={[styles.statValueHighlight, { color: '#64C6BE' }]}>
+                      <Text style={styles.statLabel}>{t('evolucao.currentOscillationSession', { count: currentSessionsCount })}</Text>
+                      <Text style={[styles.statValueHighlight, { color: theme.colors.primary }]}>
                         {currentGameData.stats?.lastVal}
-                        <Text style={[styles.statUnitHighlight, { color: '#64C6BE' }]}> ms</Text>
+                        <Text style={[styles.statUnitHighlight, { color: theme.colors.primary }]}> ms</Text>
                       </Text>
                     </View>
                   </View>
 
                   {/* RÓTULOS DOS EIXOS Y E X */}
-                  <Text style={styles.axisYLabel}>▲ Tempo (MS)</Text>
+                  <Text style={styles.axisYLabel}>{t.evolucao.yAxisTime}</Text>
 
                   <View style={styles.chartWrapper}>
                     <LineChart 
                       data={currentGameData.chartData} 
-                      {...getChartConfig('#64C6BE', currentGameData.chartData.length)} 
+                      {...getChartConfig(theme.colors.primary, currentGameData.chartData.length)} 
                     />
                   </View>
 
-                  <Text style={styles.axisXLabel}>Sessões ►</Text>
+                  <Text style={styles.axisXLabel}>{t.evolucao.xAxisSessions}</Text>
 
-                  <View style={[styles.aiCard, { backgroundColor: 'rgba(100, 198, 190, 0.1)', borderColor: 'rgba(100, 198, 190, 0.3)' }]}>
-                    <View style={[styles.aiIconBox, { backgroundColor: 'rgba(100, 198, 190, 0.2)' }]}>
-                      <Sparkles color="#64C6BE" size={16} />
+                  <View style={[styles.aiCard, { backgroundColor: `${theme.colors.primary}10`, borderColor: `${theme.colors.primary}25` }]}>
+                    <View style={[styles.aiIconBox, { backgroundColor: `${theme.colors.primary}20` }]}>
+                      <Sparkles color={theme.colors.primary} size={16} />
                     </View>
                     <View style={styles.aiTextCol}>
-                      <Text style={[styles.aiTitle, { color: '#64C6BE' }]}>Análise Assistida</Text>
+                      <Text style={[styles.aiTitle, { color: theme.colors.primary }]}>{t.evolucao.aiAnalysisTitle}</Text>
                       <Text style={styles.aiDesc}>{currentGameData.aiAnalysis}</Text>
                     </View>
                   </View>
@@ -255,45 +269,50 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
             {selectedGame === 'toca_rapido' && (
               <View style={styles.gameSection}>
                 <View style={styles.sectionHeader}>
-                  <Zap color="#FFC857" size={24} style={{ marginRight: 8 }} />
-                  <Text style={styles.gameTitle}>Toca Rápido!</Text>
+                  <View style={[styles.headerIconBox, { backgroundColor: 'rgba(217, 119, 6, 0.15)', borderColor: 'rgba(217, 119, 6, 0.3)' }]}>
+                    <Zap color="#D97706" size={22} />
+                  </View>
+                  <View style={styles.headerTitleCol}>
+                    <Text style={styles.gameTitle}>{t.evolucao.tocaRapido}</Text>
+                    <Text style={styles.gameSubtitle}>{t.evolucao.tocaRapidoSub}</Text>
+                  </View>
                 </View>
 
-                <View style={[styles.chartCard, { borderColor: 'rgba(255, 200, 87, 0.3)' }]}>
+                <View style={[styles.chartCard, { borderColor: 'rgba(217, 119, 6, 0.3)' }]}>
                   <View style={styles.statsRow}>
                     <View style={styles.statBox}>
-                      <Text style={styles.statLabel}>Toques Indevidos Iniciais (Sessão 1)</Text>
+                      <Text style={styles.statLabel}>{t.evolucao.initialImproperHitsSession1}</Text>
                       <Text style={styles.statValue}>
-                        {currentGameData.stats?.firstVal}<Text style={styles.statUnit}> toques</Text>
+                        {currentGameData.stats?.firstVal}<Text style={styles.statUnit}> {t.evolucao.improperHits}</Text>
                       </Text>
                     </View>
                     <View style={styles.statBox}>
-                      <Text style={styles.statLabel}>Toques Indevidos Atuais (Sessão {currentSessionsCount})</Text>
-                      <Text style={[styles.statValueHighlight, { color: '#FFC857' }]}>
+                      <Text style={styles.statLabel}>{t('evolucao.currentImproperHitsSession', { count: currentSessionsCount })}</Text>
+                      <Text style={[styles.statValueHighlight, { color: '#D97706' }]}>
                         {currentGameData.stats?.lastVal}
-                        <Text style={[styles.statUnitHighlight, { color: '#FFC857' }]}> toques</Text>
+                        <Text style={[styles.statUnitHighlight, { color: '#D97706' }]}> {t.evolucao.improperHits}</Text>
                       </Text>
                     </View>
                   </View>
 
                   {/* RÓTULOS DOS EIXOS Y E X */}
-                  <Text style={styles.axisYLabel}>▲ Toques Indevidos</Text>
+                  <Text style={styles.axisYLabel}>{t.evolucao.yAxisImproperHits}</Text>
 
                   <View style={styles.chartWrapper}>
                     <LineChart 
                       data={currentGameData.chartData} 
-                      {...getChartConfig('#FFC857', currentGameData.chartData.length)} 
+                      {...getChartConfig('#D97706', currentGameData.chartData.length)} 
                     />
                   </View>
 
-                  <Text style={styles.axisXLabel}>Sessões ►</Text>
+                  <Text style={styles.axisXLabel}>{t.evolucao.xAxisSessions}</Text>
 
-                  <View style={[styles.aiCard, { backgroundColor: 'rgba(255, 200, 87, 0.1)', borderColor: 'rgba(255, 200, 87, 0.3)' }]}>
-                    <View style={[styles.aiIconBox, { backgroundColor: 'rgba(255, 200, 87, 0.2)' }]}>
-                      <Sparkles color="#FFC857" size={16} />
+                  <View style={[styles.aiCard, { backgroundColor: 'rgba(217, 119, 6, 0.08)', borderColor: 'rgba(217, 119, 6, 0.2)' }]}>
+                    <View style={[styles.aiIconBox, { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
+                      <Sparkles color="#D97706" size={16} />
                     </View>
                     <View style={styles.aiTextCol}>
-                      <Text style={[styles.aiTitle, { color: '#FFC857' }]}>Análise Assistida</Text>
+                      <Text style={[styles.aiTitle, { color: '#D97706' }]}>{t.evolucao.aiAnalysisTitle}</Text>
                       <Text style={styles.aiDesc}>{currentGameData.aiAnalysis}</Text>
                     </View>
                   </View>
@@ -323,65 +342,67 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
               activeOpacity={1} 
               style={[
                 styles.glassModalCard, 
-                { borderColor: currentGameConfig?.color || 'rgba(255,255,255,0.2)' }
+                { borderColor: currentGameConfig?.color || theme.colors.cardBorder }
               ]}
             >
               {/* CABEÇALHO DO MODAL */}
               <View style={styles.modalHeader}>
                 <View style={styles.modalTitleRow}>
-                  <View style={[styles.modalBadge, { backgroundColor: `${currentGameConfig?.color}25` }]}>
+                  <View style={[styles.modalBadge, { backgroundColor: `${currentGameConfig?.color}15` }]}>
                     <Text style={[styles.modalBadgeText, { color: currentGameConfig?.color }]}>
-                      Sessão #{selectedPoint.item?.label}
+                      {t.evolucao.session} #{selectedPoint.item?.label}
                     </Text>
                   </View>
-                  <Text style={styles.modalGameLabel}>{currentGameConfig?.label}</Text>
+                  <Text style={styles.modalGameLabel}>
+                    {currentGameConfig ? (t.evolucao[currentGameConfig.labelKey as keyof typeof t.evolucao] || currentGameConfig.id) : ''}
+                  </Text>
                 </View>
                 <TouchableOpacity 
                   onPress={() => setSelectedPoint(null)} 
                   style={styles.closeBtn}
                 >
-                  <X size={20} color="rgba(255,255,255,0.7)" />
+                  <X size={20} color={theme.colors.textDark} />
                 </TouchableOpacity>
               </View>
 
               {/* DATA E HORA DE REALIZAÇÃO */}
               <View style={styles.metaRow}>
                 <View style={styles.metaItem}>
-                  <Calendar size={14} color="rgba(255,255,255,0.5)" style={{ marginRight: 6 }} />
-                  <Text style={styles.metaText}>{selectedPoint.item?.date || 'Data N/A'}</Text>
+                  <Calendar size={14} color={theme.colors.textMuted} style={{ marginRight: 6 }} />
+                  <Text style={styles.metaText}>{selectedPoint.item?.date || t.evolucao.dateNA}</Text>
                 </View>
                 {!!selectedPoint.item?.formattedTime && (
                   <View style={styles.metaItem}>
-                    <Clock size={14} color="rgba(255,255,255,0.5)" style={{ marginRight: 6 }} />
+                    <Clock size={14} color={theme.colors.textMuted} style={{ marginRight: 6 }} />
                     <Text style={styles.metaText}>{selectedPoint.item?.formattedTime}</Text>
                   </View>
                 )}
               </View>
 
               {/* MÉTRICA PRINCIPAL DO PONTO */}
-              <View style={[styles.primaryMetricCard, { backgroundColor: `${currentGameConfig?.color}15` }]}>
-                <Text style={styles.primaryMetricLabel}>Resultado da Partida</Text>
+              <View style={[styles.primaryMetricCard, { backgroundColor: `${currentGameConfig?.color}10` }]}>
+                <Text style={styles.primaryMetricLabel}>{t.evolucao.matchResult}</Text>
                 <Text style={[styles.primaryMetricValue, { color: currentGameConfig?.color }]}>
                   {selectedPoint.item?.rawVal}{' '}
                   <Text style={styles.primaryMetricUnit}>
-                    {selectedGame === 'toca_rapido' ? 'toques indevidos' : 'ms'}
+                    {selectedGame === 'toca_rapido' ? t.evolucao.improperHits : 'ms'}
                   </Text>
                 </Text>
               </View>
 
               {/* DETALHAMENTO DA TELEMETRIA REAL (DO BANCO DE DADOS) */}
-              <Text style={styles.detailsHeaderTitle}>Detalhamento da Partida</Text>
+              <Text style={styles.detailsHeaderTitle}>{t.evolucao.matchDetails}</Text>
               <View style={styles.detailsGrid}>
                 {selectedGame === 'goleiro' && (
                   <>
                     <View style={styles.detailGridItem}>
-                      <Text style={styles.detailItemLabel}>Oscilação da Resposta</Text>
+                      <Text style={styles.detailItemLabel}>{t.evolucao.responseOscillation}</Text>
                       <Text style={styles.detailItemValue}>
                         {selectedPoint.item?.details?.vtr_ms ?? selectedPoint.item?.rawVal} ms
                       </Text>
                     </View>
                     <View style={styles.detailGridItem}>
-                      <Text style={styles.detailItemLabel}>Média de Reação</Text>
+                      <Text style={styles.detailItemLabel}>{t.evolucao.reactionAverage}</Text>
                       <Text style={styles.detailItemValue}>
                         {selectedPoint.item?.details?.media_reacao_ms ?? 'N/A'} ms
                       </Text>
@@ -392,15 +413,15 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
                 {selectedGame === 'fotografo' && (
                   <>
                     <View style={styles.detailGridItem}>
-                      <Text style={styles.detailItemLabel}>Variação do Foco</Text>
+                      <Text style={styles.detailItemLabel}>{t.evolucao.focusVariation}</Text>
                       <Text style={styles.detailItemValue}>
                         {selectedPoint.item?.details?.variacao ?? selectedPoint.item?.rawVal} ms
                       </Text>
                     </View>
                     <View style={styles.detailGridItem}>
-                      <Text style={styles.detailItemLabel}>Tempo Fase 1 / Fase 2</Text>
+                      <Text style={styles.detailItemLabel}>{t.evolucao.phaseTime}</Text>
                       <Text style={styles.detailItemValue}>
-                        {selectedPoint.item?.details?.tempo_fase_1 ? `${selectedPoint.item?.details?.tempo_fase_1}ms` : 'Registrado'}
+                        {selectedPoint.item?.details?.tempo_fase_1 ? `${selectedPoint.item?.details?.tempo_fase_1}ms` : t.evolucao.recorded}
                       </Text>
                     </View>
                   </>
@@ -409,15 +430,15 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
                 {selectedGame === 'toca_rapido' && (
                   <>
                     <View style={styles.detailGridItem}>
-                      <Text style={styles.detailItemLabel}>Toques Indevidos</Text>
+                      <Text style={styles.detailItemLabel}>{t.evolucao.improperHits}</Text>
                       <Text style={styles.detailItemValue}>
-                        {selectedPoint.item?.details?.erro_nogo ?? selectedPoint.item?.rawVal} toque(s)
+                        {selectedPoint.item?.details?.erro_nogo ?? selectedPoint.item?.rawVal} {t.evolucao.hitCount}
                       </Text>
                     </View>
                     <View style={styles.detailGridItem}>
-                      <Text style={styles.detailItemLabel}>Toques Corretos</Text>
+                      <Text style={styles.detailItemLabel}>{t.evolucao.correctHits}</Text>
                       <Text style={styles.detailItemValue}>
-                        {selectedPoint.item?.details?.acertos_go ?? selectedPoint.item?.details?.correctHits ?? selectedPoint.item?.details?.hits ?? selectedPoint.item?.details?.acertos ?? 0} toque(s)
+                        {selectedPoint.item?.details?.acertos_go ?? selectedPoint.item?.details?.correctHits ?? selectedPoint.item?.details?.hits ?? selectedPoint.item?.details?.acertos ?? 0} {t.evolucao.hitCount}
                       </Text>
                     </View>
                   </>
@@ -425,10 +446,10 @@ export function EvolucaoTab({ patientId, adminPsicologoId }: EvolucaoTabProps) {
               </View>
 
               <TouchableOpacity
-                style={[styles.dismissBtn, { backgroundColor: '#FFC857' }]}
+                style={[styles.dismissBtn, { backgroundColor: theme.colors.primary }]}
                 onPress={() => setSelectedPoint(null)}
               >
-                <Text style={styles.dismissBtnText}>Entendido</Text>
+                <Text style={styles.dismissBtnText}>{t.evolucao.understood}</Text>
               </TouchableOpacity>
             </TouchableOpacity>
           )}
@@ -446,7 +467,7 @@ const styles = StyleSheet.create({
   selectorContainer: {
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    borderBottomColor: theme.colors.cardBorder,
     marginBottom: 16,
   },
   selectorScroll: {
@@ -462,31 +483,40 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   pillText: {
-    color: 'rgba(255,255,255,0.7)',
     fontSize: 14,
     fontWeight: '600',
   },
 
   scrollContent: { paddingHorizontal: 16, paddingBottom: 40 },
   gameSection: { marginBottom: 32 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  gameTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 12 },
+  headerIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitleCol: { flex: 1 },
+  gameTitle: { color: theme.colors.textDark, fontSize: 22, fontWeight: '800', letterSpacing: -0.3 },
+  gameSubtitle: { color: theme.colors.textMuted, fontSize: 13, fontWeight: '600', marginTop: 1 },
   
   chartCard: { 
-    backgroundColor: 'rgba(255,255,255,0.03)', 
+    backgroundColor: theme.colors.cardBg, 
     borderRadius: 24, 
     padding: 20, 
     borderWidth: 1,
   },
   
   statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
-  statBox: { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 16, marginRight: 12 },
-  statBoxFull: { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 16 },
-  statLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 'bold', marginBottom: 8, textTransform: 'uppercase' },
-  statValue: { color: '#fff', fontSize: 28, fontWeight: '900' },
-  statUnit: { fontSize: 16, color: 'rgba(255,255,255,0.6)', fontWeight: 'normal' },
-  statValueHighlight: { fontSize: 28, fontWeight: '900' },
-  statUnitHighlight: { fontSize: 16, fontWeight: 'normal' },
+  statBox: { flex: 1, backgroundColor: theme.colors.bg, borderRadius: 16, padding: 16, marginRight: 12, borderWidth: 1, borderColor: theme.colors.cardBorder },
+  statBoxFull: { flex: 1, backgroundColor: theme.colors.bg, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: theme.colors.cardBorder },
+  statLabel: { color: theme.colors.textMuted, fontSize: 12, fontWeight: '800', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  statValue: { color: theme.colors.textDark, fontSize: 26, fontWeight: '900' },
+  statUnit: { fontSize: 15, color: theme.colors.textMuted, fontWeight: 'normal' },
+  statValueHighlight: { fontSize: 26, fontWeight: '900' },
+  statUnitHighlight: { fontSize: 15, fontWeight: 'normal' },
   
   scoreRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   scoreValue: { fontSize: 36, fontWeight: '900' },
@@ -494,7 +524,7 @@ const styles = StyleSheet.create({
   trendText: { fontWeight: 'bold', fontSize: 14 },
   
   axisYLabel: {
-    color: 'rgba(255,255,255,0.6)',
+    color: theme.colors.textMuted,
     fontSize: 11,
     fontWeight: 'bold',
     textTransform: 'uppercase',
@@ -503,7 +533,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   axisXLabel: {
-    color: 'rgba(255,255,255,0.6)',
+    color: theme.colors.textMuted,
     fontSize: 11,
     fontWeight: 'bold',
     textTransform: 'uppercase',
@@ -535,19 +565,19 @@ const styles = StyleSheet.create({
     marginRight: 12 
   },
   aiTextCol: { flex: 1 },
-  aiTitle: { fontSize: 14, fontWeight: 'bold', marginBottom: 6, textTransform: 'uppercase' },
-  aiDesc: { color: 'rgba(255,255,255,0.85)', fontSize: 14, lineHeight: 22 },
+  aiTitle: { fontSize: 14, fontWeight: '800', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
+  aiDesc: { color: theme.colors.textDark, fontSize: 14, lineHeight: 22 },
 
   loadingBox: { padding: 40, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { color: 'rgba(255,255,255,0.7)', marginTop: 12, fontSize: 15 },
+  loadingText: { color: theme.colors.textMuted, marginTop: 12, fontSize: 15 },
   
   // Card para menos de 3 partidas
   insufficientCard: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: theme.colors.cardBg,
     borderRadius: 24,
     padding: 28,
     borderWidth: 1,
-    borderColor: 'rgba(255, 200, 87, 0.3)',
+    borderColor: theme.colors.cardBorder,
     alignItems: 'center',
     marginVertical: 12,
   },
@@ -555,19 +585,20 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(255, 200, 87, 0.1)',
+    backgroundColor: `${theme.colors.primary}15`,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 200, 87, 0.3)',
+    borderColor: `${theme.colors.primary}30`,
   },
-  insufficientTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-  insufficientSub: { color: 'rgba(255,255,255,0.7)', fontSize: 14, textAlign: 'center', lineHeight: 22, marginBottom: 20 },
+  insufficientTitle: { color: theme.colors.textDark, fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
+  insufficientSub: { color: theme.colors.textMuted, fontSize: 14, textAlign: 'center', lineHeight: 22, marginBottom: 20 },
+
   // Teko Style Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(8, 28, 26, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -575,13 +606,14 @@ const styles = StyleSheet.create({
   glassModalCard: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: '#122523',
+    backgroundColor: theme.colors.cardBg,
     borderRadius: 28,
     padding: 24,
     borderWidth: 1.5,
+    borderColor: theme.colors.cardBorder,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.6,
+    shadowOpacity: 0.15,
     shadowRadius: 24,
     elevation: 12,
   },
@@ -606,14 +638,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   modalGameLabel: {
-    color: '#FFF',
+    color: theme.colors.textDark,
     fontSize: 18,
     fontWeight: 'bold',
   },
   closeBtn: {
     padding: 6,
     borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: theme.colors.bg,
   },
   metaRow: {
     flexDirection: 'row',
@@ -622,14 +654,14 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomColor: theme.colors.cardBorder,
   },
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   metaText: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.textMuted,
     fontSize: 13,
     fontWeight: '500',
   },
@@ -639,10 +671,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
   },
   primaryMetricLabel: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.textMuted,
     fontSize: 12,
     fontWeight: 'bold',
     textTransform: 'uppercase',
@@ -655,11 +687,11 @@ const styles = StyleSheet.create({
   },
   primaryMetricUnit: {
     fontSize: 15,
-    color: 'rgba(255,255,255,0.8)',
+    color: theme.colors.textMuted,
     fontWeight: 'normal',
   },
   detailsHeaderTitle: {
-    color: '#FFC857',
+    color: theme.colors.textDark,
     fontSize: 12,
     fontWeight: 'bold',
     textTransform: 'uppercase',
@@ -674,22 +706,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: theme.colors.bg,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: theme.colors.cardBorder,
     gap: 12,
   },
   detailItemLabel: {
-    color: 'rgba(255,255,255,0.75)',
+    color: theme.colors.textMuted,
     fontSize: 13,
     fontWeight: '500',
     flex: 1,
   },
   detailItemValue: {
-    color: '#FFF',
+    color: theme.colors.textDark,
     fontSize: 13,
     fontWeight: 'bold',
   },
@@ -697,23 +729,24 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 14,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: theme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
   },
   dismissBtnText: {
-    color: '#084D48',
+    color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 15,
   },
   
   // Progress tracker styles para o card de menos de 3 partidas
-  progressTracker: { width: '100%', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 16 },
+  progressTracker: { width: '100%', backgroundColor: theme.colors.bg, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: theme.colors.cardBorder },
   progressTextRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  progressLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase' },
-  progressCount: { color: '#FFC857', fontSize: 14, fontWeight: 'bold' },
-  progressBarTrack: { height: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' },
-  progressBarFill: { height: '100%', backgroundColor: '#FFC857', borderRadius: 4 },
+  progressLabel: { color: theme.colors.textMuted, fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase' },
+  progressCount: { color: theme.colors.primary, fontSize: 14, fontWeight: 'bold' },
+  progressBarTrack: { height: 8, backgroundColor: theme.colors.cardBorder, borderRadius: 4, overflow: 'hidden' },
+  progressBarFill: { height: '100%', backgroundColor: theme.colors.primary, borderRadius: 4 },
 });
+

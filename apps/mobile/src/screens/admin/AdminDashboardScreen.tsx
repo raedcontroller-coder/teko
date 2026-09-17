@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Plus, Users, FileText, Baby, ChevronLeft, ChevronRight, UserCircle } from 'lucide-react-native';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
 
 interface AdminDashboardScreenProps {
   onNavigateToPsychologists?: () => void;
@@ -58,16 +59,12 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
         <Pressable 
           style={({ pressed }) => [
             styles.newButton,
-            pressed && { backgroundColor: '#7B61FF' }
+            pressed && { backgroundColor: theme.colors.primaryDark }
           ]}
           onPress={onNavigateToNewPsychologist}
         >
-          {({ pressed }) => (
-            <>
-              <Plus color={pressed ? "#FFF" : "#181c1c"} size={20} />
-              <Text style={[styles.newButtonText, pressed && { color: '#FFF' }]}>Novo profissional</Text>
-            </>
-          )}
+          <Plus color="#FFF" size={20} />
+          <Text style={styles.newButtonText}>Novo profissional</Text>
         </Pressable>
 
         {/* Horizontal Carousel for Metrics with Arrows */}
@@ -79,7 +76,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
               style={[styles.arrowContainer, styles.arrowLeft]}
               onPress={() => scrollViewRef.current?.scrollTo({ x: 0, animated: true })}
             >
-              <ChevronLeft color="rgba(255,255,255,0.7)" size={28} />
+              <ChevronLeft color={theme.colors.textDark} size={28} />
             </TouchableOpacity>
           )}
 
@@ -92,13 +89,13 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
             scrollEventThrottle={16}
           >
             {/* Profissionais Ativos */}
-            <View style={[styles.card, styles.interactiveCard]}>
-              <View style={[styles.iconWrapper, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-                <Users color="#FFC857" size={24} />
+            <View style={styles.card}>
+              <View style={[styles.iconWrapper, { backgroundColor: theme.colors.tealSoft }]}>
+                <Users color={theme.colors.primary} size={24} />
               </View>
               <View>
                 {loading ? (
-                  <ActivityIndicator color="#FFF" style={{ alignSelf: 'flex-start' }} />
+                  <ActivityIndicator color={theme.colors.primary} style={{ alignSelf: 'flex-start' }} />
                 ) : (
                   <Text style={styles.cardNumber}>{stats.profissionais}</Text>
                 )}
@@ -107,13 +104,13 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
             </View>
 
             {/* Relatórios Gerados */}
-            <View style={[styles.card, styles.interactiveCard]}>
-              <View style={[styles.iconWrapper, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-                <FileText color="#7B61FF" size={24} />
+            <View style={styles.card}>
+              <View style={[styles.iconWrapper, { backgroundColor: theme.colors.badgePurple }]}>
+                <FileText color={theme.colors.badgePurpleText} size={24} />
               </View>
               <View>
                 {loading ? (
-                  <ActivityIndicator color="#FFF" style={{ alignSelf: 'flex-start' }} />
+                  <ActivityIndicator color={theme.colors.primary} style={{ alignSelf: 'flex-start' }} />
                 ) : (
                   <Text style={styles.cardNumber}>{stats.relatorios}</Text>
                 )}
@@ -122,13 +119,13 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
             </View>
 
             {/* Crianças na plataforma */}
-            <View style={[styles.card, styles.interactiveCard]}>
-              <View style={[styles.iconWrapper, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-                <Baby color="#D8E6CC" size={24} />
+            <View style={styles.card}>
+              <View style={[styles.iconWrapper, { backgroundColor: theme.colors.tealSoft }]}>
+                <Baby color={theme.colors.primary} size={24} />
               </View>
               <View>
                 {loading ? (
-                  <ActivityIndicator color="#FFF" style={{ alignSelf: 'flex-start' }} />
+                  <ActivityIndicator color={theme.colors.primary} style={{ alignSelf: 'flex-start' }} />
                 ) : (
                   <Text style={styles.cardNumber}>{stats.criancas}</Text>
                 )}
@@ -143,7 +140,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
               style={[styles.arrowContainer, styles.arrowRight]}
               onPress={() => scrollViewRef.current?.scrollTo({ x: 300, animated: true })}
             >
-              <ChevronRight color="rgba(255,255,255,0.7)" size={28} />
+              <ChevronRight color={theme.colors.textDark} size={28} />
             </TouchableOpacity>
           )}
         </View>
@@ -153,10 +150,10 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
           <Text style={styles.sectionTitle}>Profissionais Cadastrados</Text>
           
           {loading ? (
-            <ActivityIndicator color="#FFC857" style={{ marginTop: 40 }} />
+            <ActivityIndicator color={theme.colors.primary} style={{ marginTop: 40 }} />
           ) : recentPsychologists.length === 0 ? (
             <View style={styles.emptyState}>
-              <UserCircle color="rgba(255,255,255,0.2)" size={48} />
+              <UserCircle color={theme.colors.textMuted} size={48} />
               <Text style={styles.emptyStateText}>Nenhum profissional cadastrado ainda.</Text>
             </View>
           ) : (
@@ -165,7 +162,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
                 <View key={psi.id} style={styles.listItem}>
                   <View style={styles.listHeader}>
                     <View style={styles.avatar}>
-                      <UserCircle color="#FFF" size={24} />
+                      <UserCircle color={theme.colors.primary} size={24} />
                     </View>
                     <View style={styles.infoContainer}>
                       <Text style={styles.itemName}>{psi.name}</Text>
@@ -184,13 +181,11 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
           <Pressable 
             style={({ pressed }) => [
               styles.seeAllButton,
-              pressed && { backgroundColor: '#7B61FF' }
+              pressed && { backgroundColor: theme.colors.primaryDark }
             ]}
             onPress={onNavigateToPsychologists}
           >
-            {({ pressed }) => (
-              <Text style={[styles.seeAllButtonText, pressed && { color: '#FFF' }]}>Ver todos os profissionais</Text>
-            )}
+            <Text style={styles.seeAllButtonText}>Ver todos os profissionais</Text>
           </Pressable>
         </View>
 
@@ -202,24 +197,25 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onNa
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#064b46',
+    backgroundColor: theme.colors.bg,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 110,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   headerTextContainer: {},
   title: {
-    color: '#FFF',
-    fontSize: 28,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.4,
   },
   subtitle: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.textMuted,
     fontSize: 14,
     marginTop: 4,
   },
@@ -227,56 +223,55 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFC857',
-    paddingVertical: 16,
-    borderRadius: 16,
-    marginBottom: 32,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 14,
+    borderRadius: theme.radii.md,
+    marginBottom: 24,
     gap: 8,
+    ...theme.shadows.subtle,
   },
   newButtonText: {
-    color: '#181c1c',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
   carouselWrapper: {
     position: 'relative',
-    marginHorizontal: -24, // Extends full width for scrolling
-    marginBottom: 40,
+    marginHorizontal: -20,
+    marginBottom: 32,
   },
   carouselContainer: {
-    paddingHorizontal: 24,
-    gap: 16,
+    paddingHorizontal: 20,
+    gap: 12,
   },
   card: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
     width: 200,
-    height: 180,
+    height: 160,
     justifyContent: 'space-between',
-  },
-  interactiveCard: {
-    borderColor: 'rgba(255,255,255,0.2)',
+    ...theme.shadows.card,
   },
   iconWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardNumber: {
-    color: '#FFF',
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    color: theme.colors.textDark,
+    fontSize: 28,
+    fontWeight: '900',
+    marginBottom: 2,
   },
   cardLabel: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 14,
-    fontWeight: '500',
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    fontWeight: '600',
   },
   arrowContainer: {
     position: 'absolute',
@@ -285,10 +280,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: theme.colors.cardBg,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
+    ...theme.shadows.subtle,
   },
   arrowLeft: {
     left: 8,
@@ -300,9 +298,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 18,
+    fontWeight: '800',
     marginBottom: 16,
   },
   emptyState: {
@@ -310,22 +308,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 40,
     gap: 12,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
   },
   emptyStateText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 16,
-    fontStyle: 'italic',
+    color: theme.colors.textMuted,
+    fontSize: 14,
   },
   listContainer: {
     gap: 12,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   listItem: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderRadius: 16,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.subtle,
   },
   listHeader: {
     flexDirection: 'row',
@@ -337,7 +339,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: theme.colors.tealSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -345,35 +347,37 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemName: {
-    color: '#FFF',
+    color: theme.colors.textDark,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   itemEmail: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontSize: 13,
   },
   listFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: theme.colors.cardBorder,
   },
   itemMeta: {
-    color: 'rgba(255,255,255,0.5)',
+    color: theme.colors.textMuted,
     fontSize: 12,
   },
   seeAllButton: {
-    backgroundColor: '#FFC857',
-    paddingVertical: 16,
-    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 14,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
+    ...theme.shadows.subtle,
   },
   seeAllButtonText: {
-    color: '#181c1c',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
+

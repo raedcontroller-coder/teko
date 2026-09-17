@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, ActivityIndicator, Animated, Easing, Dimensions, ScrollView, Pressable } from 'react-native';
-import { Plus, Search, X, Trash2, XCircle } from 'lucide-react-native';
+import { Plus, Search, X, Trash2, XCircle, CheckCircle2 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -18,7 +19,10 @@ export interface Holiday {
   type: string;
 }
 
+import { useTranslation } from '../../i18n';
+
 export function AgendaScreen() {
+  const { t } = useTranslation();
   const getTodayDate = () => {
     const d = new Date();
     const year = d.getFullYear();
@@ -146,6 +150,32 @@ export function AgendaScreen() {
   const [errorSlideAnim] = useState(new Animated.Value(-screenWidth));
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const [successSlideAnim] = useState(new Animated.Value(-screenWidth));
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const showSuccess = (msg: string) => {
+    setSuccessMessage(msg);
+    setShowSuccessToast(true);
+    Animated.timing(successSlideAnim, {
+      toValue: 0,
+      duration: 600,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.back(1.2)),
+    }).start();
+
+    setTimeout(() => {
+      Animated.timing(successSlideAnim, {
+        toValue: -screenWidth,
+        duration: 500,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease),
+      }).start(() => {
+        setShowSuccessToast(false);
+      });
+    }, 4000);
+  };
 
   const showError = (msg: string) => {
     setErrorMessage(msg);
@@ -301,22 +331,22 @@ export function AgendaScreen() {
 
   const handleSave = async () => {
     if (!formTitle.trim()) {
-      showError('Por favor, informe o título do agendamento.');
+      showError(t.agenda.titleRequired);
       return;
     }
     if (!formName.trim()) {
-      showError('Por favor, informe o nome do paciente.');
+      showError(t.agenda.nameRequired);
       return;
     }
     if (!formDate.trim() || formDate.length !== 10) {
-      showError('Preencha a data completa no formato DD/MM/AAAA.');
+      showError(t.agenda.dateRequired);
       return;
     }
     
     // Validação Lógica de Data
     const dateParts = formDate.split('/');
     if (dateParts.length !== 3) {
-      showError('Formato de data inválido. Use DD/MM/AAAA.');
+      showError(t.agenda.invalidDateFormat);
       return;
     }
     const day = parseInt(dateParts[0], 10);
@@ -326,35 +356,35 @@ export function AgendaScreen() {
     const monthDays = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     
     if (year < 2020 || year > 2040 || month < 1 || month > 12 || day < 1 || day > monthDays[month - 1]) {
-       showError('Data inválida. O dia não existe nesse mês ou o ano é absurdo.');
+       showError(t.agenda.invalidDateValue);
        return;
     }
 
     if (!formType.trim()) {
-      showError('O campo "Tipo" é obrigatório. (Ex: Avaliação, Sessão, etc).');
+      showError(t.agenda.typeRequired);
       return;
     }
     if (!formTime.trim()) {
-      showError('Defina o horário de início da consulta.');
+      showError(t.agenda.startTimeRequired);
       return;
     }
     if (!formEnd.trim()) {
-      showError('Defina o horário de término da consulta.');
+      showError(t.agenda.endTimeRequired);
       return;
     }
 
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(formTime)) {
-      showError('Horário de início inválido. O horário deve estar entre 00:00 e 23:59.');
+      showError(t.agenda.invalidStartTime);
       return;
     }
     if (!timeRegex.test(formEnd)) {
-      showError('Horário de término inválido. O horário deve estar entre 00:00 e 23:59.');
+      showError(t.agenda.invalidEndTime);
       return;
     }
 
     if (!/^#[0-9A-Fa-f]{6}$/.test(formColor)) {
-      showError('A cor informada é inválida. Use o formato Hexadecimal (Ex: #FF0000).');
+      showError(t.agenda.invalidColor);
       return;
     }
 
@@ -363,7 +393,7 @@ export function AgendaScreen() {
     const endMinutes = parseInt(formEnd.split(':')[0]) * 60 + parseInt(formEnd.split(':')[1]);
 
     if (startMinutes >= endMinutes) {
-      showError('Inconsistência de horário! O término deve ser mais tarde que o início.');
+      showError(t.agenda.timeInconsistency);
       return;
     }
 
@@ -387,15 +417,17 @@ export function AgendaScreen() {
 
       if (editingId) {
         await api.put(`/api/appointments/${editingId}`, payload);
+        showSuccess(t.agenda.updateSuccess);
       } else {
         await api.post('/api/appointments', payload);
+        showSuccess(t.agenda.createSuccess);
       }
 
       await fetchAppointments();
       setIsModalVisible(false);
     } catch (err: any) {
       console.error("Erro ao salvar agendamento:", err);
-      showError(err.response?.data?.error || "Falha ao salvar agendamento no servidor.");
+      showError(err.response?.data?.error || t.agenda.saveError);
     } finally {
       setIsSaving(false);
     }
@@ -415,9 +447,10 @@ export function AgendaScreen() {
         setDeleteConfirmId(null);
         if (isModalVisible) setIsModalVisible(false);
         await fetchAppointments();
+        showSuccess(t.agenda.deleteSuccess);
       } catch (err: any) {
         console.error("Erro ao excluir agendamento:", err);
-        showError(err.response?.data?.error || "Falha ao excluir agendamento.");
+        showError(err.response?.data?.error || t.agenda.deleteError);
       } finally {
         setIsSaving(false);
       }
@@ -437,55 +470,65 @@ export function AgendaScreen() {
           <View style={styles.searchContainer}>
             <TextInput 
                style={styles.searchInput}
-               placeholder="Buscar paciente..."
-               placeholderTextColor="rgba(255,255,255,0.5)"
+               placeholder={t.agenda.searchPlaceholder}
+               placeholderTextColor={theme.colors.textMuted}
                value={searchQuery}
                onChangeText={setSearchQuery}
                autoFocus
             />
             <TouchableOpacity onPress={() => { setIsSearching(false); setSearchQuery(''); }} style={{ padding: 4 }}>
-              <X size={20} color="#fff" />
+              <X size={20} color={theme.colors.textDark} />
             </TouchableOpacity>
           </View>
         ) : (
           <>
-            <Text style={styles.title}>Agenda</Text>
+            <View style={styles.headerTitleCol}>
+              <Text style={styles.title}>{t.agenda.title}</Text>
+              <Text style={styles.headerSubtitle}>
+                {t('agenda.scheduledAppointmentsCount', { count: appointments.length })}
+              </Text>
+            </View>
             {viewMode !== 'Mês' && (
-              <TouchableOpacity style={styles.iconBtn} onPress={() => setIsSearching(true)}>
-                <Search size={20} color="#fff" />
+              <TouchableOpacity style={styles.iconBtn} onPress={() => setIsSearching(true)} activeOpacity={0.75}>
+                <Search size={20} color={theme.colors.primary} />
               </TouchableOpacity>
             )}
           </>
         )}
       </View>
 
-      {/* TOGGLE */}
-      <View style={styles.toggleContainer}>
-        {['Mês', 'Semana', 'Dia'].map(mode => (
-          <TouchableOpacity 
-            key={mode} 
-            style={[styles.toggleBtn, viewMode === mode && styles.toggleBtnActive]}
-            onPress={() => {
-              if (mode === 'Dia' && viewMode !== 'Dia') {
-                setSelectedDate(getTodayDate());
-              }
-              if (mode === 'Mês') {
-                setIsSearching(false);
-                setSearchQuery('');
-              }
-              setViewMode(mode as any);
-            }}
-          >
-            <Text style={[styles.toggleText, viewMode === mode && styles.toggleTextActive]}>{mode}</Text>
-          </TouchableOpacity>
-        ))}
+      {/* TOGGLE CONTROLS */}
+      <View style={styles.toggleCard}>
+        <View style={styles.toggleContainer}>
+          {['Mês', 'Semana', 'Dia'].map(mode => (
+            <TouchableOpacity 
+              key={mode} 
+              style={[styles.toggleBtn, viewMode === mode && styles.toggleBtnActive]}
+              onPress={() => {
+                if (mode === 'Dia' && viewMode !== 'Dia') {
+                  setSelectedDate(getTodayDate());
+                }
+                if (mode === 'Mês') {
+                  setIsSearching(false);
+                  setSearchQuery('');
+                }
+                setViewMode(mode as any);
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.toggleText, viewMode === mode && styles.toggleTextActive]}>
+                {mode === 'Dia' ? t.agenda.daily : mode === 'Semana' ? t.agenda.weekly : t.agenda.monthly}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       {/* DYNAMIC VIEWS */}
       {isLoadingHolidays ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFC857" />
-          <Text style={styles.loadingText}>Carregando calendário...</Text>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>{t.agenda.loadingCalendar}</Text>
         </View>
       ) : (
         <>
@@ -522,7 +565,7 @@ export function AgendaScreen() {
 
       {/* FAB - ADD APPOINTMENT */}
       <TouchableOpacity style={styles.fab} onPress={handleOpenCreateModal}>
-        <Plus size={32} color="#181c1c" />
+        <Plus size={30} color="#FFF" />
       </TouchableOpacity>
 
       {/* MODAL CRUD */}
@@ -531,28 +574,15 @@ export function AgendaScreen() {
           style={styles.modalOverlay} 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          {/* SPINNER & PROCESSING OVERLAY - FULL SCREEN CENTERED */}
-          {isSaving && (
-            <View style={styles.fullScreenProcessingOverlay}>
-              <View style={styles.processingCard}>
-                <ActivityIndicator size="large" color="#FFC857" style={{ marginBottom: 14 }} />
-                <Text style={styles.processingTitle}>
-                  {editingId ? 'Processando e validando edição...' : 'Criando agendamento...'}
-                </Text>
-                <Text style={styles.processingSub}>Aguarde a confirmação das alterações</Text>
-              </View>
-            </View>
-          )}
-
           <View style={[styles.modalContent, { maxHeight: Dimensions.get('window').height * 0.85 }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{editingId ? 'Editar Agendamento' : 'Novo Agendamento'}</Text>
+              <Text style={styles.modalTitle}>{editingId ? t.agenda.editAppointment : t.agenda.newAppointment}</Text>
               <TouchableOpacity 
                 onPress={() => !isSaving && setIsModalVisible(false)} 
                 style={[styles.closeBtn, isSaving && { opacity: 0.5 }]}
                 disabled={isSaving}
               >
-                <X size={24} color="#fff" />
+                <X size={24} color={theme.colors.textDark} />
               </TouchableOpacity>
             </View>
 
@@ -561,21 +591,21 @@ export function AgendaScreen() {
               keyboardShouldPersistTaps="handled" 
               contentContainerStyle={styles.formContainer}
             >
-              <Text style={styles.label}>Nome do Agendamento</Text>
+              <Text style={styles.label}>{t.agenda.appointmentTitleLabel}</Text>
               <TextInput 
                 style={styles.input} 
-                placeholder="Ex: Sessão de Terapia" 
-                placeholderTextColor="rgba(255,255,255,0.4)"
+                placeholder={t.agenda.appointmentTitlePlaceholder} 
+                placeholderTextColor={theme.colors.textMuted}
                 value={formTitle} 
                 onChangeText={setFormTitle} 
                 editable={!isSaving}
               />
 
-              <Text style={styles.label}>Nome do Paciente</Text>
+              <Text style={styles.label}>{t.agenda.patientNameLabel}</Text>
               <TextInput 
                 style={styles.input} 
-                placeholder="Ex: João Silva" 
-                placeholderTextColor="rgba(255,255,255,0.4)"
+                placeholder={t.agenda.patientNamePlaceholder} 
+                placeholderTextColor={theme.colors.textMuted}
                 value={formName} 
                 onChangeText={setFormName} 
                 editable={!isSaving}
@@ -583,7 +613,7 @@ export function AgendaScreen() {
 
               <View style={styles.row}>
                 <View style={styles.halfInput}>
-                  <Text style={styles.label}>Data (DD/MM/AAAA)</Text>
+                  <Text style={styles.label}>{t.agenda.dateLabelWithFormat}</Text>
                   <TextInput 
                     style={styles.input} 
                     placeholder="25/12/2026" 
@@ -595,10 +625,10 @@ export function AgendaScreen() {
                   />
                 </View>
                 <View style={styles.halfInput}>
-                  <Text style={styles.label}>Tipo</Text>
+                  <Text style={styles.label}>{t.agenda.typeLabel}</Text>
                   <TextInput 
                     style={styles.input} 
-                    placeholder="Ex: Avaliação" 
+                    placeholder={t.agenda.typePlaceholder} 
                     placeholderTextColor="rgba(255,255,255,0.4)"
                     value={formType} 
                     onChangeText={setFormType} 
@@ -609,7 +639,7 @@ export function AgendaScreen() {
 
               <View style={styles.row}>
                 <View style={styles.halfInput}>
-                  <Text style={styles.label}>Início (hh:mm)</Text>
+                  <Text style={styles.label}>{t.agenda.startTimeLabel}</Text>
                   <TextInput 
                     style={styles.input} 
                     placeholder="09:00" 
@@ -622,7 +652,7 @@ export function AgendaScreen() {
                   />
                 </View>
                 <View style={styles.halfInput}>
-                  <Text style={styles.label}>Fim (hh:mm)</Text>
+                  <Text style={styles.label}>{t.agenda.endTimeLabel}</Text>
                   <TextInput 
                     style={styles.input} 
                     placeholder="10:00" 
@@ -636,7 +666,7 @@ export function AgendaScreen() {
                 </View>
               </View>
 
-              <Text style={styles.label}>Cor de Destaque (Hexadecimal)</Text>
+              <Text style={styles.label}>{t.agenda.highlightColorLabel}</Text>
               <View style={styles.colorPickerContainer}>
                 <TouchableOpacity 
                   style={[styles.colorPreview, { backgroundColor: /^#[0-9A-Fa-f]{6}$/.test(formColor) ? formColor : 'transparent' }]} 
@@ -653,7 +683,7 @@ export function AgendaScreen() {
                 />
               </View>
 
-              <Text style={styles.label}>Cores Recentes</Text>
+              <Text style={styles.label}>{t.agenda.recentColorsLabel}</Text>
               <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false} 
@@ -694,25 +724,12 @@ export function AgendaScreen() {
                 {isSaving ? (
                   <ActivityIndicator color="#181c1c" size="small" />
                 ) : (
-                  <Text style={styles.saveBtnText}>{editingId ? 'Salvar Alterações' : 'Salvar'}</Text>
+                  <Text style={styles.saveBtnText}>{editingId ? (t.common.saveChanges || t.common.save) : t.common.save}</Text>
                 )}
               </TouchableOpacity>
             </View>
           </View>
         </KeyboardAvoidingView>
-
-        {/* ERROR TOAST */}
-        {showErrorToast && (
-          <Animated.View style={[styles.errorToastContainer, { transform: [{ translateX: errorSlideAnim }] }]}>
-            <View style={styles.errorToastIconBg}>
-              <XCircle color="#FF4B4B" size={28} />
-            </View>
-            <View style={styles.toastTextContainer}>
-              <Text style={styles.errorToastTitle}>Ops, algo deu errado!</Text>
-              <Text style={styles.toastMessage}>{errorMessage}</Text>
-            </View>
-          </Animated.View>
-        )}
       </Modal>
 
       {/* COLOR PICKER MODAL */}
@@ -726,7 +743,7 @@ export function AgendaScreen() {
               <X color="rgba(255,255,255,0.6)" size={24} />
             </TouchableOpacity>
 
-            <Text style={styles.pickerTitle}>Escolha uma Cor</Text>
+            <Text style={styles.pickerTitle}>{t.agenda.chooseColor}</Text>
             
             <View style={{ height: 300, width: '100%', marginBottom: 24 }}>
               <ColorPicker
@@ -746,7 +763,7 @@ export function AgendaScreen() {
                 setIsColorPickerVisible(false);
               }}
             >
-              <Text style={styles.pickerSaveText}>Confirmar Cor</Text>
+              <Text style={styles.pickerSaveText}>{t.agenda.confirmColor}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -759,9 +776,9 @@ export function AgendaScreen() {
             <View style={styles.deleteModalIconBgRed}>
               <Trash2 color="#FF4B4B" size={32} />
             </View>
-            <Text style={styles.deleteModalTitleRed}>Excluir Agendamento</Text>
+            <Text style={styles.deleteModalTitleRed}>{t.agenda.deleteConfirmTitle}</Text>
             <Text style={styles.deleteModalMessage}>
-              Tem certeza que deseja remover este agendamento? Esta ação não poderá ser desfeita.
+              {t.agenda.deleteConfirmText}
             </Text>
             <View style={styles.deleteModalActions}>
               <Pressable 
@@ -769,7 +786,7 @@ export function AgendaScreen() {
                 onPress={() => setDeleteConfirmId(null)}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.deleteModalCancelText, pressed && { color: '#FFF' }]}>Cancelar</Text>
+                  <Text style={[styles.deleteModalCancelText, pressed && { color: '#FFF' }]}>{t.common.cancel}</Text>
                 )}
               </Pressable>
               
@@ -778,129 +795,116 @@ export function AgendaScreen() {
                 onPress={confirmDeletion}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.deleteModalConfirmTextRed, pressed && { color: '#FFF' }]}>Excluir</Text>
+                  <Text style={[styles.deleteModalConfirmTextRed, pressed && { color: '#FFF' }]}>{t.common.delete}</Text>
                 )}
               </Pressable>
             </View>
           </View>
         </View>
       </Modal>
+
+      {/* TOAST NOTIFICATIONS TEKO STYLE */}
+      {showSuccessToast && (
+        <Animated.View style={[styles.successToastContainer, { transform: [{ translateX: successSlideAnim }] }]}>
+          <View style={styles.successToastIconBg}>
+            <CheckCircle2 color={theme.colors.primary} size={28} />
+          </View>
+          <View style={styles.toastTextContainer}>
+            <Text style={styles.successToastTitle}>{t.common.success}</Text>
+            <Text style={styles.toastMessage}>{successMessage}</Text>
+          </View>
+        </Animated.View>
+      )}
+
+      {showErrorToast && (
+        <Animated.View style={[styles.errorToastContainer, { transform: [{ translateX: errorSlideAnim }] }]}>
+          <View style={styles.errorToastIconBg}>
+            <XCircle color="#FF4B4B" size={28} />
+          </View>
+          <View style={styles.toastTextContainer}>
+            <Text style={styles.errorToastTitle}>{t.common.error}</Text>
+            <Text style={styles.toastMessage}>{errorMessage}</Text>
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#084D48' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 24, paddingTop: 60, minHeight: 110 },
-  title: { fontSize: 32, fontWeight: 'bold', color: '#fff' },
-  iconBtn: { padding: 10, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 12 },
-  searchContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 12, paddingHorizontal: 16 },
-  searchInput: { flex: 1, color: '#fff', fontSize: 16, paddingVertical: 12, paddingRight: 8 },
-  toggleContainer: { flexDirection: 'row', marginHorizontal: 24, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 24, padding: 4, marginBottom: 24 },
-  toggleBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 20 },
-  toggleBtnActive: { backgroundColor: '#fff' },
-  toggleText: { color: 'rgba(255,255,255,0.7)', fontWeight: 'bold' },
-  toggleTextActive: { color: '#084D48' },
-  fab: { position: 'absolute', bottom: 24, right: 24, width: 64, height: 64, borderRadius: 32, backgroundColor: '#FFC857', alignItems: 'center', justifyContent: 'center', elevation: 8 },
+  container: { flex: 1, backgroundColor: theme.colors.bg },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56, paddingBottom: 16 },
+  headerTitleCol: { flex: 1 },
+  title: { fontSize: 28, fontWeight: '800', color: theme.colors.textDark, letterSpacing: -0.5 },
+  headerSubtitle: { fontSize: 13, color: theme.colors.textMuted, fontWeight: '600', marginTop: 2 },
+  iconBtn: { width: 44, height: 44, backgroundColor: theme.colors.tealSoft, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: `${theme.colors.primary}25` },
+  searchContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.cardBg, borderRadius: 16, borderWidth: 1, borderColor: theme.colors.cardBorder, paddingHorizontal: 14 },
+  searchInput: { flex: 1, color: theme.colors.textDark, fontSize: 15, paddingVertical: 10, paddingRight: 8 },
+  toggleCard: { paddingHorizontal: 20, marginBottom: 20 },
+  toggleContainer: { flexDirection: 'row', backgroundColor: theme.colors.cardBg, borderRadius: 20, borderWidth: 1, borderColor: theme.colors.cardBorder, padding: 4, ...theme.shadows.subtle },
+  toggleBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 16 },
+  toggleBtnActive: { backgroundColor: theme.colors.primary, ...theme.shadows.subtle },
+  toggleText: { color: theme.colors.textMuted, fontWeight: '700', fontSize: 14 },
+  toggleTextActive: { color: '#FFFFFF', fontWeight: '800' },
+  fab: { position: 'absolute', bottom: 130, right: 20, width: 58, height: 58, borderRadius: 29, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', ...theme.shadows.floating, zIndex: 10 },
   
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: '#084D48', borderTopLeftRadius: 24, borderTopRightRadius: 24, minHeight: '60%', padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
+  modalContent: { backgroundColor: theme.colors.cardBg, borderTopLeftRadius: theme.radii.xl, borderTopRightRadius: theme.radii.xl, minHeight: '60%', padding: 24, borderWidth: 1, borderColor: theme.colors.cardBorder },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalTitle: { fontSize: 20, fontWeight: '800', color: theme.colors.textDark },
   closeBtn: { padding: 4 },
   formContainer: { paddingBottom: 20 },
-  label: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginBottom: 8, fontWeight: '600' },
-  input: { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 12, padding: 16, marginBottom: 16, fontSize: 16, color: '#fff' },
+  label: { fontSize: 13, color: theme.colors.textDark, marginBottom: 6, fontWeight: '700' },
+  input: { backgroundColor: '#FFFFFF', borderRadius: theme.radii.md, borderWidth: 1, borderColor: theme.colors.cardBorder, padding: 14, marginBottom: 14, fontSize: 15, color: theme.colors.textDark },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
   halfInput: { width: '48%' },
-  modalFooter: { flexDirection: 'row', justifyContent: 'flex-end', paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', alignItems: 'center' },
-  saveBtn: { backgroundColor: '#FFC857', paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12, flex: 1, alignItems: 'center', marginLeft: 16 },
-  saveBtnText: { color: '#084D48', fontSize: 16, fontWeight: 'bold' },
-  deleteBtn: { padding: 14, backgroundColor: 'rgba(239, 68, 68, 0.2)', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  modalFooter: { flexDirection: 'row', justifyContent: 'flex-end', paddingTop: 16, borderTopWidth: 1, borderTopColor: theme.colors.cardBorder, alignItems: 'center' },
+  saveBtn: { backgroundColor: theme.colors.primary, paddingVertical: 14, paddingHorizontal: 24, borderRadius: theme.radii.md, flex: 1, alignItems: 'center', marginLeft: 12, ...theme.shadows.subtle },
+  saveBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  deleteBtn: { padding: 14, backgroundColor: 'rgba(224, 122, 95, 0.15)', borderRadius: theme.radii.md, alignItems: 'center', justifyContent: 'center' },
   
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { color: 'rgba(255,255,255,0.7)', marginTop: 16, fontSize: 16, fontWeight: '600' },
+  loadingText: { color: theme.colors.textMuted, marginTop: 14, fontSize: 14, fontWeight: '600' },
 
   // Toast Styles
-  errorToastContainer: { position: 'absolute', top: Platform.OS === 'ios' ? 40 : 20, right: 16, left: 16, backgroundColor: '#181c1c', borderLeftWidth: 6, borderLeftColor: '#FF4B4B', borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 16, flexDirection: 'row', alignItems: 'center', padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 15 }, shadowOpacity: 0.5, shadowRadius: 20, elevation: 20, zIndex: 9999 },
-  errorToastIconBg: { width: 50, height: 50, borderRadius: 25, backgroundColor: 'rgba(255, 75, 75, 0.15)', borderWidth: 1, borderColor: 'rgba(255, 75, 75, 0.4)', alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+  successToastContainer: { position: 'absolute', top: Platform.OS === 'ios' ? 50 : 30, right: 16, left: 16, backgroundColor: theme.colors.cardBg, borderLeftWidth: 6, borderLeftColor: theme.colors.primary, borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderColor: theme.colors.cardBorder, borderRadius: theme.radii.md, flexDirection: 'row', alignItems: 'center', padding: 16, ...theme.shadows.floating, zIndex: 99999 },
+  successToastIconBg: { width: 44, height: 44, borderRadius: 22, backgroundColor: `${theme.colors.primary}18`, borderWidth: 1, borderColor: `${theme.colors.primary}35`, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  successToastTitle: { color: theme.colors.primary, fontSize: 16, fontWeight: '800', marginBottom: 2 },
+
+  errorToastContainer: { position: 'absolute', top: Platform.OS === 'ios' ? 50 : 30, right: 16, left: 16, backgroundColor: theme.colors.cardBg, borderLeftWidth: 6, borderLeftColor: theme.colors.accentOrange, borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderColor: theme.colors.cardBorder, borderRadius: theme.radii.md, flexDirection: 'row', alignItems: 'center', padding: 16, ...theme.shadows.floating, zIndex: 99999 },
+  errorToastIconBg: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(224, 122, 95, 0.15)', borderWidth: 1, borderColor: 'rgba(224, 122, 95, 0.3)', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   toastTextContainer: { flex: 1 },
-  errorToastTitle: { color: '#FF4B4B', fontSize: 18, fontWeight: '900', marginBottom: 4 },
-  toastMessage: { color: 'rgba(255,255,255,0.9)', fontSize: 15, fontWeight: '500' },
+  errorToastTitle: { color: theme.colors.accentOrange, fontSize: 16, fontWeight: '800', marginBottom: 2 },
+  toastMessage: { color: theme.colors.textDark, fontSize: 13, fontWeight: '500' },
 
   // Color Picker
-  colorPickerContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 12, padding: 8, marginBottom: 16 },
-  colorPreview: { width: 40, height: 40, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', marginRight: 12 },
-  hexInput: { flex: 1, color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  recentColorsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  colorBubble: { width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: 'transparent' },
-  colorBubbleSelected: { borderColor: '#fff' },
+  colorPickerContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: theme.radii.md, borderWidth: 1, borderColor: theme.colors.cardBorder, padding: 8, marginBottom: 14 },
+  colorPreview: { width: 36, height: 36, borderRadius: 8, borderWidth: 1, borderColor: theme.colors.cardBorder, marginRight: 10 },
+  hexInput: { flex: 1, color: theme.colors.textDark, fontSize: 15, fontWeight: '700' },
+  recentColorsRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
+  colorBubble: { width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: 'transparent' },
+  colorBubbleSelected: { borderColor: theme.colors.primary },
 
   // Color Picker Modal
-  pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 24 },
-  pickerContent: { backgroundColor: '#084D48', borderRadius: 24, padding: 24, width: '100%', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', position: 'relative' },
-  pickerCloseBtn: { position: 'absolute', top: 20, left: 20, padding: 4, zIndex: 10 },
-  pickerTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 24, marginTop: 4 },
-  pickerSaveBtn: { backgroundColor: '#FFC857', paddingVertical: 14, paddingHorizontal: 32, borderRadius: 12, width: '100%', alignItems: 'center' },
-  pickerSaveText: { color: '#084D48', fontSize: 16, fontWeight: 'bold' },
+  pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  pickerContent: { backgroundColor: theme.colors.cardBg, borderRadius: theme.radii.lg, padding: 20, width: '100%', alignItems: 'center', borderWidth: 1, borderColor: theme.colors.cardBorder, position: 'relative' },
+  pickerCloseBtn: { position: 'absolute', top: 16, left: 16, padding: 4, zIndex: 10 },
+  pickerTitle: { fontSize: 18, fontWeight: '800', color: theme.colors.textDark, marginBottom: 20, marginTop: 4 },
+  pickerSaveBtn: { backgroundColor: theme.colors.primary, paddingVertical: 14, paddingHorizontal: 32, borderRadius: theme.radii.md, width: '100%', alignItems: 'center' },
+  pickerSaveText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
 
   // Delete Confirmation Modal
-  deleteModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', alignItems: 'center', justifyContent: 'center', padding: 24 },
-  deleteModalContainer: { width: '100%', backgroundColor: '#181c1c', borderRadius: 24, padding: 24, borderWidth: 1, alignItems: 'center' },
-  deleteModalContainerRed: { borderColor: 'rgba(255, 75, 75, 0.2)' },
-  deleteModalIconBgRed: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255, 75, 75, 0.1)', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255, 75, 75, 0.3)' },
-  deleteModalTitleRed: { color: '#FF4B4B', fontSize: 22, fontWeight: '900', marginBottom: 12 },
-  deleteModalMessage: { color: 'rgba(255,255,255,0.8)', fontSize: 16, textAlign: 'center', lineHeight: 24, marginBottom: 24 },
-  deleteModalActions: { flexDirection: 'row', gap: 12, width: '100%' },
-  deleteModalCancelButton: { flex: 1, height: 52, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  deleteModalCancelText: { color: 'rgba(255,255,255,0.7)', fontSize: 16, fontWeight: 'bold' },
-  deleteModalConfirmButtonRed: { flex: 1, height: 52, borderRadius: 12, backgroundColor: '#FF4B4B', alignItems: 'center', justifyContent: 'center' },
-  deleteModalConfirmTextRed: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
-
-  // Processing Overlay Styles
-  fullScreenProcessingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 99999,
-    elevation: 25,
-  },
-  processingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(8, 77, 72, 0.9)',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 9999,
-  },
-  processingCard: {
-    backgroundColor: '#181c1c',
-    paddingHorizontal: 28,
-    paddingVertical: 24,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 200, 87, 0.4)',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 10,
-  },
-  processingTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  processingSub: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: 12,
-    textAlign: 'center',
-  },
+  deleteModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  deleteModalContainer: { width: '100%', backgroundColor: theme.colors.cardBg, borderRadius: theme.radii.lg, padding: 24, borderWidth: 1, borderColor: theme.colors.cardBorder, alignItems: 'center', ...theme.shadows.floating },
+  deleteModalContainerRed: { borderColor: theme.colors.accentOrange },
+  deleteModalIconBgRed: { width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(224, 122, 95, 0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 14, borderWidth: 1, borderColor: 'rgba(224, 122, 95, 0.3)' },
+  deleteModalTitleRed: { color: theme.colors.accentOrange, fontSize: 20, fontWeight: '800', marginBottom: 8 },
+  deleteModalMessage: { color: theme.colors.textMuted, fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 20 },
+  deleteModalActions: { flexDirection: 'row', gap: 10, width: '100%' },
+  deleteModalCancelButton: { flex: 1, height: 48, borderRadius: theme.radii.md, backgroundColor: theme.colors.tealSoft, borderWidth: 1, borderColor: theme.colors.tealMint, alignItems: 'center', justifyContent: 'center' },
+  deleteModalCancelText: { color: theme.colors.textDark, fontSize: 15, fontWeight: '700' },
+  deleteModalConfirmButtonRed: { flex: 1, height: 48, borderRadius: theme.radii.md, backgroundColor: theme.colors.accentOrange, alignItems: 'center', justifyContent: 'center' },
+  deleteModalConfirmTextRed: { color: '#FFF', fontSize: 15, fontWeight: '700' },
 });
 

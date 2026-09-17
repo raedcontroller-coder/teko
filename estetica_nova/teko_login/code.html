@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Teko - Entrar</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            teko: {
+              bg: '#FAF7F2',
+              petroleum: '#00534C',
+              darkGreen: '#035951',
+              labelGreen: '#0C5A52',
+              purple: '#7B42BC',
+              lightPurpleBg: '#F3ECFC',
+              purpleIconBg: '#E8DCFA',
+              border: '#E2E6E7',
+              muted: '#627271'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom CSS for specialized visuals -->
+<style data-purpose="base-styles">
+    body {
+      background-color: #FAF7F2;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    input::placeholder {
+      color: #90A1A0;
+      font-weight: 400;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#FAF7F2] text-slate-800 flex justify-center selection:bg-teal-100 selection:text-teal-900">
+<!-- Mobile Viewport Wrapper -->
+<main class="w-full max-w-[430px] min-h-screen flex flex-col justify-between px-6 pt-3 pb-8 relative shadow-sm" data-purpose="screen-container">
+<!-- BEGIN: StatusBar -->
+<header class="w-full flex justify-between items-center text-xs font-semibold tracking-tight text-slate-800 mb-6 px-1 select-none" data-purpose="mobile-status-bar">
+<!-- Current Time & Notification Badges -->
+<div class="flex items-center gap-1.5 font-bold text-sm">
+<span>06:09</span>
+<svg class="w-3.5 h-3.5 fill-current opacity-85 ml-0.5" viewbox="0 0 24 24">
+<path d="M12 2C6.48 2 2 6.48 2 12C2 13.85 2.5 15.58 3.39 17.06L2 22L7.09 20.66C8.54 21.5 10.21 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z"></path>
+</svg>
+<span class="text-xs opacity-75 font-normal">@</span>
+<span class="w-1.5 h-1.5 rounded-full bg-slate-700 inline-block"></span>
+</div>
+<!-- System Status Indicators -->
+<div class="flex items-center gap-2">
+<svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 7v5l3 2"></path>
+</svg>
+<svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewbox="0 0 24 24">
+<path d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10s10-4.48 10-10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8.01 8.01 0 0 1-8 8zm-5-8a5 5 0 0 1 10 0H7z"></path>
+</svg>
+<span class="text-[9px] font-bold border border-current rounded px-0.5 leading-tight">VoLTE</span>
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+<path d="M12 3L2 21h20L12 3zm0 5l6.5 11h-13L12 8z"></path>
+</svg>
+<div class="w-5 h-2.5 border border-slate-700 rounded-[2px] p-[1px] flex items-center">
+<div class="h-full w-full bg-slate-700 rounded-[1px]"></div>
+</div>
+</div>
+</header>
+<!-- END: StatusBar -->
+<div class="flex-1 flex flex-col justify-start">
+<!-- BEGIN: BrandHeader -->
+<section class="flex flex-col items-center text-center mt-2 mb-8" data-purpose="brand-presentation">
+<!-- Logo Icon & Typography Container -->
+<div class="flex items-center justify-center gap-3 mb-5 scale-105" data-purpose="logo">
+<!-- Bee Illustration -->
+<svg class="w-16 h-16" fill="none" viewbox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+<!-- Antennae -->
+<path d="M36 28C33 21 27 19 23 20" stroke="#00534C" stroke-linecap="round" stroke-width="3"></path>
+<path d="M42 27C44 20 48 18 52 19" stroke="#00534C" stroke-linecap="round" stroke-width="3"></path>
+<!-- Wings with delicate inner details -->
+<path d="M51 27C67 22 75 32 64 45C56 54 44 48 44 40C44 32 46 29 51 27Z" fill="#00534C" fill-opacity="0.85"></path>
+<path d="M56 31C64 36 62 44 54 44" stroke="#FAF7F2" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Head -->
+<circle cx="37" cy="34" fill="#00534C" r="8.5"></circle>
+<!-- Bee Abdomen Segments -->
+<path d="M37 45C45 45 52 53 49 63C47 71 37 77 34 78C32 75 30 68 30 60C30 51 33 45 37 45Z" fill="#00534C"></path>
+<!-- Abdomen Striped Detailing -->
+<path d="M33 52C38 52 44 54 46 59" stroke="#FAF7F2" stroke-linecap="round" stroke-width="3"></path>
+<path d="M32 61C36 61 41 63 43 68" stroke="#FAF7F2" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+<!-- Teko Typographic Wordmark -->
+<span class="text-[52px] font-extrabold tracking-tight text-[#00534C] flex items-center leading-none">
+            Tek<span class="relative inline-flex items-center justify-center">
+              o
+              <span class="absolute w-2.5 h-2.5 rounded-full bg-[#8A3FFC] top-[48%] left-[49%] -translate-x-1/2 -translate-y-1/2"></span>
+</span>
+</span>
+</div>
+<!-- Greeting & Subtitle -->
+<h1 class="text-2xl sm:text-[27px] font-bold text-[#00534C] tracking-tight mb-2">
+          Bem-vindo(a) de volta!
+        </h1>
+<p class="text-sm font-medium text-[#657675] tracking-tight">
+          Acesse sua jornada terapêutica digital.
+        </p>
+</section>
+<!-- END: BrandHeader -->
+<!-- BEGIN: LoginForm -->
+<form class="flex flex-col gap-4 w-full" data-purpose="login-form" onsubmit="event.preventDefault();">
+<!-- Email Input Field -->
+<div class="flex flex-col gap-1.5" data-purpose="input-group-email">
+<label class="text-sm font-semibold text-[#00534C] tracking-tight ml-0.5" for="email">
+            E-mail
+          </label>
+<div class="relative flex items-center">
+<!-- Mail Icon -->
+<div class="absolute left-4.5 pointer-events-none text-[#00534C] flex items-center">
+<svg class="w-5 h-5 stroke-[1.8] stroke-current fill-none" viewbox="0 0 24 24">
+<rect height="15" rx="2.5" width="19" x="2.5" y="4.5"></rect>
+<path d="M3.5 6.5L12 13.5L20.5 6.5"></path>
+</svg>
+</div>
+<input class="w-full h-13 pl-13 pr-4 py-3.5 bg-white border border-[#D8E1E0] rounded-xl text-slate-800 text-sm font-medium focus:ring-2 focus:ring-[#00534C] focus:border-[#00534C] outline-none transition-shadow shadow-xs placeholder-[#9AA9A8]" id="email" placeholder="Digite seu e-mail" required="" type="email"/>
+</div>
+</div>
+<!-- Password Input Field -->
+<div class="flex flex-col gap-1.5" data-purpose="input-group-password">
+<label class="text-sm font-semibold text-[#00534C] tracking-tight ml-0.5" for="password">
+            Senha
+          </label>
+<div class="relative flex items-center">
+<!-- Lock Icon -->
+<div class="absolute left-4.5 pointer-events-none text-[#00534C] flex items-center">
+<svg class="w-5 h-5 stroke-[1.8] stroke-current fill-none" viewbox="0 0 24 24">
+<rect height="11" rx="2.5" width="16" x="4" y="10"></rect>
+<path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+</svg>
+</div>
+<input class="w-full h-13 pl-13 pr-12 py-3.5 bg-white border border-[#D8E1E0] rounded-xl text-slate-800 text-sm font-medium focus:ring-2 focus:ring-[#00534C] focus:border-[#00534C] outline-none transition-shadow shadow-xs placeholder-[#9AA9A8]" id="password" placeholder="Digite sua senha" required="" type="password"/>
+<!-- Toggle Visibility Eye Icon Button -->
+<button aria-label="Revelar senha" class="absolute right-4 text-[#00534C] hover:opacity-80 transition-opacity focus:outline-none p-1" data-purpose="password-toggle-button" id="togglePassword" type="button">
+<svg class="w-5 h-5 stroke-[1.8] stroke-current fill-none" viewbox="0 0 24 24">
+<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+<circle cx="12" cy="12" r="3.2"></circle>
+</svg>
+</button>
+</div>
+</div>
+<!-- Forgot Password Link -->
+<div class="flex justify-end -mt-0.5 mb-1" data-purpose="forgot-password">
+<a class="text-xs font-semibold text-[#7635C7] underline decoration-dashed decoration-1 underline-offset-4 hover:opacity-80 transition-opacity" href="#">
+            Esqueci minha senha
+          </a>
+</div>
+<!-- Primary Submit Button -->
+<button class="w-full h-13 bg-[#00534C] hover:bg-[#02443E] active:scale-[0.99] text-white rounded-xl font-bold text-base flex items-center justify-center gap-2.5 transition-all shadow-sm shadow-teal-900/10 mt-1 cursor-pointer" data-purpose="submit-login-button" type="submit">
+<span>Entrar</span>
+<!-- Arrow Right Icon -->
+<svg class="w-5 h-5 stroke-[2.2] stroke-current fill-none" viewbox="0 0 24 24">
+<path d="M5 12h14M13 6l6 6-6 6"></path>
+</svg>
+</button>
+<!-- Divider with 'ou' -->
+<div class="relative flex items-center justify-center my-2.5" data-purpose="divider">
+<div class="w-full border-t border-[#DDE4E3]"></div>
+<span class="absolute px-3 bg-[#FAF7F2] text-xs font-semibold text-[#728584] uppercase tracking-wider">
+            ou
+          </span>
+</div>
+<!-- Google Social Login Button -->
+<button class="w-full h-13 bg-white hover:bg-slate-50 border border-[#D5DFDE] rounded-xl flex items-center justify-center gap-3 text-slate-700 font-semibold text-sm transition-all shadow-xs active:scale-[0.99] cursor-pointer" data-purpose="google-login-button" type="button">
+<!-- Google 'G' Logo -->
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z" fill="#4285F4"></path>
+<path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.34 24 12 24z" fill="#34A853"></path>
+<path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.99 0 12s.46 3.84 1.26 5.42l4.02-3.15z" fill="#FBBC05"></path>
+<path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z" fill="#EA4335"></path>
+</svg>
+<span class="tracking-tight text-slate-700">Entrar como Google</span>
+</button>
+</form>
+<!-- END: LoginForm -->
+</div>
+<!-- BEGIN: BottomRegistrationCard -->
+<footer class="mt-8" data-purpose="registration-prompt">
+<a class="w-full bg-[#F3ECFC] hover:bg-[#EEE4FB] border border-[#E8DCFA] rounded-2xl p-4 flex items-center justify-between transition-all group" href="#">
+<!-- Text Invitation -->
+<div class="flex flex-col text-left">
+<span class="text-xs font-medium text-slate-600 mb-1">
+            Ainda não tem uma conta?
+          </span>
+<span class="text-sm font-bold text-[#6D28D9] flex items-center gap-1.5 group-hover:translate-x-0.5 transition-transform">
+            Criar uma conta
+            <svg class="w-4 h-4 stroke-[2.2] stroke-current fill-none" viewbox="0 0 24 24">
+<path d="M5 12h14M13 6l6 6-6 6"></path>
+</svg>
+</span>
+</div>
+<!-- Profile Add Avatar Icon -->
+<div class="w-13 h-13 rounded-full bg-[#E5D5F9] flex items-center justify-center text-[#6D28D9] shrink-0" data-purpose="user-avatar-badge">
+<svg class="w-6 h-6 stroke-[1.8] stroke-current fill-none" viewbox="0 0 24 24">
+<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+<circle cx="9" cy="7" r="4"></circle>
+<line x1="19" x2="19" y1="8" y2="14"></line>
+<line x1="22" x2="16" y1="11" y2="11"></line>
+</svg>
+</div>
+</a>
+</footer>
+<!-- END: BottomRegistrationCard -->
+</main>
+<!-- Interactive script to toggle password visibility -->
+<script data-purpose="toggle-password-script">
+    const toggleButton = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    if (toggleButton && passwordInput) {
+      toggleButton.addEventListener('click', () => {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        toggleButton.style.opacity = isPassword ? '0.65' : '1';
+      });
+    }
+  </script>
+</body></html>

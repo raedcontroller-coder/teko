@@ -17,9 +17,11 @@ import {
 } from 'react-native';
 import { ArrowLeft, Baby, User, Shield, Target, Camera, Bomb, Save, Trash2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react-native';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
 import { AnamneseTab } from './patient-tabs/AnamneseTab';
 import { NotasTab } from './patient-tabs/NotasTab';
 import { EvolucaoTab } from './patient-tabs/EvolucaoTab';
+import { useTranslation } from '../../i18n';
 
 interface PatientProfileScreenProps {
   patientId: string;
@@ -29,6 +31,7 @@ interface PatientProfileScreenProps {
 }
 
 export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ patientId, onBack, onDeleteSuccess, adminPsicologoId }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [savingPatient, setSavingPatient] = useState(false);
   const [savingGuardian, setSavingGuardian] = useState(false);
@@ -63,7 +66,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
     setSuccessMessage(msg);
     setShowSuccessToast(true);
     Animated.timing(slideAnim, {
-      toValue: Platform.OS === 'ios' ? 70 : 50,
+      toValue: Platform.OS === 'ios' ? 12 : 8,
       duration: 300,
       useNativeDriver: true,
       easing: Easing.out(Easing.ease),
@@ -82,7 +85,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
     setErrorMessage(msg);
     setShowErrorToast(true);
     Animated.timing(errorSlideAnim, {
-      toValue: Platform.OS === 'ios' ? 70 : 50,
+      toValue: Platform.OS === 'ios' ? 12 : 8,
       duration: 300,
       useNativeDriver: true,
       easing: Easing.out(Easing.ease),
@@ -236,7 +239,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#FFC857" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -249,24 +252,30 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
       {/* Header Fixo */}
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <ArrowLeft color="#FFF" size={24} />
+          <ArrowLeft color={theme.colors.textDark} size={22} />
         </TouchableOpacity>
-        <Text style={styles.topBarTitle}>Perfil do Paciente</Text>
+        <Text style={styles.topBarTitle}>{t.patientProfile.title}</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <View style={styles.topTabsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.topTabsScroll}>
-          {['Dados', 'Anamnese', 'Notas', 'Evolução'].map((tab) => (
+        <View style={styles.topTabsWrapper}>
+          {([
+            { key: 'Dados', label: t.patientProfile.infoTab },
+            { key: 'Anamnese', label: t.patientProfile.anamneseTab },
+            { key: 'Notas', label: t.patientProfile.notasTab },
+            { key: 'Evolução', label: t.patientProfile.evolucaoTab },
+          ] as const).map((tabItem) => (
             <TouchableOpacity 
-              key={tab} 
-              style={[styles.topTabBtn, activeTab === tab && styles.topTabBtnActive]}
-              onPress={() => setActiveTab(tab as any)}
+              key={tabItem.key} 
+              style={[styles.topTabBtn, activeTab === tabItem.key && styles.topTabBtnActive]}
+              onPress={() => setActiveTab(tabItem.key)}
+              activeOpacity={0.75}
             >
-              <Text style={[styles.topTabText, activeTab === tab && styles.topTabTextActive]}>{tab}</Text>
+              <Text style={[styles.topTabText, activeTab === tabItem.key && styles.topTabTextActive]}>{tabItem.label}</Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
       </View>
 
       {activeTab === 'Dados' && (
@@ -275,7 +284,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
         {/* Seção Criança (Amarelo) */}
         <View style={styles.card}>
           <View style={styles.cardBgIcon}>
-            <Baby color="rgba(255, 255, 255, 0.05)" size={120} />
+            <Baby color={theme.colors.primary} size={110} />
           </View>
           
           <View style={styles.cardHeader}>
@@ -283,13 +292,13 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
               <User color="#FFC857" size={32} />
             </View>
             <View style={styles.headerTexts}>
-              <Text style={styles.sectionTitle}>Ficha do Paciente</Text>
-              <Text style={styles.sectionSubtitle}>Informações básicas do paciente.</Text>
+              <Text style={styles.sectionTitle}>{t.patientProfile.childCardTitle}</Text>
+              <Text style={styles.sectionSubtitle}>{t.patientProfile.childCardSubtitle}</Text>
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Nome do Paciente</Text>
+            <Text style={styles.labelYellow}>{t.patients.nameLabel}</Text>
             <TextInput
               style={styles.input}
               placeholder="Ex: João"
@@ -300,7 +309,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Idade</Text>
+            <Text style={styles.labelYellow}>{t.newPatient.ageLabel}</Text>
             <TextInput
               style={styles.input}
               placeholder="Ex: 7"
@@ -312,17 +321,21 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Gênero</Text>
+            <Text style={styles.labelYellow}>{t.patientProfile.genderLabel}</Text>
             <View style={styles.pillsContainer}>
-              {['Masculino', 'Feminino', 'Prefiro não dizer'].map((gen) => {
-                const isSelected = formData.gender === gen;
+              {[
+                { key: 'Masculino', label: t.newPatient.genderMale },
+                { key: 'Feminino', label: t.newPatient.genderFemale },
+                { key: 'Prefiro não dizer', label: t.newPatient.genderOther }
+              ].map((genItem) => {
+                const isSelected = formData.gender === genItem.key;
                 return (
                   <TouchableOpacity
-                    key={gen}
+                    key={genItem.key}
                     style={[styles.pill, isSelected && styles.pillSelected]}
-                    onPress={() => setFormData(prev => ({ ...prev, gender: gen }))}
+                    onPress={() => setFormData(prev => ({ ...prev, gender: genItem.key }))}
                   >
-                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]} numberOfLines={1} adjustsFontSizeToFit>{gen}</Text>
+                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]} numberOfLines={1} adjustsFontSizeToFit>{genItem.label}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -330,7 +343,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelYellow}>Paciente possui diagnóstico de TDAH?</Text>
+            <Text style={styles.labelYellow}>{t.newPatient.tdahQuestion}</Text>
             <View style={styles.pillsContainer}>
               {[true, false].map((val) => {
                 const isSelected = formData.hasTdah === val;
@@ -340,7 +353,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                     style={[styles.pill, isSelected && styles.pillSelected]}
                     onPress={() => setFormData(prev => ({ ...prev, hasTdah: val }))}
                   >
-                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]}>{val ? 'Sim' : 'Não'}</Text>
+                    <Text style={[styles.pillText, isSelected && styles.pillTextSelected]}>{val ? t.common.yes : t.common.no}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -354,7 +367,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
               onPress={handleDeletePatient}
             >
               <Trash2 color="#F87171" size={20} />
-              <Text style={styles.deleteButtonText}>Excluir</Text>
+              <Text style={styles.deleteButtonText}>{t.patientProfile.deleteBtn || t.common.delete}</Text>
             </TouchableOpacity>
 
             <Pressable 
@@ -368,7 +381,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
               {({ pressed }) => savingPatient ? <ActivityIndicator color="#181c1c" /> : (
                 <>
                   <Save color={pressed ? "#FFF" : "#181c1c"} size={20} />
-                  <Text style={[styles.saveButtonTextYellow, pressed && { color: '#FFF' }]}>Salvar Paciente</Text>
+                  <Text style={[styles.saveButtonTextYellow, pressed && { color: '#FFF' }]}>{t.patientProfile.savePatientBtn}</Text>
                 </>
               )}
             </Pressable>
@@ -378,9 +391,9 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
         {/* Avaliações Clínicas (Carrossel Horizontal) */}
         <View style={styles.carouselSection}>
           <View style={styles.carouselHeader}>
-            <Text style={styles.carouselTitle}>Avaliações Clínicas</Text>
+            <Text style={styles.carouselTitle}>{t.patientProfile.clinicalEvaluations}</Text>
             <View style={styles.carouselBadge}>
-              <Text style={styles.carouselBadgeText}>3 Atividades</Text>
+              <Text style={styles.carouselBadgeText}>{t('patientProfile.activitiesCount', { count: 3 })}</Text>
             </View>
           </View>
 
@@ -399,11 +412,11 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                   <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(123,97,255,0.1)' }]}>
                     <Target color="#7B61FF" size={32} />
                   </View>
-                  <Text style={styles.gameTitle}>Toca Rápido!</Text>
-                  <Text style={styles.gameDesc}>Controle inibitório e impulsividade.</Text>
+                  <Text style={styles.gameTitle}>{t.games.goNoGo}</Text>
+                  <Text style={styles.gameDesc}>{t.games.goNoGoDesc}</Text>
                   <View style={[styles.gameBadge, played && { backgroundColor: 'rgba(52,211,153,0.2)', borderColor: 'rgba(52,211,153,0.3)' }]}>
                     <Text style={[styles.gameBadgeText, played && { color: '#34D399' }]}>
-                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                      {played ? (score || t.patientProfile.completed) : t.patientProfile.notPlayedYet}
                     </Text>
                   </View>
                 </View>
@@ -420,11 +433,11 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                   <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(230,168,0,0.1)' }]}>
                     <Camera color="#FFC857" size={32} />
                   </View>
-                  <Text style={styles.gameTitle}>Fotógrafo da Floresta</Text>
-                  <Text style={styles.gameDesc}>Atenção e velocidade motora.</Text>
+                  <Text style={styles.gameTitle}>{t.games.puzzle}</Text>
+                  <Text style={styles.gameDesc}>{t.games.puzzleDesc}</Text>
                   <View style={[styles.gameBadge, played && { backgroundColor: 'rgba(52,211,153,0.2)', borderColor: 'rgba(52,211,153,0.3)' }]}>
                     <Text style={[styles.gameBadgeText, played && { color: '#34D399' }]}>
-                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                      {played ? (score || t.patientProfile.completed) : t.patientProfile.notPlayedYet}
                     </Text>
                   </View>
                 </View>
@@ -441,11 +454,11 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                   <View style={[styles.gameIconWrapper, { backgroundColor: 'rgba(96,165,250,0.1)' }]}>
                     <Shield color="#60A5FA" size={32} />
                   </View>
-                  <Text style={styles.gameTitle}>Jogo do Goleiro</Text>
-                  <Text style={styles.gameDesc}>Tempo de Reação Visual (VTR).</Text>
+                  <Text style={styles.gameTitle}>{t.games.goleiro}</Text>
+                  <Text style={styles.gameDesc}>{t.games.goleiroDesc}</Text>
                   <View style={[styles.gameBadge, played && { backgroundColor: 'rgba(52,211,153,0.2)', borderColor: 'rgba(52,211,153,0.3)' }]}>
                     <Text style={[styles.gameBadgeText, played && { color: '#34D399' }]}>
-                      {played ? (score || 'Concluído') : 'Ainda não jogou'}
+                      {played ? (score || t.patientProfile.completed) : t.patientProfile.notPlayedYet}
                     </Text>
                   </View>
                 </View>
@@ -457,7 +470,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
         {/* Seção Responsável (Roxo) */}
         <View style={[styles.card, styles.cardPurple]}>
           <View style={styles.cardBgIcon}>
-            <Shield color="rgba(255, 255, 255, 0.05)" size={120} />
+            <Shield color={theme.colors.badgePurpleText} size={110} />
           </View>
           
           <View style={styles.cardHeader}>
@@ -465,13 +478,13 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
               <Shield color="#7B61FF" size={32} />
             </View>
             <View style={styles.headerTexts}>
-              <Text style={styles.sectionTitle}>Ficha do Responsável</Text>
-              <Text style={styles.sectionSubtitle}>Contato para vínculo do app.</Text>
+              <Text style={styles.sectionTitle}>{t.patientProfile.guardianCardTitle}</Text>
+              <Text style={styles.sectionSubtitle}>{t.patientProfile.guardianCardSubtitle}</Text>
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Nome do Responsável</Text>
+            <Text style={styles.labelPurple}>{t.newPatient.guardianNameLabel}</Text>
             <TextInput
               style={styles.input}
               placeholder="Ex: Maria Silva"
@@ -482,7 +495,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Email</Text>
+            <Text style={styles.labelPurple}>{t.newPatient.emailLabel}</Text>
             <TextInput
               style={styles.input}
               placeholder="maria@email.com"
@@ -495,7 +508,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.labelPurple}>Telefone (WhatsApp)</Text>
+            <Text style={styles.labelPurple}>{t.newPatient.phoneLabel}</Text>
             <TextInput
               style={styles.input}
               placeholder="(11) 99999-9999"
@@ -509,7 +522,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
           <Pressable 
             style={({ pressed }) => [
               styles.saveButtonPurple,
-              pressed && { backgroundColor: '#FFC857' } // Inverte pra amarelo ao pressionar o botão roxo
+              pressed && { backgroundColor: '#FFC857' }
             ]} 
             onPress={handleSaveGuardian}
             disabled={savingGuardian}
@@ -517,7 +530,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             {({ pressed }) => savingGuardian ? <ActivityIndicator color="#FFF" /> : (
               <>
                 <Save color={pressed ? "#181c1c" : "#FFF"} size={20} />
-                <Text style={[styles.saveButtonTextPurple, pressed && { color: '#181c1c' }]}>Salvar Responsável</Text>
+                <Text style={[styles.saveButtonTextPurple, pressed && { color: '#181c1c' }]}>{t.patientProfile.saveGuardianBtn}</Text>
               </>
             )}
           </Pressable>
@@ -541,9 +554,9 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             <View style={styles.modalIconBg}>
               <AlertTriangle color="#FFC857" size={32} />
             </View>
-            <Text style={styles.modalTitle}>Atenção!</Text>
+            <Text style={styles.modalTitle}>{t.patientProfile.confirmGuardianEditTitle}</Text>
             <Text style={styles.modalMessage}>
-              Você está alterando as informações do responsável. Essa modificação se aplicará automaticamente a <Text style={{fontWeight: 'bold', color: '#FFF'}}>todos os pacientes</Text> vinculados a ele. Deseja prosseguir?
+              {t.patientProfile.confirmGuardianEditMessage}
             </Text>
             
             <View style={styles.modalActions}>
@@ -552,7 +565,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                 onPress={() => setShowGuardianConfirmModal(false)}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.modalCancelText, pressed && { color: '#FFF' }]}>Cancelar</Text>
+                  <Text style={[styles.modalCancelText, pressed && { color: '#FFF' }]}>{t.common.cancel}</Text>
                 )}
               </Pressable>
               
@@ -561,7 +574,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                 onPress={confirmSaveGuardian}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.modalConfirmText, pressed && { color: '#FFF' }]}>Confirmar Edição</Text>
+                  <Text style={[styles.modalConfirmText, pressed && { color: '#FFF' }]}>{t.patientProfile.confirmGuardianEditBtn}</Text>
                 )}
               </Pressable>
             </View>
@@ -580,9 +593,9 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             <View style={styles.modalIconBgRed}>
               <Trash2 color="#FF4B4B" size={32} />
             </View>
-            <Text style={styles.modalTitleRed}>Excluir Paciente</Text>
+            <Text style={styles.modalTitleRed}>{t.patientProfile.confirmDeletePatientTitle}</Text>
             <Text style={styles.modalMessage}>
-              Tem certeza que deseja excluir o paciente <Text style={{fontWeight: 'bold', color: '#FFF'}}>{formData.name}</Text>? Esta ação apagará todo o histórico de jogos e relatórios permanentemente.
+              {t('patientProfile.confirmDeletePatientMessage', { name: formData.name })}
             </Text>
             
             <View style={styles.modalActions}>
@@ -592,7 +605,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                 disabled={deletingPatient}
               >
                 {({ pressed }) => (
-                  <Text style={[styles.modalCancelText, pressed && { color: '#FFF' }]}>Cancelar</Text>
+                  <Text style={[styles.modalCancelText, pressed && { color: '#FFF' }]}>{t.common.cancel}</Text>
                 )}
               </Pressable>
               
@@ -602,7 +615,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                 disabled={deletingPatient}
               >
                 {({ pressed }) => deletingPatient ? <ActivityIndicator color="#FFF" /> : (
-                  <Text style={[styles.modalConfirmTextRed, pressed && { color: '#FFF' }]}>Excluir</Text>
+                  <Text style={[styles.modalConfirmTextRed, pressed && { color: '#FFF' }]}>{t.common.delete}</Text>
                 )}
               </Pressable>
             </View>
@@ -645,109 +658,114 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#064b46',
+    backgroundColor: theme.colors.bg,
   },
   container: {
     flex: 1,
-    backgroundColor: '#064b46',
+    backgroundColor: theme.colors.bg,
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   backButton: {
-    padding: 8,
-    marginLeft: -8,
+    padding: 6,
+    marginLeft: -6,
+    backgroundColor: theme.colors.tealSoft,
+    borderRadius: theme.radii.md,
   },
   topBarTitle: {
-    color: '#FFF',
+    color: theme.colors.textDark,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   topTabsContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
-  topTabsScroll: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 16,
-    padding: 8,
-    gap: 12,
+  topTabsWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.full,
+    padding: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.subtle,
   },
   topTabBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 9,
+    borderRadius: theme.radii.full,
     backgroundColor: 'transparent',
   },
   topTabBtnActive: {
-    backgroundColor: '#FFC857',
-    shadowColor: '#FFC857',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: theme.colors.primary,
+    ...theme.shadows.subtle,
   },
   topTabText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
-    fontWeight: '600',
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
   },
   topTabTextActive: {
-    color: '#181c1c',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    gap: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 110,
+    gap: 16,
   },
   card: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.cardBorder,
     overflow: 'hidden',
+    position: 'relative',
+    ...theme.shadows.subtle,
   },
   cardPurple: {
-    borderColor: 'rgba(123,97,255,0.2)',
+    borderColor: theme.colors.cardBorder,
   },
   cardBgIcon: {
     position: 'absolute',
-    top: -20,
-    right: -20,
-    opacity: 0.8,
+    top: -10,
+    right: -10,
+    opacity: 0.12,
+    pointerEvents: 'none',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
-    gap: 16,
+    marginBottom: 16,
+    gap: 12,
   },
   iconCircleYellow: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderWidth: 2,
-    borderColor: '#FFC857',
+    width: 44,
+    height: 44,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.tealSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconCirclePurple: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,246,227,0.05)',
-    borderWidth: 2,
-    borderColor: '#7B61FF',
+    width: 44,
+    height: 44,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.purpleSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.badgePurple,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -755,39 +773,39 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    color: theme.colors.textDark,
+    fontSize: 17,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   sectionSubtitle: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 14,
+    color: theme.colors.textMuted,
+    fontSize: 12,
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 14,
   },
   labelYellow: {
-    color: '#FFC857',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: theme.colors.textDark,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 6,
   },
   labelPurple: {
-    color: '#7B61FF',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: theme.colors.textDark,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 6,
   },
   input: {
-    backgroundColor: 'rgba(255,246,227,0.05)',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 52,
-    color: '#FFF',
-    fontSize: 16,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
+    paddingHorizontal: 14,
+    height: 46,
+    color: theme.colors.textDark,
+    fontSize: 14,
   },
   pillsContainer: {
     flexDirection: 'row',
@@ -797,350 +815,348 @@ const styles = StyleSheet.create({
   },
   pill: {
     flex: 1,
-    backgroundColor: 'rgba(255,246,227,0.05)',
+    backgroundColor: theme.colors.tealSoft,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    height: 48,
-    borderRadius: 999,
+    borderColor: theme.colors.tealMint,
+    height: 42,
+    borderRadius: theme.radii.full,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
   },
   pillSelected: {
-    backgroundColor: '#FFC857',
-    borderColor: '#FFC857',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   pillText: {
-    color: 'rgba(255,255,255,0.6)',
+    color: theme.colors.textMuted,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   pillTextSelected: {
-    color: '#181c1c',
+    color: '#FFFFFF',
   },
   cardActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
-    gap: 16,
+    gap: 12,
   },
   deleteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(248,113,113,0.1)',
+    backgroundColor: 'rgba(224, 122, 95, 0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(248,113,113,0.3)',
-    height: 56,
+    borderColor: 'rgba(224, 122, 95, 0.3)',
+    height: 48,
     paddingHorizontal: 16,
-    borderRadius: 16,
-    gap: 8,
+    borderRadius: theme.radii.md,
+    gap: 6,
   },
   deleteButtonText: {
-    color: '#F87171',
-    fontWeight: 'bold',
+    color: theme.colors.accentOrange,
+    fontWeight: '700',
+    fontSize: 14,
   },
   saveButtonYellow: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#FFC857',
-    height: 56,
-    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    height: 48,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    ...theme.shadows.subtle,
   },
   saveButtonTextYellow: {
-    color: '#181c1c',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
   saveButtonPurple: {
     flexDirection: 'row',
-    backgroundColor: '#7B61FF',
-    height: 56,
-    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    height: 48,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 8,
+    marginTop: 6,
+    ...theme.shadows.subtle,
   },
   saveButtonTextPurple: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '700',
   },
 
   /* Carousel */
   carouselSection: {
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 6,
+    marginBottom: 6,
   },
   carouselHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   carouselTitle: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 18,
+    fontWeight: '800',
   },
   carouselBadge: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: theme.colors.tealSoft,
     borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    borderColor: theme.colors.tealMint,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: theme.radii.full,
   },
   carouselBadgeText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: theme.colors.primary,
+    fontSize: 11,
+    fontWeight: '700',
   },
   carouselContent: {
-    paddingRight: 24,
-    gap: 16,
+    paddingRight: 20,
+    gap: 12,
   },
   gameCard: {
-    width: 200,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 20,
-    padding: 20,
+    width: 190,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.subtle,
   },
   gameIconWrapper: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: theme.radii.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   gameTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: theme.colors.textDark,
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 4,
   },
   gameDesc: {
-    color: 'rgba(255,255,255,0.6)',
+    color: theme.colors.textMuted,
     fontSize: 12,
-    lineHeight: 18,
-    marginBottom: 16,
+    lineHeight: 16,
+    marginBottom: 12,
     flex: 1,
   },
   gameBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
+    backgroundColor: theme.colors.tealSoft,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: theme.radii.xs,
   },
   gameBadgeText: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 11,
-    fontWeight: 'bold',
+    color: theme.colors.primary,
+    fontSize: 10,
+    fontWeight: '700',
     textTransform: 'uppercase',
   },
 
   /* Toasts */
   toastContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 20 : 10,
+    top: Platform.OS === 'ios' ? 40 : 20,
     right: 16,
     left: 16,
-    backgroundColor: '#181c1c', 
+    backgroundColor: theme.colors.cardBg, 
     borderLeftWidth: 6,
-    borderLeftColor: '#FFC857',
+    borderLeftColor: theme.colors.primary,
     borderTopWidth: 1,
     borderRightWidth: 1,
     borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, 
+    padding: 16, 
+    ...theme.shadows.floating,
   },
   toastIconBg: {
-    width: 50, 
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,200,87,0.15)',
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.tealSoft,
     borderWidth: 1,
-    borderColor: 'rgba(255,200,87,0.4)',
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 12,
   },
   toastTitle: {
-    color: '#FFC857', 
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
+    color: theme.colors.primary, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   errorToastContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 20 : 10,
+    top: Platform.OS === 'ios' ? 40 : 20,
     right: 16,
     left: 16,
-    backgroundColor: '#181c1c', 
+    backgroundColor: theme.colors.cardBg, 
     borderLeftWidth: 6,
-    borderLeftColor: '#FF4B4B',
+    borderLeftColor: theme.colors.accentOrange,
     borderTopWidth: 1,
     borderRightWidth: 1,
     borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, 
+    padding: 16, 
+    ...theme.shadows.floating,
   },
   errorToastIconBg: {
-    width: 50, 
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 75, 75, 0.15)',
+    width: 44, 
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(224, 122, 95, 0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 75, 75, 0.4)',
+    borderColor: 'rgba(224, 122, 95, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 12,
   },
   toastTextContainer: {
     flex: 1,
   },
   errorToastTitle: {
-    color: '#FF4B4B', 
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
+    color: theme.colors.accentOrange, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   toastMessage: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 15,
+    color: theme.colors.textDark,
+    fontSize: 13,
     fontWeight: '500',
   },
 
   /* Modal de Confirmação */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: 20,
   },
   modalContainer: {
     width: '100%',
-    backgroundColor: '#181c1c',
-    borderRadius: 24,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
     padding: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,200,87,0.2)',
+    borderColor: theme.colors.cardBorder,
     alignItems: 'center',
+    ...theme.shadows.floating,
   },
   modalIconBg: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,200,87,0.1)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.tealSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255,200,87,0.3)',
+    borderColor: theme.colors.tealMint,
   },
   modalTitle: {
-    color: '#FFC857',
-    fontSize: 22,
-    fontWeight: '900',
-    marginBottom: 12,
+    color: theme.colors.textDark,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
   },
   modalMessage: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 16,
+    color: theme.colors.textMuted,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
+    lineHeight: 20,
+    marginBottom: 20,
   },
   modalActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     width: '100%',
   },
   modalCancelButton: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.tealSoft,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.tealMint,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCancelText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: theme.colors.textDark,
+    fontSize: 15,
+    fontWeight: '700',
   },
   modalConfirmButton: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#FFC857',
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalConfirmText: {
-    color: '#181c1c',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 
   /* Modal de Exclusão (Vermelho) */
   modalContainerRed: {
-    borderColor: 'rgba(255, 75, 75, 0.2)',
+    borderColor: theme.colors.accentOrange,
   },
   modalIconBgRed: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255, 75, 75, 0.1)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(224, 122, 95, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 75, 75, 0.3)',
+    borderColor: 'rgba(224, 122, 95, 0.3)',
   },
   modalTitleRed: {
-    color: '#FF4B4B',
-    fontSize: 22,
-    fontWeight: '900',
-    marginBottom: 12,
+    color: theme.colors.accentOrange,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
   },
   modalConfirmButtonRed: {
     flex: 1,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#FF4B4B',
+    height: 48,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.accentOrange,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalConfirmTextRed: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
   }
 });

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { theme } from '../../theme/theme';
 
 interface Appointment {
   id: string | number;
@@ -27,7 +28,10 @@ interface MonthlyViewProps {
   onDayPress: (date: string) => void;
 }
 
+import { useTranslation } from '../../i18n';
+
 export function MonthlyView({ currentDate, appointments, holidays = [], onDayPress }: MonthlyViewProps) {
+  const { t, language } = useTranslation();
   const [viewDate, setViewDate] = useState(new Date((currentDate || new Date().toISOString().split('T')[0]) + 'T00:00:00'));
 
   // Sincroniza caso o pai mude o currentDate drasticamente
@@ -70,27 +74,31 @@ export function MonthlyView({ currentDate, appointments, holidays = [], onDayPre
   };
 
   const days = generateMonthDays();
-  const monthName = viewDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const locale = language === 'en' ? 'en-US' : 'pt-BR';
+  const monthName = viewDate.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+  const weekdaysList = t.agenda.shortWeekdays || ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
   return (
     <View style={styles.container}>
       
       {/* HEADER DE NAVEGAÇÃO */}
-      <View style={styles.navHeader}>
-        <TouchableOpacity onPress={handlePrevMonth} style={styles.navBtn} activeOpacity={0.7}>
-          <ChevronLeft color="#FFC857" size={24} />
+      <View style={styles.navHeaderCard}>
+        <TouchableOpacity onPress={handlePrevMonth} style={styles.navBtn} activeOpacity={0.75}>
+          <ChevronLeft color={theme.colors.primary} size={22} strokeWidth={2.4} />
         </TouchableOpacity>
         
-        <Text style={styles.sectionTitle}>{monthName}</Text>
+        <View style={styles.monthTitleWrapper}>
+          <Text style={styles.sectionTitle}>{monthName}</Text>
+        </View>
         
-        <TouchableOpacity onPress={handleNextMonth} style={styles.navBtn} activeOpacity={0.7}>
-          <ChevronRight color="#FFC857" size={24} />
+        <TouchableOpacity onPress={handleNextMonth} style={styles.navBtn} activeOpacity={0.75}>
+          <ChevronRight color={theme.colors.primary} size={22} strokeWidth={2.4} />
         </TouchableOpacity>
       </View>
       
       <View style={styles.card}>
         <View style={styles.weekLabelsRow}>
-          {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((label, i) => {
+          {weekdaysList.map((label: string, i: number) => {
             const isWeekendLabel = i === 0 || i === 6;
             return (
               <Text key={i} style={[styles.weekLabel, isWeekendLabel && styles.weekendLabel]}>{label}</Text>
@@ -143,30 +151,66 @@ export function MonthlyView({ currentDate, appointments, holidays = [], onDayPre
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 24 },
-  navHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  navBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 12 },
-  sectionTitle: { color: 'rgba(255,255,255,0.9)', fontSize: 18, fontWeight: 'bold', textTransform: 'capitalize' },
-  card: { 
-    backgroundColor: 'rgba(13, 118, 110, 0.4)', // glass-panel
-    borderRadius: 24, 
-    padding: 16, 
-    borderWidth: 1, 
-    borderColor: 'rgba(255,255,255,0.1)',
+  container: { flex: 1, paddingHorizontal: 20 },
+  navHeaderCard: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 16,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.subtle,
   },
-  weekLabelsRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 16 },
-  weekLabel: { color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: 'bold', width: 32, textAlign: 'center' },
-  weekendLabel: { color: 'rgba(255, 200, 87, 0.6)' }, 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 16 },
+  monthTitleWrapper: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: `${theme.colors.primary}12`,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: `${theme.colors.primary}25`,
+  },
+  navBtn: { 
+    width: 40, 
+    height: 40, 
+    backgroundColor: theme.colors.tealSoft, 
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: `${theme.colors.primary}20`
+  },
+  sectionTitle: { 
+    color: theme.colors.textDark, 
+    fontSize: 17, 
+    fontWeight: '800', 
+    textTransform: 'capitalize',
+    letterSpacing: -0.2
+  },
+  card: { 
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: 24, 
+    padding: 18, 
+    borderWidth: 1, 
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.subtle,
+  },
+  weekLabelsRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 16, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: `${theme.colors.cardBorder}80` },
+  weekLabel: { color: theme.colors.textDark, fontSize: 11, fontWeight: '800', width: 36, textAlign: 'center', letterSpacing: 0.3 },
+  weekendLabel: { color: theme.colors.textMuted }, 
+  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 10 },
   cellContainer: { width: '14.28%', alignItems: 'center', justifyContent: 'center' },
-  cell: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
-  cellWeekend: { backgroundColor: 'rgba(255, 200, 87, 0.15)' }, 
-  cellToday: { backgroundColor: 'rgba(8, 77, 72, 0.5)', borderWidth: 2, borderColor: '#FFC857' },
-  cellNumber: { color: '#fff', fontSize: 16 },
-  cellNumberWeekend: { color: 'rgba(255, 200, 87, 0.8)' },
-  cellNumberToday: { color: '#FFC857', fontWeight: 'bold', fontSize: 18 },
-  holidayMarker: { position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3, backgroundColor: '#7B61FF', shadowColor: '#7B61FF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.8, shadowRadius: 4 },
+  cell: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 14 },
+  cellWeekend: { backgroundColor: theme.colors.tealSoft }, 
+  cellToday: { backgroundColor: theme.colors.primary, borderWidth: 0, shadowColor: theme.colors.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.35, shadowRadius: 6, elevation: 4 },
+  cellNumber: { color: theme.colors.textDark, fontSize: 16, fontWeight: '700' },
+  cellNumberWeekend: { color: theme.colors.textMuted },
+  cellNumberToday: { color: '#FFFFFF', fontWeight: '900', fontSize: 17 },
+  holidayMarker: { position: 'absolute', top: 5, right: 5, width: 6, height: 6, borderRadius: 3, backgroundColor: theme.colors.badgePurpleText },
   dotsRow: { flexDirection: 'row', position: 'absolute', bottom: 4, alignItems: 'center', justifyContent: 'center' },
-  dot: { width: 6, height: 6, borderRadius: 3, marginHorizontal: 2 },
-  moreDots: { color: 'rgba(255,255,255,0.6)', fontSize: 10, marginLeft: 2, fontWeight: 'bold' }
+  dot: { width: 5, height: 5, borderRadius: 2.5, marginHorizontal: 1.5 },
+  moreDots: { color: theme.colors.textMuted, fontSize: 10, marginLeft: 2, fontWeight: '700' }
 });

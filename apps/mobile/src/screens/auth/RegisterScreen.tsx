@@ -1,7 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Image, Animated, Easing, ActivityIndicator, Alert, Pressable } from 'react-native';
-import { CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator, Image, ScrollView, Animated, Easing, Pressable } from 'react-native';
+import { Eye, EyeOff, XCircle, CheckCircle2, User, Mail, Lock, Building } from 'lucide-react-native';
 import { api } from '../../services/api';
+import { theme } from '../../theme/theme';
+import { useTranslation } from '../../i18n';
+import { LanguageSelector } from '../../components/LanguageSelector';
 
 interface RegisterScreenProps {
   onRegisterSuccess: (token: string, user: any) => void;
@@ -9,23 +12,16 @@ interface RegisterScreenProps {
 }
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSuccess, onNavigateToLogin }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [crp, setCrp] = useState('');
-  const [clinicName, setClinicName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [crp, setCrp] = useState('');
+  const [clinicName, setClinicName] = useState('');
+
   const [loading, setLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const handleCrpChange = (value: string) => {
-    let finalValue = value.replace(/\D/g, '');
-    if (finalValue.length > 7) finalValue = finalValue.substring(0, 7);
-    if (finalValue.length > 2) finalValue = `${finalValue.substring(0, 2)}/${finalValue.substring(2)}`;
-    setCrp(finalValue);
-  };
 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const slideAnim = useRef(new Animated.Value(-100)).current;
@@ -48,7 +44,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
     setErrorMessage(msg);
     setShowErrorToast(true);
     
-    // Anima a entrada
     Animated.timing(errorSlideAnim, {
       toValue: Platform.OS === 'ios' ? 70 : 50,
       duration: 600,
@@ -56,7 +51,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
       easing: Easing.out(Easing.back(1.5)),
     }).start();
 
-    // Aguarda um tempo maior (ex: 4 segundos) e anima a saída
     setTimeout(() => {
       Animated.timing(errorSlideAnim, {
         toValue: -150,
@@ -71,12 +65,12 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      showError('Por favor, preencha todos os campos obrigatórios (*).');
+      showError(t.auth.fillRequiredFields);
       return;
     }
 
     if (password !== confirmPassword) {
-      showError('As senhas não coincidem. Verifique e tente novamente.');
+      showError(t.auth.passwordsDoNotMatch);
       return;
     }
 
@@ -86,7 +80,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
         name, 
         email, 
         password, 
-        confirmPassword, 
         crp, 
         clinicName 
       });
@@ -96,11 +89,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
         showToast();
         setTimeout(() => {
           onRegisterSuccess(response.data.token, response.data.user);
-        }, 2500);
+        }, 2000);
       }
     } catch (error: any) {
       setLoading(false);
-      const errorMsg = error.response?.data?.error || 'Não foi possível conectar ao servidor. Verifique se o Next.js está rodando.';
+      const errorMsg = error.response?.data?.error || t.auth.registerServerError;
       showError(errorMsg);
     }
   };
@@ -116,161 +109,173 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ flex: 1 }} />
-          {/* Glassmorphism Simulado */}
-          <View style={styles.glassPanel}>
-            
-            {/* Logo Oficial Teko */}
+          <View style={styles.cardContainer}>
+            {/* Top Bar com Botão de Idioma */}
+            <View style={styles.topSelectorRow}>
+              <LanguageSelector />
+            </View>
+
+            {/* Logo Oficial Teko Transparente */}
             <View style={styles.logoWrapper}>
               <Image 
-                source={require('../../../assets/icon.jpg')} 
+                source={require('../../../assets/elementos_visuais/teko_logo_logo_transparente.png')} 
                 style={styles.logoImage}
+                resizeMode="contain"
               />
             </View>
 
             {/* Cabeçalho */}
             <View style={styles.headerContainer}>
-              <Text style={styles.title}>Crie sua conta</Text>
-              <Text style={styles.subtitle}>Junte-se à revolução terapêutica.</Text>
+              <Text style={styles.title}>{t.auth.registerTitle}</Text>
+              <Text style={styles.subtitle}>{t.auth.registerSubtitle}</Text>
             </View>
 
-            {/* Campos de Input */}
+            {/* Campos */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nome Completo *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ex: Dra. Ana Silva"
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={name}
-                onChangeText={setName}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>E-mail *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="seu.email@exemplo.com"
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>CRP (Opcional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ex: 00/00000"
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={crp}
-                onChangeText={handleCrpChange}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nome da Clínica (Opcional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ex: Clínica Teko Mente"
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={clinicName}
-                onChangeText={setClinicName}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Senha *</Text>
-              <View style={styles.passwordContainer}>
+              <Text style={styles.label}>{t.auth.nameLabel} *</Text>
+              <View style={styles.inputWrapper}>
+                <User size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
                 <TextInput
-                  style={[styles.input, styles.passwordInput]}
-                  placeholder="Mínimo 6 caracteres"
-                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  style={styles.input}
+                  placeholder={t.auth.namePlaceholder}
+                  placeholderTextColor={theme.colors.textMuted}
+                  value={name}
+                  onChangeText={setName}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>{t.auth.emailLabel} *</Text>
+              <View style={styles.inputWrapper}>
+                <Mail size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder={t.auth.emailPlaceholder}
+                  placeholderTextColor={theme.colors.textMuted}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>{t.auth.crpLabel} ({t.common.optional})</Text>
+              <View style={styles.inputWrapper}>
+                <Building size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder={t.auth.crpPlaceholder}
+                  placeholderTextColor={theme.colors.textMuted}
+                  value={crp}
+                  onChangeText={setCrp}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>{t.auth.clinicLabel} ({t.common.optional})</Text>
+              <View style={styles.inputWrapper}>
+                <Building size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder={t.auth.clinicPlaceholder}
+                  placeholderTextColor={theme.colors.textMuted}
+                  value={clinicName}
+                  onChangeText={setClinicName}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>{t.auth.passwordLabel} *</Text>
+              <View style={styles.inputWrapper}>
+                <Lock size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { paddingRight: 44 }]}
+                  placeholder={t.auth.passwordPlaceholder}
+                  placeholderTextColor={theme.colors.textMuted}
                   secureTextEntry={!showPassword}
                   value={password}
                   onChangeText={setPassword}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                  {showPassword ? <EyeOff color="rgba(255,255,255,0.5)" size={20} /> : <Eye color="rgba(255,255,255,0.5)" size={20} />}
+                  {showPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
                 </TouchableOpacity>
               </View>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Confirmar Senha *</Text>
-              <View style={styles.passwordContainer}>
+              <Text style={styles.label}>{t.auth.confirmPasswordLabel} *</Text>
+              <View style={styles.inputWrapper}>
+                <Lock size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
                 <TextInput
-                  style={[styles.input, styles.passwordInput]}
-                  placeholder="Digite a senha novamente"
-                  placeholderTextColor="rgba(255,255,255,0.5)"
-                  secureTextEntry={!showConfirmPassword}
+                  style={styles.input}
+                  placeholder={t.auth.confirmPasswordPlaceholder}
+                  placeholderTextColor={theme.colors.textMuted}
+                  secureTextEntry={!showPassword}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                 />
-                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
-                  {showConfirmPassword ? <EyeOff color="rgba(255,255,255,0.5)" size={20} /> : <Eye color="rgba(255,255,255,0.5)" size={20} />}
-                </TouchableOpacity>
               </View>
             </View>
 
-            {/* Botão de Cadastro (Amarelo Teko) */}
+            {/* Botão Cadastrar */}
             <Pressable 
               style={({ pressed }) => [
                 styles.button, 
                 loading && styles.buttonDisabled,
-                pressed && !loading && { backgroundColor: '#7B61FF' }
+                pressed && !loading && { backgroundColor: theme.colors.primaryDark, transform: [{ scale: 0.98 }] }
               ]} 
               onPress={handleRegister}
               disabled={loading}
             >
-              {({ pressed }) => loading ? (
+              {loading ? (
                 <ActivityIndicator color="#FFF" />
               ) : (
-                <Text style={[styles.buttonText, pressed && { color: '#FFF' }]}>Cadastrar</Text>
+                <Text style={styles.buttonText}>{t.auth.registerButton}</Text>
               )}
             </Pressable>
 
-            {/* Footer de Navegação (Roxo Teko) */}
+            {/* Footer Link */}
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Já tem uma conta?</Text>
-              <TouchableOpacity onPress={onNavigateToLogin}>
-                <Text style={styles.footerLink}>Faça login</Text>
+              <Text style={styles.footerText}>{t.auth.hasAccountText}</Text>
+              <TouchableOpacity onPress={onNavigateToLogin} activeOpacity={0.7}>
+                <View style={styles.badgeLogin}>
+                  <Text style={styles.footerLink}>{t.auth.loginLink}</Text>
+                </View>
               </TouchableOpacity>
             </View>
-
           </View>
-          <View style={{ flex: 1 }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Popup de Sucesso (Topo, grande e escuro) */}
+      {/* Popups */}
       {showSuccessToast && (
         <Animated.View style={[styles.toastContainer, { transform: [{ translateY: slideAnim }] }]}>
           <View style={styles.toastIconBg}>
-            <CheckCircle2 color="#FFC857" size={28} />
+            <CheckCircle2 color={theme.colors.primary} size={24} />
           </View>
           <View style={styles.toastTextContainer}>
-            <Text style={styles.toastTitle}>Sucesso!</Text>
-            <Text style={styles.toastMessage}>Cadastro concluído. Redirecionando...</Text>
+            <Text style={styles.toastTitle}>{t.common.success}</Text>
+            <Text style={styles.toastMessage}>{t.auth.registerSuccess}</Text>
           </View>
         </Animated.View>
       )}
 
-      {/* Popup de Erro (Topo, vermelho) */}
       {showErrorToast && (
         <Animated.View style={[styles.errorToastContainer, { transform: [{ translateY: errorSlideAnim }] }]}>
           <View style={styles.errorToastIconBg}>
-            <XCircle color="#FF4B4B" size={28} />
+            <XCircle color={theme.colors.accentOrange} size={24} />
           </View>
           <View style={styles.toastTextContainer}>
-            <Text style={styles.errorToastTitle}>Ops, algo deu errado!</Text>
+            <Text style={styles.errorToastTitle}>{t.common.attention}</Text>
             <Text style={styles.toastMessage}>{errorMessage}</Text>
           </View>
         </Animated.View>
       )}
-
     </SafeAreaView>
   );
 };
@@ -278,210 +283,216 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegisterSucces
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#084D48',
+    backgroundColor: theme.colors.bg,
   },
   container: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    justifyContent: 'center',
   },
-  glassPanel: {
-    borderRadius: 32,
-    padding: 32,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  cardContainer: {
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.xl,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    ...theme.shadows.card,
+  },
+  topSelectorRow: {
+    alignItems: 'flex-end',
+    marginBottom: 8,
   },
   logoWrapper: {
     alignSelf: 'center',
-    marginBottom: 24,
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    borderWidth: 4,
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: '#2e2a1e',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 15,
-    elevation: 8,
-    overflow: 'hidden',
+    marginBottom: 18,
+    width: 250,
+    height: 105,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   headerContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
+  },
+  brandTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: theme.colors.primary,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#FFF',
-    marginBottom: 8,
+    fontSize: 22,
+    fontWeight: '800',
+    color: theme.colors.textDark,
+    letterSpacing: -0.4,
+    marginBottom: 4,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.7)',
+    fontSize: 13,
+    color: theme.colors.textMuted,
     textAlign: 'center',
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 14,
+  },
+  rowInputs: {
+    flexDirection: 'row',
+    gap: 12,
   },
   label: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
+    color: theme.colors.textDark,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.bg,
+    borderRadius: theme.radii.md,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  inputIcon: {
+    marginRight: 8,
   },
   input: {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 56,
-    color: '#FFF',
-    fontSize: 16,
-  },
-  passwordContainer: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  passwordInput: {
-    paddingRight: 48,
+    flex: 1,
+    color: theme.colors.textDark,
+    fontSize: 14,
+    height: '100%',
   },
   eyeIcon: {
     position: 'absolute',
-    right: 16,
+    right: 12,
     padding: 4,
   },
   button: {
-    backgroundColor: '#FFC857',
+    backgroundColor: theme.colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 16,
-    marginTop: 16,
+    height: 48,
+    borderRadius: theme.radii.md,
+    marginTop: 8,
+    ...theme.shadows.subtle,
   },
   buttonDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   buttonText: {
-    color: '#084D48',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
   footer: {
-    marginTop: 32,
-    paddingTop: 24,
+    marginTop: 20,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: theme.colors.cardBorder,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 8,
   },
   footerText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 15,
-    marginRight: 8,
+    color: theme.colors.textMuted,
+    fontSize: 13,
+  },
+  badgeLogin: {
+    backgroundColor: theme.colors.badgePurple,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: theme.radii.full,
   },
   footerLink: {
-    color: '#FFC857', // Amarelo Teko
-    fontSize: 15,
-    fontWeight: 'bold',
+    color: theme.colors.badgePurpleText,
+    fontSize: 12,
+    fontWeight: '700',
   },
+
+  /* Toasts */
   toastContainer: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 20 : 10,
     right: 16,
-    left: 16, // Stretch across the screen with margin
-    backgroundColor: '#181c1c', // Fundo bem escuro e destacado
-    borderLeftWidth: 6,
-    borderLeftColor: '#FFC857', // Destaque na borda esquerda
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    left: 16,
+    backgroundColor: theme.colors.cardBg, 
+    borderLeftWidth: 5,
+    borderLeftColor: theme.colors.primary,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, // Padding maior
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, // Sombra super forte
+    padding: 16, 
+    ...theme.shadows.floating,
   },
   toastIconBg: {
-    width: 50, // Ícone maior
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,200,87,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,200,87,0.4)',
+    width: 40, 
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.tealSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
-  },
-  toastTextContainer: {
-    flex: 1,
+    marginRight: 12,
   },
   toastTitle: {
-    color: '#FFC857', // Amarelo Teko
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
-  },
-  toastMessage: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 15,
-    fontWeight: '500',
+    color: theme.colors.textDark, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   errorToastContainer: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 20 : 10,
     right: 16,
     left: 16,
-    backgroundColor: '#181c1c', 
-    borderLeftWidth: 6,
-    borderLeftColor: '#FF4B4B', // Vermelho forte
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 16,
+    backgroundColor: theme.colors.cardBg, 
+    borderLeftWidth: 5,
+    borderLeftColor: theme.colors.accentOrange,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    borderRadius: theme.radii.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20, 
+    padding: 16, 
+    ...theme.shadows.floating,
   },
   errorToastIconBg: {
-    width: 50, 
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 75, 75, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 75, 75, 0.4)',
+    width: 40, 
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FDF0ED',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 12,
+  },
+  toastTextContainer: {
+    flex: 1,
   },
   errorToastTitle: {
-    color: '#FF4B4B', 
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
+    color: theme.colors.accentOrange, 
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  toastMessage: {
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    fontWeight: '500',
   },
 });
