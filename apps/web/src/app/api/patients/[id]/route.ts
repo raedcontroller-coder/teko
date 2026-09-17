@@ -49,12 +49,12 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       return NextResponse.json({ error: "Paciente não encontrado." }, { status: 404 });
     }
 
-    let guardianData = null;
-    if (patientData.guardianId) {
-      guardianData = await db.query.users.findFirst({
-        where: eq(users.id, patientData.guardianId)
-      });
-    }
+    const guardianData = await db.query.users.findFirst({
+      where: and(
+        eq(users.role, "FAMILIAR"),
+        eq(users.alunoId, patientId)
+      )
+    });
 
     const rawSessions = await db.query.gameSessions.findMany({
       where: eq(gameSessions.alunoId, patientId),

@@ -101,7 +101,7 @@ describe('Integration Tests (DB Real) - Pacientes', () => {
     });
 
     expect(guardian).toBeDefined();
-    expect(child?.guardianId).toBe(guardian?.id); // A Criança vinculou perfeitamente ao familiar no DB
+    expect(guardian?.alunoId).toBe(child?.id); // O familiar vinculou perfeitamente à criança no DB
 
     if (child) patientId = child.id;
   });

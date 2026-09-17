@@ -72,16 +72,21 @@ export async function createPatientAction(formData: FormData, adminPsicologoId?:
     // Então geramos um email fictício único para a criança.
     const childUniqueEmail = `child_${Date.now()}_${Math.random().toString(36).substring(7)}@teko.local`;
 
-    await db.insert(users).values({
+    const [newChild] = await db.insert(users).values({
       role: "ALUNO",
       name: name,
       age: age,
       gender: gender,
       email: childUniqueEmail,
-      guardianId: guardianId,
       psicologoId: psicologoId,
       hasTdah: hasTdah,
-    });
+    }).returning();
+
+    if (guardianId && newChild) {
+      await db.update(users)
+        .set({ alunoId: newChild.id })
+        .where(eq(users.id, guardianId));
+    }
 
     revalidatePath("/[lang]/dashboard/pacientes", "page");
     return { success: true };
@@ -165,12 +170,12 @@ export async function getPatientByIdAction(patientId: string, adminPsicologoId?:
       return { error: "Paciente não encontrado." };
     }
 
-    let guardian = null;
-    if (patient.guardianId) {
-      guardian = await db.query.users.findFirst({
-        where: eq(users.id, patient.guardianId),
-      });
-    }
+    const guardian = await db.query.users.findFirst({
+      where: and(
+        eq(users.role, "FAMILIAR"),
+        eq(users.alunoId, patient.id)
+      ),
+    });
 
     const rawSessions = await db.query.gameSessions.findMany({
       where: eq(gameSessions.alunoId, patientId),

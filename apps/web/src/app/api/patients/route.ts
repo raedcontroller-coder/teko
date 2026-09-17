@@ -60,7 +60,7 @@ export async function GET(request: Request) {
     const allGames = await db.query.games.findMany();
 
     const patientsWithData = patients.map((p) => {
-      const guardian = allGuardians.find(g => g.id === p.guardianId);
+      const guardian = allGuardians.find(g => g.alunoId === p.id);
       const pSessions = allSessions.filter(s => s.alunoId === p.id);
       
       let tocaRapido = 0;
@@ -175,16 +175,21 @@ export async function POST(request: Request) {
     // 5. Criar o Paciente (ALUNO)
     const childUniqueEmail = `child_${Date.now()}_${Math.random().toString(36).substring(7)}@teko.local`;
 
-    await db.insert(users).values({
+    const [newChild] = await db.insert(users).values({
       role: "ALUNO",
       name: name,
       age: age,
       gender: gender,
       email: childUniqueEmail,
-      guardianId: guardianId,
       psicologoId: psicologoId,
       hasTdah: hasTdah ?? false,
-    });
+    }).returning();
+
+    if (guardianId && newChild) {
+      await db.update(users)
+        .set({ alunoId: newChild.id })
+        .where(eq(users.id, guardianId));
+    }
 
     return NextResponse.json({ success: true, message: "Paciente cadastrado com sucesso!" });
 

@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { GET } from './route';
 import { db } from '../../../../../../../packages/db/db/index';
@@ -47,8 +47,9 @@ describe('Integração - Admin Reports API (/api/admin/reports)', () => {
       passwordHash: 'hash',
       role: 'ALUNO',
       psicologoId: psi[0].id,
-      guardianId: guardian[0].id
     }).returning();
+
+    await db.update(users).set({ alunoId: aluno[0].id }).where(eq(users.id, guardian[0].id));
 
     const game = await db.query.games.findFirst();
     if (game) {

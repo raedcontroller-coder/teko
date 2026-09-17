@@ -275,7 +275,7 @@ export async function GET(
         
         // Obter a sessão exata do marco (ex: 3ª, 6ª sessão)
         const milestoneSession = filteredSessions[lastCycleSessionCount - 1];
-        let cachedAnalysis = (milestoneSession?.flaggedPatterns as any)?.aiAnalysis;
+        const cachedAnalysis = (milestoneSession?.flaggedPatterns as any)?.aiAnalysis;
 
         const forceRefresh = url.searchParams.get("forceRefresh") === "true";
         const isFallback = cachedAnalysis && (cachedAnalysis.includes("O paciente") || cachedAnalysis.includes("A oscilação no tempo") || cachedAnalysis.includes("O índice de toques"));

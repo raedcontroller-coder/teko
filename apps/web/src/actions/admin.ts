@@ -298,17 +298,15 @@ export async function getAdminDadosGeradosAction(skipAuth: boolean = false) {
     
     if (alunos.length === 0) return { data: [] };
 
-    const guardianIds = Array.from(new Set(alunos.map(a => a.guardianId).filter(Boolean))) as string[];
-    const guardians = guardianIds.length > 0 ? await db.select().from(users).where(inArray(users.id, guardianIds)) : [];
-
     const alunoIds = alunos.map(a => a.id);
+    const guardians = alunoIds.length > 0 ? await db.select().from(users).where(and(eq(users.role, "FAMILIAR"), isNull(users.deletedAt), inArray(users.alunoId, alunoIds))) : [];
     const sessions = alunoIds.length > 0 ? await db.select().from(gameSessions).where(inArray(gameSessions.alunoId, alunoIds)) : [];
     
     const allGames = await db.select().from(games);
     const gameMap = new Map(allGames.map(g => [g.id, g.name.toLowerCase()]));
 
     const psiMap = new Map(psicologosAtivos.map(p => [p.id, p]));
-    const guardMap = new Map(guardians.map(g => [g.id, g]));
+    const guardMap = new Map(guardians.map(g => [g.alunoId as string, g]));
 
     // Para pegar a última sessão de cada métrica por aluno
     const metricsMap = new Map();
@@ -343,7 +341,7 @@ export async function getAdminDadosGeradosAction(skipAuth: boolean = false) {
 
     const result = alunos.map(aluno => {
       const psi = aluno.psicologoId ? psiMap.get(aluno.psicologoId) : null;
-      const guard = aluno.guardianId ? guardMap.get(aluno.guardianId) : null;
+      const guard = guardMap.get(aluno.id) || null;
       const metrics = metricsMap.get(aluno.id) || { vtri: "N/A", qa: "N/A", imp: "N/A" };
 
       return {
