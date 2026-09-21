@@ -17,9 +17,60 @@ type PatientData = {
   [key: string]: unknown;
 };
 
+const psychDashboardTranslations: Record<string, {
+  title: string;
+  subtitle: string;
+  newPatient: string;
+  activePatients: string;
+  readyReports: string;
+  completedSessions: string;
+  recentPatients: string;
+  patientName: string;
+  age: string;
+  lastSession: string;
+  none: string;
+  noPatients: string;
+  viewAllPatients: string;
+  comingSoon: string;
+}> = {
+  pt: {
+    title: "Resumo Clínico",
+    subtitle: "Acompanhe o progresso dos seus pacientes em tempo real.",
+    newPatient: "Novo Paciente",
+    activePatients: "Pacientes Ativos",
+    readyReports: "Relatórios Prontos",
+    completedSessions: "Sessões Concluídas",
+    recentPatients: "Pacientes Recentes",
+    patientName: "Nome do Paciente",
+    age: "Idade",
+    lastSession: "Última Sessão",
+    none: "Nenhuma",
+    noPatients: "Nenhum paciente cadastrado ainda.",
+    viewAllPatients: "Ver todos os pacientes",
+    comingSoon: "Em breve..."
+  },
+  en: {
+    title: "Clinical Summary",
+    subtitle: "Track your patients' progress in real time.",
+    newPatient: "New Patient",
+    activePatients: "Active Patients",
+    readyReports: "Completed Reports",
+    completedSessions: "Completed Sessions",
+    recentPatients: "Recent Patients",
+    patientName: "Patient Name",
+    age: "Age",
+    lastSession: "Last Session",
+    none: "None",
+    noPatients: "No patients registered yet.",
+    viewAllPatients: "View all patients",
+    comingSoon: "Coming soon..."
+  }
+};
+
 export default function PsychologistDashboard() {
   const params = useParams();
-  const lang = (params?.lang as string) || "pt";
+  const lang = (params?.lang as string) === "en" ? "en" : "pt";
+  const t = psychDashboardTranslations[lang];
 
   const [patients, setPatients] = React.useState<PatientData[]>([]);
   const [totalSessions, setTotalSessions] = React.useState<number>(0);
@@ -45,14 +96,14 @@ export default function PsychologistDashboard() {
       {/* Header Actions */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="font-headline-lg text-[28px] text-white font-bold">Resumo Clínico</h1>
-          <p className="text-white/70 font-body-md mt-1">Acompanhe o progresso dos seus pacientes em tempo real.</p>
+          <h1 className="font-headline-lg text-[28px] text-white font-bold">{t.title}</h1>
+          <p className="text-white/70 font-body-md mt-1">{t.subtitle}</p>
         </div>
         <div className="flex gap-4">
           <Link href={`/${lang}/dashboard/pacientes/novo`}>
             <Button variant="primary" className="gap-2">
               <UserPlus size={18} />
-              Novo Paciente
+              {t.newPatient}
             </Button>
           </Link>
         </div>
@@ -70,7 +121,7 @@ export default function PsychologistDashboard() {
             <h3 className="font-headline-md text-[32px] font-bold text-white">
               {isLoading ? <Loader2 className="w-8 h-8 animate-spin text-white/50" /> : patients.length}
             </h3>
-            <p className="text-white/70 font-label-md">Pacientes Ativos</p>
+            <p className="text-white/70 font-label-md">{t.activePatients}</p>
           </div>
         </Card>
 
@@ -82,9 +133,9 @@ export default function PsychologistDashboard() {
           </div>
           <div>
             <h3 className="font-headline-md text-[32px] font-bold text-white/50">0</h3>
-            <p className="text-white/50 font-label-md">Relatórios Prontos</p>
+            <p className="text-white/50 font-label-md">{t.readyReports}</p>
             <span className="inline-block mt-2 px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
-              Em breve...
+              {t.comingSoon}
             </span>
           </div>
         </Card>
@@ -99,7 +150,7 @@ export default function PsychologistDashboard() {
             <h3 className="font-headline-md text-[32px] font-bold text-white">
               {isLoading ? <Loader2 className="w-8 h-8 animate-spin text-white/50" /> : totalSessions}
             </h3>
-            <p className="text-white/70 font-label-md">Sessões Concluídas</p>
+            <p className="text-white/70 font-label-md">{t.completedSessions}</p>
           </div>
         </Card>
       </div>
@@ -107,14 +158,14 @@ export default function PsychologistDashboard() {
       {/* Recent Patients Table */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-headline-md text-[20px] font-bold text-white">Pacientes Recentes</h2>
+          <h2 className="font-headline-md text-[20px] font-bold text-white">{t.recentPatients}</h2>
         </div>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome do Paciente</TableHead>
-              <TableHead>Idade</TableHead>
-              <TableHead>Última Sessão</TableHead>
+              <TableHead>{t.patientName}</TableHead>
+              <TableHead>{t.age}</TableHead>
+              <TableHead>{t.lastSession}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -132,11 +183,11 @@ export default function PsychologistDashboard() {
                   <TableCell>
                     {patient.lastSessionDate ? (
                       <span className="text-white/80">
-                        {new Date(patient.lastSessionDate).toLocaleDateString("pt-BR")}
+                        {new Date(patient.lastSessionDate).toLocaleDateString(lang === "en" ? "en-US" : "pt-BR")}
                       </span>
                     ) : (
                       <span className="inline-block px-2 py-1 bg-white/5 rounded-md text-[11px] font-bold tracking-wider text-white/40 uppercase">
-                        Nenhuma
+                        {t.none}
                       </span>
                     )}
                   </TableCell>
@@ -145,7 +196,7 @@ export default function PsychologistDashboard() {
             ) : (
               <TableRow>
                 <TableCell colSpan={3} className="text-center py-8 text-white/50">
-                  Nenhum paciente cadastrado ainda.
+                  {t.noPatients}
                 </TableCell>
               </TableRow>
             )}
@@ -154,7 +205,7 @@ export default function PsychologistDashboard() {
         <div className="flex justify-center mt-6">
           <Link href={`/${lang}/dashboard/pacientes`}>
             <Button variant="primary" className="px-8 py-3 text-sm font-bold shadow-[0_0_20px_rgba(230,168,0,0.3)] hover:shadow-[0_0_20px_rgba(123,97,255,0.4)]">
-              Ver todos os pacientes
+              {t.viewAllPatients}
             </Button>
           </Link>
         </div>
@@ -173,3 +224,4 @@ function UsersIcon({ size = 24, ...props }: React.SVGProps<SVGSVGElement> & { si
     </svg>
   );
 }
+

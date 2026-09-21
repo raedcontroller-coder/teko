@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../packages/db/db/index';
 import { users, gameSessions } from '../../../../../../packages/db/db/schema';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, isNull } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
@@ -40,13 +40,17 @@ export async function GET(request: Request) {
     const patients = await db.query.users.findMany({
       where: and(
         eq(users.role, "ALUNO"),
-        eq(users.psicologoId, psicologoId)
+        eq(users.psicologoId, psicologoId),
+        isNull(users.deletedAt)
       ),
       orderBy: (users, { desc }) => [desc(users.createdAt)],
     });
 
     const allGuardians = await db.query.users.findMany({
-      where: eq(users.role, "FAMILIAR")
+      where: and(
+        eq(users.role, "FAMILIAR"),
+        isNull(users.deletedAt)
+      )
     });
 
     const patientIds = patients.map(p => p.id);
@@ -133,7 +137,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "ID do usuário não encontrado no token." }, { status: 400 });
     }
 
-    const { name, age, gender, guardianName, guardianEmail, guardianPhone, hasTdah } = body;
+    const { name, age, gender, guardianName, guardianEmail, guardianPhone, hasTdah, avatarUrl } = body;
 
     if (!name || !age || !gender || !guardianName || !guardianEmail || !guardianPhone) {
       return NextResponse.json({ error: "Todos os campos são obrigatórios." }, { status: 400 });
@@ -183,6 +187,7 @@ export async function POST(request: Request) {
       email: childUniqueEmail,
       psicologoId: psicologoId,
       hasTdah: hasTdah ?? false,
+      avatarUrl: avatarUrl || undefined,
     }).returning();
 
     if (guardianId && newChild) {

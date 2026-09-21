@@ -1,10 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getDictionary } from "../../../dictionaries";
 
 import LoginForm from "./LoginForm";
 
 export default async function LoginPage({ params }: { params: Promise<{ lang: string }> }) {
-  const { lang } = await params;
+  const resolvedParams = await params;
+  const lang = (resolvedParams?.lang === "en" ? "en" : "pt") as "en" | "pt";
+  const dict = await getDictionary(lang);
 
   return (
     <div className="flex-grow flex flex-col items-center justify-center w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop min-h-screen py-8 relative">
@@ -20,7 +23,7 @@ export default async function LoginPage({ params }: { params: Promise<{ lang: st
         </div>
         <div className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg pointer-events-none">
           <span className="font-label-md text-sm text-white/90 whitespace-nowrap">
-            Voltar para Início
+            {dict.login.back_to_home}
           </span>
         </div>
       </Link>
@@ -30,7 +33,7 @@ export default async function LoginPage({ params }: { params: Promise<{ lang: st
         <div className="glass-panel rounded-[2rem] p-stack-lg md:p-12 flex flex-col items-center">
           {/* Brand Icon */}
           <div className="mb-stack-lg w-24 h-24 rounded-[2rem] overflow-hidden border-[4px] border-white/10 p-0 bg-surface-container-low shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
-            <Link href="/" className="hover:scale-105 transition-transform duration-500 block w-full h-full">
+            <Link href={`/${lang}`} className="hover:scale-105 transition-transform duration-500 block w-full h-full">
               <Image
                 alt="Teko Brand Icon"
                 width={96}
@@ -43,18 +46,18 @@ export default async function LoginPage({ params }: { params: Promise<{ lang: st
 
           {/* Header Text */}
           <div className="text-center mb-stack-lg">
-            <h1 className="font-headline-lg text-3xl font-black text-white mb-2">Bem-vindo(a) de volta</h1>
-            <p className="text-white/70 font-body-md">Acesse sua jornada terapêutica digital.</p>
+            <h1 className="font-headline-lg text-3xl font-black text-white mb-2">{dict.login.welcome_title}</h1>
+            <p className="text-white/70 font-body-md">{dict.login.welcome_subtitle}</p>
           </div>
 
-          <LoginForm />
+          <LoginForm lang={lang} dict={dict.login} />
 
           {/* Footer Link */}
           <div className="mt-stack-lg pt-stack-md border-t border-white/10 w-full text-center">
             <p className="text-white/70 font-body-md">
-              Não tem uma conta?
+              {dict.login.no_account}
               <Link className="text-[#7B61FF] font-bold hover:text-teko-yellow transition-colors ml-2" href={`/${lang}/cadastro`}>
-                Criar uma conta
+                {dict.login.create_account}
               </Link>
             </p>
           </div>

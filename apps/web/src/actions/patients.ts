@@ -2,7 +2,7 @@
 
 import { db } from "../../../../packages/db/db/index";
 import { users, gameSessions } from "../../../../packages/db/db/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "./auth";
 
@@ -113,7 +113,8 @@ export async function getPatientsAction(adminPsicologoId?: string) {
     const patients = await db.query.users.findMany({
       where: and(
         eq(users.role, "ALUNO"),
-        eq(users.psicologoId, psicologoId)
+        eq(users.psicologoId, psicologoId),
+        isNull(users.deletedAt)
       ),
       orderBy: (users, { desc }) => [desc(users.createdAt)],
     });
@@ -276,9 +277,42 @@ export async function deletePatientAction(patientId: string, adminPsicologoId?: 
       psicologoId = adminPsicologoId;
     }
 
-    await db.delete(users)
-      .where(and(eq(users.id, patientId), eq(users.psicologoId, psicologoId)));
-    
+    const now = new Date();
+
+    const [deleted] = await db.update(users)
+      .set({ 
+        deletedAt: now,
+        updatedAt: now
+      })
+      .where(
+        and(
+          eq(users.id, patientId),
+          eq(users.psicologoId, psicologoId),
+          eq(users.role, "ALUNO"),
+          isNull(users.deletedAt)
+        )
+      )
+      .returning();
+
+    if (!deleted) {
+      return { error: "Paciente não encontrado ou sem permissão para excluir." };
+    }
+
+    // Soft delete associated guardian and clear alunoId reference
+    await db.update(users)
+      .set({ 
+        alunoId: null,
+        deletedAt: now,
+        updatedAt: now
+      })
+      .where(
+        and(
+          eq(users.role, "FAMILIAR"),
+          eq(users.alunoId, patientId),
+          eq(users.psicologoId, psicologoId)
+        )
+      );
+
     revalidatePath("/[lang]/dashboard/pacientes", "page");
     return { success: true };
   } catch (error) {

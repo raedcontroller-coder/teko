@@ -44,7 +44,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
         name: psi.name,
         email: psi.email,
         crp: psi.crp,
-        clinicName: psi.clinicName
+        clinicName: psi.clinicName,
+        avatarUrl: psi.avatarUrl
       }
     });
   } catch {
@@ -98,7 +99,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
       return NextResponse.json({ success: true });
     } else {
       // update data
-      const { name, email, crp, clinicName } = body;
+      const { name, email, crp, clinicName, avatarUrl } = body;
       if (!name || !email) {
         return NextResponse.json({ error: "Nome e e-mail são obrigatórios." }, { status: 400 });
       }
@@ -125,10 +126,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         name,
         email,
         crp,
-        clinicName
+        clinicName,
+        avatarUrl
       }).where(eq(users.id, id));
       
-      // Apenas para satisfazer o mock que retorna rowCount no teste
       return NextResponse.json({ success: true });
     }
   } catch {

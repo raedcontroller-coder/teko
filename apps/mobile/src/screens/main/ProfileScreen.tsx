@@ -300,8 +300,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
               </View>
             </TouchableOpacity>
 
-            <Text style={styles.avatarHeroTitle}>Foto de Perfil</Text>
-            <Text style={styles.avatarHeroSub}>Toque no avatar para escolher uma foto do seu celular</Text>
+            <Text style={styles.avatarHeroTitle}>{t.profileScreen.photoTitle}</Text>
+            <Text style={styles.avatarHeroSub}>{t.profileScreen.avatarHeroSub}</Text>
 
             {Boolean(personalData.avatarUrl) && (
               <TouchableOpacity 
@@ -309,7 +309,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 onPress={() => setPersonalData(prev => ({ ...prev, avatarUrl: '' }))}
                 activeOpacity={0.7}
               >
-                <Text style={styles.avatarRemoveText}>Remover foto / Voltar ao padrão</Text>
+                <Text style={styles.avatarRemoveText}>{t.profileScreen.avatarRemoveText}</Text>
               </TouchableOpacity>
             )}
           </View>

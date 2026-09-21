@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TouchableW
 import { Sparkles, MoreHorizontal, Edit3, Trash2, X, FileText, CheckCircle2, AlertCircle, Clock } from 'lucide-react-native';
 import { theme } from '../../theme/theme';
 import { useTranslation } from '../../i18n';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface Appointment {
   id: string | number;
@@ -46,6 +47,7 @@ const parseISODate = (dateStr: string): Date => {
 };
 
 export function DailyView({ selectedDate, appointments, holidays = [], onEdit, onDelete, onStatusChange }: DailyViewProps) {
+  const insets = useSafeAreaInsets();
   const { t, language } = useTranslation();
   const [optionsApp, setOptionsApp] = useState<Appointment | null>(null);
 
@@ -172,7 +174,7 @@ export function DailyView({ selectedDate, appointments, holidays = [], onEdit, o
             <View style={styles.modalBackground} />
           </TouchableWithoutFeedback>
 
-          <View style={[styles.optionsModalContent, { borderColor: optionsApp ? `${optionsApp.color}50` : theme.colors.cardBorder }]}>
+          <View style={[styles.optionsModalContent, { borderColor: optionsApp ? `${optionsApp.color}50` : theme.colors.cardBorder, paddingBottom: Math.max(insets.bottom + 16, 24) }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t.agenda.appointmentOptions}</Text>
               <TouchableOpacity onPress={() => setOptionsApp(null)} style={styles.closeBtn}>

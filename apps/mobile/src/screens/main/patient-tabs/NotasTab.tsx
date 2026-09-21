@@ -17,6 +17,8 @@ import {
   Dimensions
 } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 const screenWidth = Dimensions.get('window').width;
 import { 
   Plus, 
@@ -58,8 +60,28 @@ const CATEGORIES = [
   { key: 'Outros', labelKey: 'catOutros', color: '#059669', icon: FileText }
 ];
 
+
 export function NotasTab({ patientId, adminPsicologoId }: NotasTabProps) {
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
@@ -410,12 +432,15 @@ export function NotasTab({ patientId, adminPsicologoId }: NotasTabProps) {
 
       {/* EDITOR MODAL (Glassmorphism Overlay) */}
       <Modal visible={isModalVisible} transparent animationType="slide">
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+          style={styles.modalOverlay}
+        >
           <TouchableWithoutFeedback onPress={closeModal}>
             <View style={styles.modalBackground} />
           </TouchableWithoutFeedback>
           
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom + 16, 24) }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editingId ? t.notas.editNoteBtn : t.notas.newNoteBtn}</Text>
               <TouchableOpacity onPress={closeModal} style={styles.closeBtn}>

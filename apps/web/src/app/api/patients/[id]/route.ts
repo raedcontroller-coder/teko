@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../../packages/db/db/index';
 import { users, gameSessions } from '../../../../../../../packages/db/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
@@ -41,7 +41,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       where: and(
         eq(users.id, patientId),
         eq(users.role, "ALUNO"),
-        eq(users.psicologoId, psicologoId)
+        eq(users.psicologoId, psicologoId),
+        isNull(users.deletedAt)
       )
     });
 
@@ -52,7 +53,14 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     const guardianData = await db.query.users.findFirst({
       where: and(
         eq(users.role, "FAMILIAR"),
-        eq(users.alunoId, patientId)
+        eq(users.alunoId, patientId),
+        isNull(users.deletedAt)
+      )
+    }) || await db.query.users.findFirst({
+      where: and(
+        eq(users.role, "FAMILIAR"),
+        eq(users.psicologoId, patientData.psicologoId || psicologoId),
+        isNull(users.deletedAt)
       )
     });
 
@@ -122,15 +130,22 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     const body = await request.json();
 
     if (updateType === "patient") {
-      const { name, age, gender, hasTdah } = body;
+      const { name, age, gender, hasTdah, avatarUrl } = body;
       
       const [updated] = await db.update(users)
-        .set({ name, age, gender, hasTdah })
+        .set({ 
+          name, 
+          age, 
+          gender, 
+          hasTdah, 
+          avatarUrl: avatarUrl !== undefined ? avatarUrl : undefined 
+        })
         .where(
           and(
             eq(users.id, targetId),
             eq(users.psicologoId, psicologoId),
-            eq(users.role, "ALUNO")
+            eq(users.role, "ALUNO"),
+            isNull(users.deletedAt)
           )
         )
         .returning();
@@ -150,7 +165,8 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
           and(
             eq(users.id, targetId),
             eq(users.psicologoId, psicologoId),
-            eq(users.role, "FAMILIAR")
+            eq(users.role, "FAMILIAR"),
+            isNull(users.deletedAt)
           )
         )
         .returning();
@@ -216,13 +232,19 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     }
 
     const { id: patientId } = await context.params;
+    const now = new Date();
 
-    const [deleted] = await db.delete(users)
+    const [deleted] = await db.update(users)
+      .set({ 
+        deletedAt: now,
+        updatedAt: now
+      })
       .where(
         and(
           eq(users.id, patientId),
           eq(users.psicologoId, psicologoId),
-          eq(users.role, "ALUNO")
+          eq(users.role, "ALUNO"),
+          isNull(users.deletedAt)
         )
       )
       .returning();
@@ -230,6 +252,21 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     if (!deleted) {
       return NextResponse.json({ error: "Paciente não encontrado ou sem permissão para excluir." }, { status: 404 });
     }
+
+    // Soft delete associated guardian and clear alunoId reference
+    await db.update(users)
+      .set({ 
+        alunoId: null,
+        deletedAt: now,
+        updatedAt: now
+      })
+      .where(
+        and(
+          eq(users.role, "FAMILIAR"),
+          eq(users.alunoId, patientId),
+          eq(users.psicologoId, psicologoId)
+        )
+      );
 
     return NextResponse.json({ success: true, message: "Paciente excluído com sucesso." });
 

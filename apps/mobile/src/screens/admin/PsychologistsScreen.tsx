@@ -9,23 +9,43 @@ import {
   ActivityIndicator, 
   ScrollView,
   Pressable,
-  Modal
+  Modal,
+  Image
 } from 'react-native';
-import { Search, Plus, UserCircle, Users, FileText, X, Key, Baby } from 'lucide-react-native';
+import { Search, Plus, UserCircle, Users, FileText, X, Key, Baby, Calendar } from 'lucide-react-native';
 import { api } from '../../services/api';
 import { theme } from '../../theme/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '../../i18n';
 
 interface PsychologistsScreenProps {
   onNavigateToNewPsychologist?: () => void;
   onNavigateToAdminPatients?: (psiId: string, psiName: string) => void;
   onNavigateToAdminPsychologistProfile?: (psiId: string, psiName: string) => void;
+  onNavigateToAdminAgenda?: (psiId: string, psiName: string) => void;
+  initialSelectedPsi?: { id: string, name: string } | null;
 }
 
-export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavigateToNewPsychologist, onNavigateToAdminPatients, onNavigateToAdminPsychologistProfile }) => {
+
+export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ 
+  onNavigateToNewPsychologist, 
+  onNavigateToAdminPatients, 
+  onNavigateToAdminPsychologistProfile,
+  onNavigateToAdminAgenda,
+  initialSelectedPsi
+}) => {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [psychologists, setPsychologists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedActionPsi, setSelectedActionPsi] = useState<any>(null);
+  const [selectedActionPsi, setSelectedActionPsi] = useState<any>(initialSelectedPsi || null);
+
+  useEffect(() => {
+    if (initialSelectedPsi) {
+      setSelectedActionPsi(initialSelectedPsi);
+    }
+  }, [initialSelectedPsi]);
 
   const fetchPsychologists = async () => {
     try {
@@ -56,8 +76,8 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
         
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Meus Profissionais</Text>
-          <Text style={styles.subtitle}>Gerencie a lista completa de psicólogos da plataforma Teko.</Text>
+          <Text style={styles.title}>{t.admin.psychologistsTitle}</Text>
+          <Text style={styles.subtitle}>{t.admin.psychologistsSubtitle}</Text>
         </View>
 
         {/* Top Actions: Search and New Button */}
@@ -66,7 +86,7 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
             <Search color={theme.colors.textMuted} size={18} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Buscar profissional..."
+              placeholder={t.admin.searchProfessionalPlaceholder}
               placeholderTextColor={theme.colors.textMuted}
               value={searchTerm}
               onChangeText={setSearchTerm}
@@ -81,7 +101,7 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
             onPress={onNavigateToNewPsychologist}
           >
             <Plus color="#FFF" size={18} />
-            <Text style={styles.newButtonText}>Novo Profissional</Text>
+            <Text style={styles.newButtonText}>{t.admin.newProfessional}</Text>
           </Pressable>
         </View>
 
@@ -92,15 +112,26 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
           ) : filtered.length === 0 ? (
             <View style={styles.emptyState}>
               <Users color={theme.colors.textMuted} size={42} />
-              <Text style={styles.emptyStateText}>Nenhum profissional encontrado.</Text>
+              <Text style={styles.emptyStateText}>{t.admin.noProfessionals}</Text>
             </View>
           ) : (
             <View style={styles.listContainer}>
               {filtered.map((psi) => (
-                <View key={psi.id} style={styles.card}>
+                <Pressable 
+                  key={psi.id} 
+                  style={({ pressed }) => [
+                    styles.card,
+                    pressed && { transform: [{ scale: 0.99 }], opacity: 0.9 }
+                  ]}
+                  onPress={() => setSelectedActionPsi(psi)}
+                >
                   <View style={styles.cardHeader}>
                     <View style={styles.avatar}>
-                      <UserCircle color={theme.colors.primary} size={24} />
+                      {psi.avatarUrl ? (
+                        <Image source={{ uri: psi.avatarUrl }} style={{ width: 40, height: 40, borderRadius: 20 }} resizeMode="cover" />
+                      ) : (
+                        <UserCircle color={theme.colors.primary} size={24} />
+                      )}
                     </View>
                     <View style={styles.infoContainer}>
                       <Text style={styles.itemName}>{psi.name}</Text>
@@ -110,30 +141,24 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
 
                   <View style={styles.cardDetails}>
                     <Text style={styles.itemMeta}>CRP: <Text style={styles.metaValue}>{psi.crp || "-"}</Text></Text>
-                    <Text style={styles.itemMeta}>Clínica: <Text style={styles.metaValue}>{psi.clinicName || "-"}</Text></Text>
+                    <Text style={styles.itemMeta}>{t.admin.clinicLabel.split(':')[0]}: <Text style={styles.metaValue}>{psi.clinicName || "-"}</Text></Text>
                   </View>
 
                   <View style={styles.metricsContainer}>
                     <View style={styles.metricBadge}>
                       <Users color={theme.colors.primary} size={14} />
-                      <Text style={styles.metricText}>Crianças: {psi.childrenCount || 0}</Text>
+                      <Text style={styles.metricText}>{t('admin.childrenCountLabel', { count: psi.childrenCount || 0 })}</Text>
                     </View>
                     <View style={styles.metricBadge}>
                       <FileText color={theme.colors.badgePurpleText} size={14} />
-                      <Text style={styles.metricText}>Relatórios: {psi.reportsCount || 0}</Text>
+                      <Text style={styles.metricText}>{t('admin.reportsCountLabel', { count: psi.reportsCount || 0 })}</Text>
                     </View>
                   </View>
 
-                  <Pressable 
-                    style={({ pressed }) => [
-                      styles.profileButton,
-                      pressed && { backgroundColor: theme.colors.tealSoft }
-                    ]}
-                    onPress={() => setSelectedActionPsi(psi)}
-                  >
-                    <Text style={styles.profileButtonText}>Acessar Perfil</Text>
-                  </Pressable>
-                </View>
+                  <View style={styles.profileButton}>
+                    <Text style={styles.profileButtonText}>{t.admin.accessProfileBtn}</Text>
+                  </View>
+                </Pressable>
               ))}
             </View>
           )}
@@ -149,15 +174,15 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
         onRequestClose={() => setSelectedActionPsi(null)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom + 16, 24) }]}>
             
             <TouchableOpacity style={styles.modalCloseButton} onPress={() => setSelectedActionPsi(null)}>
               <X color={theme.colors.textDark} size={22} />
             </TouchableOpacity>
 
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Acessar Perfil</Text>
-              <Text style={styles.modalSubtitle}>O que você deseja gerenciar em <Text style={{ fontWeight: '800', color: theme.colors.primary }}>{selectedActionPsi?.name}</Text>?</Text>
+              <Text style={styles.modalTitle}>{t.admin.accessProfileModalTitle}</Text>
+              <Text style={styles.modalSubtitle}>{t('admin.accessProfileModalSub', { name: selectedActionPsi?.name || '' })}</Text>
             </View>
 
             <View style={styles.modalCardsContainer}>
@@ -179,8 +204,30 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
                   <Key color={theme.colors.primary} size={26} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.actionCardTitle}>Credenciais do Profissional</Text>
-                  <Text style={styles.actionCardDesc}>Gerencie e-mail, senha e dados cadastrais.</Text>
+                  <Text style={styles.actionCardTitle}>{t.admin.profCredentialsCardTitle}</Text>
+                  <Text style={styles.actionCardDesc}>{t.admin.profCredentialsCardDesc}</Text>
+                </View>
+              </Pressable>
+
+              {/* Card Agenda */}
+              <Pressable 
+                style={({ pressed }) => [
+                  styles.actionCard,
+                  pressed && { borderColor: theme.colors.primary, backgroundColor: theme.colors.tealSoft }
+                ]}
+                onPress={() => {
+                  setSelectedActionPsi(null);
+                  if (onNavigateToAdminAgenda && selectedActionPsi) {
+                    onNavigateToAdminAgenda(selectedActionPsi.id, selectedActionPsi.name);
+                  }
+                }}
+              >
+                <View style={[styles.actionCardIcon, { backgroundColor: theme.colors.tealSoft }]}>
+                  <Calendar color={theme.colors.primary} size={26} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.actionCardTitle}>{t.admin.viewAgendaCardTitle}</Text>
+                  <Text style={styles.actionCardDesc}>{t.admin.viewAgendaCardDesc}</Text>
                 </View>
               </Pressable>
 
@@ -201,8 +248,8 @@ export const PsychologistsScreen: React.FC<PsychologistsScreenProps> = ({ onNavi
                   <Baby color={theme.colors.badgePurpleText} size={26} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.actionCardTitle}>Pacientes do Profissional</Text>
-                  <Text style={styles.actionCardDesc}>Visualize e gerencie a lista de crianças vinculadas.</Text>
+                  <Text style={styles.actionCardTitle}>{t.admin.profPatientsCardTitle}</Text>
+                  <Text style={styles.actionCardDesc}>{t.admin.profPatientsCardDesc}</Text>
                 </View>
               </Pressable>
 

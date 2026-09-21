@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { STIMULI, StimulusType } from './data';
 import { TelemetryLogger, ResponseType } from './TelemetryLogger';
 import { api } from '../../services/api';
+import { useTranslation } from '../../i18n';
 
 interface GoNoGoGameProps {
   alunoId: string;
@@ -36,6 +37,7 @@ const generateSequence = () => {
 };
 
 export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState<GameState>('menu');
   const [sequence, setSequence] = useState<StimulusType[]>([]);
   const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
@@ -145,22 +147,22 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
             <Frown color="#FFC857" size={48} />
           </View>
 
-          <Text style={styles.exitModalTitle}>Puxa vida...</Text>
+          <Text style={styles.exitModalTitle}>{t.gameGoNoGo.exitTitle}</Text>
           <Text style={styles.exitModalText}>
-            Você já vai embora?{'\n'}O teste ainda não terminou!
+            {t.gameGoNoGo.exitText}
           </Text>
 
           <View style={styles.exitModalButtons}>
             <Pressable onPress={cancelExit}>
               {({ pressed }) => (
                 <View style={[styles.stayButton, pressed && { backgroundColor: '#7B61FF' }]}>
-                  <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero Ficar!</Text>
+                  <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>{t.gameGoNoGo.stayButton}</Text>
                 </View>
               )}
             </Pressable>
 
             <TouchableOpacity style={styles.leaveButton} onPress={confirmExit}>
-              <Text style={styles.leaveButtonText}>Sair do Jogo</Text>
+              <Text style={styles.leaveButtonText}>{t.gameGoNoGo.leaveButton}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -359,13 +361,12 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
         </TouchableOpacity>
         
         <View style={styles.menuContent}>
-          <Text style={styles.title}>Toca Rápido!</Text>
+          <Text style={styles.title}>{t.gameGoNoGo.title}</Text>
           
           <View style={styles.glassPanel}>
-            <Text style={styles.instructionsTitle}>Fique muito atento!</Text>
+            <Text style={styles.instructionsTitle}>{t.gameGoNoGo.subtitle}</Text>
             <Text style={styles.instructionsDesc}>
-              Toque na tela o mais rápido que puder quando ver o Cachorro.{'\n\n'}
-              <Text style={{ color: '#EF4444', fontWeight: 'bold' }}>NÃO TOQUE</Text> na tela quando ver o Gato.
+              {t.gameGoNoGo.instructions}
             </Text>
 
             <View style={styles.stimulusPreview}>
@@ -373,13 +374,13 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
                 <View style={[styles.previewBubble, { backgroundColor: STIMULI.go.color, borderColor: STIMULI.go.shadowColor }]}>
                   <Text style={styles.emojiHuge}>{STIMULI.go.emoji}</Text>
                 </View>
-                <Text style={styles.previewText}>TOCAR</Text>
+                <Text style={styles.previewText}>{t.gameGoNoGo.touch}</Text>
               </View>
               <View style={styles.previewItem}>
                 <View style={[styles.previewBubble, { backgroundColor: STIMULI.nogo.color, borderColor: STIMULI.nogo.shadowColor }]}>
                   <Text style={styles.emojiHuge}>{STIMULI.nogo.emoji}</Text>
                 </View>
-                <Text style={styles.previewText}>ESTÁTUA</Text>
+                <Text style={styles.previewText}>{t.gameGoNoGo.statue}</Text>
               </View>
             </View>
           </View>
@@ -394,7 +395,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
             {({ pressed }) => (
               <>
                 <Play color={pressed ? "#FFF" : "#084D48"} size={32} fill={pressed ? "#FFF" : "#084D48"} />
-                <Text style={[styles.startButtonText, pressed && { color: '#FFF' }]}>Jogar!</Text>
+                <Text style={[styles.startButtonText, pressed && { color: '#FFF' }]}>{t.gameGoNoGo.play}</Text>
               </>
             )}
           </Pressable>
@@ -411,7 +412,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
           <TouchableOpacity onPress={handleRequestExit} style={styles.iconButton}>
             <ArrowLeft color="#fff" size={24} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Resultados</Text>
+          <Text style={styles.headerTitle}>{t.gameGoNoGo.results}</Text>
           <View style={{ width: 44 }} />
         </View>
         
@@ -419,16 +420,13 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
           <View style={styles.successIcon}>
             <CheckCircle color="#9bf2e8" size={64} />
           </View>
-          <Text style={styles.finishedTitle}>Sessão Concluída</Text>
+          <Text style={styles.finishedTitle}>{t.gameGoNoGo.sessionCompleted}</Text>
           
           {metrics && (
             <View style={styles.metricsContainer}>
               <View style={[styles.metricGlassCard, { backgroundColor: 'rgba(155, 242, 232, 0.15)', borderColor: '#9bf2e8', alignItems: 'center', paddingVertical: 32 }]}>
                 <Sparkles color="#FFC857" size={48} style={{ marginBottom: 16 }} />
-                <Text style={[styles.metricLabelSmall, { color: '#FFC857', fontSize: 24, textAlign: 'center', letterSpacing: 0.5 }]}>Você foi incrível!</Text>
-                <Text style={[styles.metricValueSmall, { color: '#FFF', fontSize: 18, marginTop: 12, textAlign: 'center', lineHeight: 26 }]}>
-                  Sua sessão foi concluída. Seus reflexos estão super rápidos, parecendo um verdadeiro herói!
-                </Text>
+                <Text style={[styles.metricLabelSmall, { color: '#FFC857', fontSize: 24, textAlign: 'center', letterSpacing: 0.5 }]}>{t.gameGoNoGo.feedbackMessage}</Text>
               </View>
             </View>
           )}
@@ -444,7 +442,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
               {({ pressed }) => (
                 <>
                   <RotateCcw color={pressed ? "#FFF" : "#084D48"} size={24} />
-                  <Text style={[styles.playAgainText, pressed && { color: '#FFF' }]}>Jogar Novamente</Text>
+                  <Text style={[styles.playAgainText, pressed && { color: '#FFF' }]}>{t.gameGoNoGo.playAgain}</Text>
                 </>
               )}
             </Pressable>
@@ -457,7 +455,7 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
               onPress={onBack}
             >
               {({ pressed }) => (
-                <Text style={[styles.backHomeText, pressed && { color: '#FFF' }]}>Voltar ao Início</Text>
+                <Text style={[styles.backHomeText, pressed && { color: '#FFF' }]}>{t.gameGoNoGo.backHome}</Text>
               )}
             </Pressable>
           </View>
@@ -485,9 +483,10 @@ export const GoNoGoGame: React.FC<GoNoGoGameProps> = ({ alunoId, onBack }) => {
             <View style={styles.progressBarBg}>
               <Animated.View style={[styles.progressBarFill, { width: `${progressPercentage}%` }]} />
             </View>
-            <Text style={styles.progressTextSmall}>Progresso: {currentTrialIndex} / {TOTAL_TRIALS}</Text>
+            <Text style={styles.progressTextSmall}>{t.gameGoNoGo.progress.replace('{{current}}', currentTrialIndex.toString()).replace('{{total}}', TOTAL_TRIALS.toString())}</Text>
           </View>
         </View>
+
 
         {/* HUD do Combo Flutuante Extremo */}
         {comboCount >= 2 && (

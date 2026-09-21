@@ -21,6 +21,7 @@ import { theme } from '../../theme/theme';
 import { SkeletonLoader } from '../../components/ui/SkeletonLoader';
 
 import { useTranslation } from '../../i18n';
+import { getChildAvatarSource } from '../../utils/patientAvatarHelper';
 
 interface PatientsScreenProps {
   adminPsicologoId?: string;
@@ -87,10 +88,7 @@ export const PatientsScreen: React.FC<PatientsScreenProps> = ({ adminPsicologoId
   );
 
   const renderPatientCard = ({ item }: { item: any }) => {
-    const isGirl = item.gender?.toLowerCase().includes('fem') || item.name?.endsWith('a');
-    const avatarSource = isGirl 
-      ? require('../../../assets/elementos_visuais/menina_crianca.png')
-      : require('../../../assets/elementos_visuais/menino_crianca.png');
+    const avatarSource = getChildAvatarSource(item.avatarUrl, item.gender);
 
     return (
       <TouchableOpacity 

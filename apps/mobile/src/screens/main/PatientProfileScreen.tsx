@@ -13,15 +13,19 @@ import {
   Easing,
   Pressable,
   Modal,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
-import { ArrowLeft, Baby, User, Shield, Target, Camera, Bomb, Save, Trash2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react-native';
+import { ArrowLeft, Baby, User, Shield, Target, Camera, Bomb, Save, Trash2, CheckCircle2, XCircle, AlertTriangle, X } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import { api } from '../../services/api';
 import { theme } from '../../theme/theme';
 import { AnamneseTab } from './patient-tabs/AnamneseTab';
 import { NotasTab } from './patient-tabs/NotasTab';
 import { EvolucaoTab } from './patient-tabs/EvolucaoTab';
 import { useTranslation } from '../../i18n';
+import { getChildAvatarSource, AVAILABLE_AVATAR_OPTIONS } from '../../utils/patientAvatarHelper';
 
 interface PatientProfileScreenProps {
   patientId: string;
@@ -31,6 +35,7 @@ interface PatientProfileScreenProps {
 }
 
 export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ patientId, onBack, onDeleteSuccess, adminPsicologoId }) => {
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [savingPatient, setSavingPatient] = useState(false);
@@ -45,10 +50,13 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
     age: '',
     gender: '',
     hasTdah: false,
+    avatarUrl: '',
     guardianName: '',
     guardianEmail: '',
     guardianPhone: '',
   });
+
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -113,6 +121,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             age: patient.age ? String(patient.age) : '',
             gender: patient.gender || '',
             hasTdah: !!patient.hasTdah,
+            avatarUrl: patient.avatarUrl || '',
             guardianName: guardian?.name || '',
             guardianEmail: guardian?.email || '',
             guardianPhone: guardian?.phone || '',
@@ -168,6 +177,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
         age: formData.age,
         gender: formData.gender,
         hasTdah: formData.hasTdah,
+        avatarUrl: formData.avatarUrl,
       });
       if (response.data.success) {
         showToast('Dados do paciente salvos com sucesso!');
@@ -287,14 +297,26 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             <Baby color={theme.colors.primary} size={110} />
           </View>
           
-          <View style={styles.cardHeader}>
-            <View style={styles.iconCircleYellow}>
-              <User color="#FFC857" size={32} />
-            </View>
-            <View style={styles.headerTexts}>
-              <Text style={styles.sectionTitle}>{t.patientProfile.childCardTitle}</Text>
-              <Text style={styles.sectionSubtitle}>{t.patientProfile.childCardSubtitle}</Text>
-            </View>
+          {/* Avatar Hero Centralizado e Maior (Mesmo padrão do Perfil do Profissional) */}
+          <View style={styles.avatarHeroContainer}>
+            <TouchableOpacity 
+              style={styles.avatarHeroWrapper}
+              onPress={() => setShowAvatarModal(true)}
+              activeOpacity={0.85}
+            >
+              <View style={styles.avatarHeroCircle}>
+                <Image 
+                  source={getChildAvatarSource(formData.avatarUrl, formData.gender)} 
+                  style={styles.avatarHeroImage} 
+                  resizeMode="cover"
+                />
+              </View>
+              <View style={styles.avatarHeroBadge}>
+                <Camera size={16} color="#FFFFFF" strokeWidth={2.4} />
+              </View>
+            </TouchableOpacity>
+            <Text style={styles.sectionTitleCentered}>{t.patientProfile.childCardTitle}</Text>
+            <Text style={styles.sectionSubtitleCentered}>{t.patientProfile.avatarHeroSub}</Text>
           </View>
 
           <View style={styles.formGroup}>
@@ -380,8 +402,8 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
             >
               {({ pressed }) => savingPatient ? <ActivityIndicator color="#181c1c" /> : (
                 <>
-                  <Save color={pressed ? "#FFF" : "#181c1c"} size={20} />
-                  <Text style={[styles.saveButtonTextYellow, pressed && { color: '#FFF' }]}>{t.patientProfile.savePatientBtn}</Text>
+                  <Save color="#FFFFFF" size={20} />
+                  <Text style={styles.saveButtonTextYellow}>{t.patientProfile.savePatientBtn}</Text>
                 </>
               )}
             </Pressable>
@@ -619,6 +641,67 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
                 )}
               </Pressable>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Seleção de Avatar do Paciente */}
+      <Modal visible={showAvatarModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.avatarModalContent, { paddingBottom: Math.max(insets.bottom + 16, 24) }]}>
+            <View style={styles.avatarModalHeader}>
+              <Text style={styles.avatarModalTitle}>{t.patientProfile.modalAvatarTitle}</Text>
+              <TouchableOpacity onPress={() => setShowAvatarModal(false)} style={styles.avatarCloseBtn}>
+                <X size={22} color={theme.colors.textDark} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.avatarModalSubtitle}>
+              {t.patientProfile.modalAvatarSubtitle}
+            </Text>
+
+            {/* Grade dos 4 Avatares Nativos */}
+            <View style={styles.avatarGridContainer}>
+              {AVAILABLE_AVATAR_OPTIONS.map((opt) => {
+                const isSelected = formData.avatarUrl === opt.id;
+                return (
+                  <TouchableOpacity
+                    key={opt.id}
+                    style={[
+                      styles.avatarOptionCard,
+                      isSelected && styles.avatarOptionCardSelected
+                    ]}
+                    onPress={() => {
+                      setFormData(prev => ({ ...prev, avatarUrl: opt.id }));
+                      setShowAvatarModal(false);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Image source={opt.source} style={styles.avatarOptionImage} resizeMode="cover" />
+                    <Text style={[styles.avatarOptionLabel, isSelected && styles.avatarOptionLabelSelected]}>
+                      {opt.defaultLabel}
+                    </Text>
+                    {isSelected && (
+                      <View style={styles.avatarSelectedBadge}>
+                        <CheckCircle2 size={16} color="#FFFFFF" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Botão de Restaurar foto padrão */}
+            {Boolean(formData.avatarUrl) && (
+              <TouchableOpacity
+                style={styles.resetAvatarBtn}
+                onPress={() => {
+                  setFormData(prev => ({ ...prev, avatarUrl: '' }));
+                  setShowAvatarModal(false);
+                }}
+              >
+                <Text style={styles.resetAvatarText}>Restaurar foto padrão do gênero</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </Modal>
@@ -1158,5 +1241,162 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 15,
     fontWeight: '700',
+  },
+
+  /* Avatar Hero Centralizado (Ficha do Paciente - Mesmo padrão do Profissional) */
+  avatarHeroContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.cardBorder,
+  },
+  avatarHeroWrapper: {
+    position: 'relative',
+    marginBottom: 10,
+  },
+  avatarHeroCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 3,
+    borderColor: '#FFC857',
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    ...theme.shadows.card,
+  },
+  avatarHeroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarHeroBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    ...theme.shadows.subtle,
+  },
+  sectionTitleCentered: {
+    color: theme.colors.textDark,
+    fontSize: 20,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  sectionSubtitleCentered: {
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    marginTop: 3,
+    textAlign: 'center',
+  },
+  avatarModalContent: {
+    backgroundColor: theme.colors.cardBg,
+    borderTopLeftRadius: theme.radii.xl,
+    borderTopRightRadius: theme.radii.xl,
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+  },
+  avatarModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  avatarModalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: theme.colors.textDark,
+  },
+  avatarCloseBtn: {
+    padding: 4,
+  },
+  avatarModalSubtitle: {
+    fontSize: 13,
+    color: theme.colors.textMuted,
+    lineHeight: 18,
+    marginBottom: 20,
+  },
+  avatarGridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  avatarOptionCard: {
+    width: '47%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: theme.radii.md,
+    borderWidth: 2,
+    borderColor: theme.colors.cardBorder,
+    padding: 12,
+    alignItems: 'center',
+    position: 'relative',
+    ...theme.shadows.subtle,
+  },
+  avatarOptionCardSelected: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.tealSoft,
+  },
+  avatarOptionImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    marginBottom: 8,
+  },
+  avatarOptionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.textDark,
+  },
+  avatarOptionLabelSelected: {
+    fontWeight: '800',
+    color: theme.colors.primary,
+  },
+  avatarSelectedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  uploadGalleryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.tealSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.tealMint,
+    borderRadius: theme.radii.md,
+    paddingVertical: 14,
+    marginBottom: 10,
+  },
+  uploadGalleryText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+  resetAvatarBtn: {
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  resetAvatarText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.accentOrange,
   }
 });

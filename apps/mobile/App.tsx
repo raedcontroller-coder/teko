@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, BackHandler, Modal, Text, Image, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
-import { setAuthToken, setupInterceptors } from './src/services/api';
+import { setAuthToken, setupInterceptors, api } from './src/services/api';
 import { GlobalHeader } from './src/components/GlobalHeader';
 import { BottomTabBar, TabName } from './src/components/BottomTabBar';
 import { DashboardScreen } from './src/screens/main/DashboardScreen';
@@ -65,6 +65,15 @@ function MainApp() {
           setCurrentUser(user);
           setCurrentTab(user?.role === 'GLOBAL_ADMIN' ? 'AdminDashboard' : 'Dashboard');
           setIsAuthenticated(true);
+
+          // Sincroniza em segundo plano os dados mais recentes do perfil (incluindo foto de perfil / avatar)
+          api.get('/api/my-data').then((res) => {
+            if (res.data?.success && res.data?.data) {
+              const freshUser = { ...user, ...res.data.data };
+              setCurrentUser(freshUser);
+              AsyncStorage.setItem('userData', JSON.stringify(freshUser)).catch(e => console.error(e));
+            }
+          }).catch(err => console.log('Erro ao atualizar dados do perfil em segundo plano:', err));
         }
       } catch (e) {
         console.error('Failed to restore auth', e);
@@ -183,11 +192,19 @@ function MainApp() {
       // Admin Tabs
       case 'AdminDashboard':
         return <AdminDashboardScreen 
-                 onNavigateToPsychologists={() => setCurrentTab('Psychologists')} 
+                 onNavigateToPsychologists={() => {
+                   setAdminSelectedPsicologo(null);
+                   setCurrentTab('Psychologists');
+                 }} 
                  onNavigateToNewPsychologist={() => setCurrentTab('NewPsychologist')}
+                 onSelectPsychologist={(psi) => {
+                   setAdminSelectedPsicologo(psi);
+                   setCurrentTab('Psychologists');
+                 }}
                />;
       case 'Psychologists':
         return <PsychologistsScreen 
+                 initialSelectedPsi={adminSelectedPsicologo}
                  onNavigateToNewPsychologist={() => setCurrentTab('NewPsychologist')} 
                  onNavigateToAdminPatients={(psiId, psiName) => {
                    setAdminSelectedPsicologo({ id: psiId, name: psiName });
@@ -196,6 +213,10 @@ function MainApp() {
                  onNavigateToAdminPsychologistProfile={(psiId, psiName) => {
                    setAdminSelectedPsicologo({ id: psiId, name: psiName });
                    setCurrentTab('AdminPsychologistProfile');
+                 }}
+                 onNavigateToAdminAgenda={(psiId, psiName) => {
+                   setAdminSelectedPsicologo({ id: psiId, name: psiName });
+                   setCurrentTab('AdminAgenda');
                  }}
                />;
       case 'NewPsychologist':
@@ -215,6 +236,15 @@ function MainApp() {
         if (!adminSelectedPsicologo) return <PsychologistsScreen />;
         return <PsychologistProfileScreen 
                  psicologoId={adminSelectedPsicologo.id}
+                 onGoBack={() => {
+                   setAdminSelectedPsicologo(null);
+                   setCurrentTab('Psychologists');
+                 }}
+               />;
+      case 'AdminAgenda':
+        return <AgendaScreen 
+                 adminPsicologoId={adminSelectedPsicologo?.id}
+                 adminPsicologoName={adminSelectedPsicologo?.name}
                  onGoBack={() => {
                    setAdminSelectedPsicologo(null);
                    setCurrentTab('Psychologists');
@@ -250,7 +280,16 @@ function MainApp() {
       <View style={{ flex: 1 }}>
         {renderTabContent()}
       </View>
-      <BottomTabBar currentTab={currentTab} onTabPress={setCurrentTab} userRole={currentUser?.role} />
+      <BottomTabBar 
+        currentTab={currentTab} 
+        onTabPress={(tab) => {
+          if (tab === 'Psychologists') {
+            setAdminSelectedPsicologo(null);
+          }
+          setCurrentTab(tab);
+        }} 
+        userRole={currentUser?.role} 
+      />
 
       <Modal
         visible={showExitModal}

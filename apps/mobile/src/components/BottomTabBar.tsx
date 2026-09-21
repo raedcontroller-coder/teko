@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../theme/theme';
 import { useTranslation } from '../i18n';
 
-export type TabName = 'Dashboard' | 'Patients' | 'Agenda' | 'Games' | 'Profile' | 'AdminDashboard' | 'Psychologists' | 'AdminReports' | 'NewPsychologist' | 'AdminPatients' | 'AdminPsychologistProfile';
+export type TabName = 'Dashboard' | 'Patients' | 'Agenda' | 'Games' | 'Profile' | 'AdminDashboard' | 'Psychologists' | 'AdminReports' | 'NewPsychologist' | 'AdminPatients' | 'AdminPsychologistProfile' | 'AdminAgenda';
 
 interface BottomTabBarProps {
   currentTab: TabName;
@@ -53,7 +53,12 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ currentTab, onTabPre
             >
               <View style={[styles.pill, isActive && styles.pillActive]}>
                 <tab.Icon color={iconColor} size={20} strokeWidth={isActive ? 2.4 : 1.8} />
-                <Text style={[styles.label, { color: textColor, fontWeight: isActive ? '700' : '500' }]}>
+                <Text 
+                  numberOfLines={1} 
+                  adjustsFontSizeToFit 
+                  minimumFontScale={0.8}
+                  style={[styles.label, { color: textColor, fontWeight: isActive ? '700' : '500' }]}
+                >
                   {tab.label}
                 </Text>
               </View>

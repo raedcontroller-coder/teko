@@ -6,10 +6,103 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { publicRegisterAction } from "../../../actions/auth";
 
+const cadastroTranslations: Record<string, {
+  backToHome: string;
+  title: string;
+  subtitle: string;
+  nameLabel: string;
+  namePlaceholder: string;
+  emailLabel: string;
+  emailPlaceholder: string;
+  crpLabel: string;
+  crpOptional: string;
+  crpPlaceholder: string;
+  clinicLabel: string;
+  clinicOptional: string;
+  clinicPlaceholder: string;
+  passwordLabel: string;
+  confirmPasswordLabel: string;
+  termsAgree: string;
+  termsLink: string;
+  andText: string;
+  privacyLink: string;
+  submitButton: string;
+  submittingButton: string;
+  successTitle: string;
+  successDesc: string;
+  hasAccount: string;
+  loginLink: string;
+  errNameEmpty: string;
+  errPasswordEmpty: string;
+  errClinicSpaces: string;
+}> = {
+  pt: {
+    backToHome: "Voltar para Início",
+    title: "Criar sua conta",
+    subtitle: "Inicie sua jornada com a Teko!",
+    nameLabel: "Nome Completo *",
+    namePlaceholder: "Ex: Dr. João Silva",
+    emailLabel: "E-mail *",
+    emailPlaceholder: "nome@psicologo.com.br",
+    crpLabel: "CRP",
+    crpOptional: "(Opcional)",
+    crpPlaceholder: "00/00000",
+    clinicLabel: "Nome da Clínica",
+    clinicOptional: "(Opcional)",
+    clinicPlaceholder: "Clínica Mente Viva",
+    passwordLabel: "Senha *",
+    confirmPasswordLabel: "Confirmar senha *",
+    termsAgree: "Eu concordo com os",
+    termsLink: "Termos de Serviço",
+    andText: "e a",
+    privacyLink: "Política de Privacidade",
+    submitButton: "Cadastrar Agora",
+    submittingButton: "Criando sua conta...",
+    successTitle: "Conta Criada!",
+    successDesc: "Preparando o seu ambiente de trabalho... Você será redirecionado em instantes.",
+    hasAccount: "Já possui uma conta?",
+    loginLink: "Entrar",
+    errNameEmpty: "O nome não pode estar vazio ou conter apenas espaços.",
+    errPasswordEmpty: "A senha não pode estar vazia ou conter apenas espaços.",
+    errClinicSpaces: "O nome da clínica não pode conter apenas espaços."
+  },
+  en: {
+    backToHome: "Back to Home",
+    title: "Create Your Account",
+    subtitle: "Begin your journey with Teko!",
+    nameLabel: "Full Name *",
+    namePlaceholder: "E.g.: Dr. Jane Smith",
+    emailLabel: "Email *",
+    emailPlaceholder: "name@psychologist.com",
+    crpLabel: "License (CRP)",
+    crpOptional: "(Optional)",
+    crpPlaceholder: "00/00000",
+    clinicLabel: "Clinic Name",
+    clinicOptional: "(Optional)",
+    clinicPlaceholder: "Mind Care Clinic",
+    passwordLabel: "Password *",
+    confirmPasswordLabel: "Confirm Password *",
+    termsAgree: "I agree to the",
+    termsLink: "Terms of Service",
+    andText: "and the",
+    privacyLink: "Privacy Policy",
+    submitButton: "Register Now",
+    submittingButton: "Creating your account...",
+    successTitle: "Account Created!",
+    successDesc: "Preparing your workspace... You will be redirected shortly.",
+    hasAccount: "Already have an account?",
+    loginLink: "Sign In",
+    errNameEmpty: "Name cannot be empty or contain only spaces.",
+    errPasswordEmpty: "Password cannot be empty or contain only spaces.",
+    errClinicSpaces: "Clinic name cannot contain only spaces."
+  }
+};
+
 export default function CadastroPage() {
   const params = useParams();
   const router = useRouter();
-  const lang = (params?.lang as string) || "pt";
+  const lang = (params?.lang as string) === "en" ? "en" : "pt";
+  const t = cadastroTranslations[lang];
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,19 +112,13 @@ export default function CadastroPage() {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const handleCrpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove all non-digits
     let value = e.target.value.replace(/\D/g, '');
-    
-    // Limit to 7 digits
     if (value.length > 7) {
       value = value.slice(0, 7);
     }
-    
-    // Add the slash after the first 2 digits
     if (value.length > 2) {
       value = value.slice(0, 2) + '/' + value.slice(2);
     }
-    
     setCrpValue(value);
   };
 
@@ -42,25 +129,24 @@ export default function CadastroPage() {
 
     const formData = new FormData(e.currentTarget);
     
-    // Client-side validation for empty/spaces
     const fullName = (formData.get("full_name") as string)?.trim();
     const password = (formData.get("password") as string)?.trim();
     const rawClinicName = formData.get("clinicName") as string;
     
     if (!fullName) {
-      setError("O nome não pode estar vazio ou conter apenas espaços.");
+      setError(t.errNameEmpty);
       setLoading(false);
       return;
     }
 
     if (!password) {
-      setError("A senha não pode estar vazia ou conter apenas espaços.");
+      setError(t.errPasswordEmpty);
       setLoading(false);
       return;
     }
 
     if (rawClinicName && rawClinicName.trim().length === 0) {
-      setError("O nome da clínica não pode conter apenas espaços.");
+      setError(t.errClinicSpaces);
       setLoading(false);
       return;
     }
@@ -92,9 +178,9 @@ export default function CadastroPage() {
                 <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="300" strokeDashoffset="0" className="opacity-50" />
               </svg>
             </div>
-            <h2 className="font-headline-lg text-2xl font-bold text-white mb-2">Conta Criada!</h2>
+            <h2 className="font-headline-lg text-2xl font-bold text-white mb-2">{t.successTitle}</h2>
             <p className="text-white/70 font-body-md mb-8">
-              Preparando o seu ambiente de trabalho... Você será redirecionado em instantes.
+              {t.successDesc}
             </p>
             <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full bg-teko-yellow w-full origin-left animate-[scale-x_4s_linear_forwards]" style={{ animationName: 'scaleX' }}></div>
@@ -121,7 +207,7 @@ export default function CadastroPage() {
         </div>
         <div className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg pointer-events-none">
           <span className="font-label-md text-sm text-white/90 whitespace-nowrap">
-            Voltar para Início
+            {t.backToHome}
           </span>
         </div>
       </Link>
@@ -130,7 +216,7 @@ export default function CadastroPage() {
         <div className="glass-panel rounded-[2rem] p-stack-lg md:p-12 flex flex-col items-center">
           {/* Brand Icon */}
           <div className="mb-stack-lg w-24 h-24 rounded-[2rem] overflow-hidden border-[4px] border-white/10 p-0 bg-surface-container-low shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
-            <Link href="/" className="hover:scale-105 transition-transform duration-500 block w-full h-full">
+            <Link href={`/${lang}`} className="hover:scale-105 transition-transform duration-500 block w-full h-full">
               <Image
                 alt="Teko Brand Icon"
                 width={96}
@@ -143,8 +229,8 @@ export default function CadastroPage() {
 
           {/* Header Text */}
           <div className="text-center mb-stack-lg">
-            <h1 className="font-headline-lg text-3xl font-black text-white mb-2">Criar sua conta</h1>
-            <p className="text-white/70 font-body-md">Inicie sua jornada com a Teko!</p>
+            <h1 className="font-headline-lg text-3xl font-black text-white mb-2">{t.title}</h1>
+            <p className="text-white/70 font-body-md">{t.subtitle}</p>
           </div>
 
           {/* Registration Form */}
@@ -158,7 +244,7 @@ export default function CadastroPage() {
 
             {/* Full Name */}
             <div className="space-y-1">
-              <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="full_name">Nome Completo *</label>
+              <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="full_name">{t.nameLabel}</label>
               <div className="relative group">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-teko-yellow transition-colors">person</span>
                 <input
@@ -166,15 +252,15 @@ export default function CadastroPage() {
                   id="full_name"
                   name="full_name"
                   required
-                  placeholder="Ex: Dr. João Silva"
+                  placeholder={t.namePlaceholder}
                   type="text"
                 />
               </div>
             </div>
 
-            {/* Professional Email (CRP) */}
+            {/* Professional Email */}
             <div className="space-y-1">
-              <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="email">E-mail *</label>
+              <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="email">{t.emailLabel}</label>
               <div className="relative group">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-teko-yellow transition-colors">badge</span>
                 <input
@@ -182,7 +268,7 @@ export default function CadastroPage() {
                   id="email"
                   name="email"
                   required
-                  placeholder="nome@psicologo.com.br"
+                  placeholder={t.emailPlaceholder}
                   type="email"
                 />
               </div>
@@ -191,7 +277,7 @@ export default function CadastroPage() {
             {/* CRP & Clinic */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="crp">CRP <span className="text-white/50 text-xs">(Opcional)</span></label>
+                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="crp">{t.crpLabel} <span className="text-white/50 text-xs">{t.crpOptional}</span></label>
                 <div className="relative group">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-teko-yellow transition-colors">id_card</span>
                   <input
@@ -201,20 +287,20 @@ export default function CadastroPage() {
                     value={crpValue}
                     onChange={handleCrpChange}
                     maxLength={8}
-                    placeholder="00/00000"
+                    placeholder={t.crpPlaceholder}
                     type="text"
                   />
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="clinicName">Nome da Clínica <span className="text-white/50 text-xs">(Opcional)</span></label>
+                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="clinicName">{t.clinicLabel} <span className="text-white/50 text-xs">{t.clinicOptional}</span></label>
                 <div className="relative group">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-teko-yellow transition-colors">domain</span>
                   <input
                     className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border-2 border-white/10 text-white placeholder:text-white/40 focus:border-teko-yellow focus:ring-0 focus:outline-none transition-all"
                     id="clinicName"
                     name="clinicName"
-                    placeholder="Clínica Mente Viva"
+                    placeholder={t.clinicPlaceholder}
                     type="text"
                   />
                 </div>
@@ -225,7 +311,7 @@ export default function CadastroPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Password */}
               <div className="space-y-1">
-                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="password">Senha *</label>
+                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="password">{t.passwordLabel}</label>
                 <div className="relative group">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-teko-yellow transition-colors">lock</span>
                   <input
@@ -249,7 +335,7 @@ export default function CadastroPage() {
 
               {/* Confirm Password */}
               <div className="space-y-1">
-                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="confirm_password">Confirmar senha *</label>
+                <label className="font-label-md text-sm ml-1 text-white/90" htmlFor="confirm_password">{t.confirmPasswordLabel}</label>
                 <div className="relative group">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-teko-yellow transition-colors">check_circle</span>
                   <input
@@ -281,7 +367,7 @@ export default function CadastroPage() {
                 type="checkbox"
               />
               <label className="text-sm text-white/70 leading-tight cursor-pointer" htmlFor="terms">
-                Eu concordo com os <Link className="text-teko-yellow hover:underline" href="#">Termos de Serviço</Link> e a <Link className="text-teko-yellow hover:underline" href="#">Política de Privacidade</Link>.
+                {t.termsAgree} <Link className="text-teko-yellow hover:underline" href="#">{t.termsLink}</Link> {t.andText} <Link className="text-teko-yellow hover:underline" href="#">{t.privacyLink}</Link>.
               </label>
             </div>
 
@@ -294,11 +380,11 @@ export default function CadastroPage() {
               {loading ? (
                 <>
                   <span className="material-symbols-outlined animate-spin">refresh</span>
-                  Criando sua conta...
+                  {t.submittingButton}
                 </>
               ) : (
                 <>
-                  Cadastrar Agora
+                  {t.submitButton}
                   <span className="material-symbols-outlined">arrow_forward</span>
                 </>
               )}
@@ -308,9 +394,9 @@ export default function CadastroPage() {
           {/* Footer Link */}
           <div className="mt-stack-lg pt-stack-md border-t border-white/10 w-full text-center">
             <p className="text-white/70 font-body-md">
-              Já possui uma conta?
+              {t.hasAccount}
               <Link className="text-[#7B61FF] font-bold hover:text-teko-yellow transition-colors ml-2" href={`/${lang}/login`}>
-                Entrar
+                {t.loginLink}
               </Link>
             </p>
           </div>

@@ -16,6 +16,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { api } from '../../services/api';
 import { theme } from '../../theme/theme';
+import { useTranslation } from '../../i18n';
 
 interface DadosRow {
   id: string;
@@ -36,6 +37,7 @@ interface DadosRow {
 }
 
 export const AdminReportsScreen: React.FC = () => {
+  const { t } = useTranslation();
   const [data, setData] = useState<DadosRow[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -117,21 +119,21 @@ export const AdminReportsScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Psicólogo */}
+        {/* Profissional */}
         <View style={styles.dataRow}>
           <Briefcase color={theme.colors.textMuted} size={16} />
           <View style={styles.dataTextContainer}>
-            <Text style={styles.dataLabel}>Psicólogo(a)</Text>
+            <Text style={styles.dataLabel}>Profissional</Text>
             <Text style={styles.dataValue}>{item.psicologoName}</Text>
             <Text style={styles.dataSubValue}>{item.psicologoClinic || 'Sem clínica'}</Text>
           </View>
         </View>
 
-        {/* Contato Psi */}
+        {/* Contato Profissional */}
         <View style={styles.dataRow}>
           <AtSign color={theme.colors.textMuted} size={16} />
           <View style={styles.dataTextContainer}>
-            <Text style={styles.dataLabel}>Contato (Psi)</Text>
+            <Text style={styles.dataLabel}>Contato (Profissional)</Text>
             <Text style={styles.dataValue}>{item.psicologoEmail}</Text>
             <Text style={styles.dataSubValue}>CRP: {item.psicologoCrp || 'Não informado'}</Text>
           </View>
@@ -162,8 +164,8 @@ export const AdminReportsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.title}>Dados Gerados</Text>
-        <Text style={styles.subtitle}>Extraia relatórios brutos da plataforma</Text>
+        <Text style={styles.title}>{t.admin.reportsTitle}</Text>
+        <Text style={styles.subtitle}>{t.admin.reportsSubtitle}</Text>
       </View>
 
       <View style={styles.controls}>
@@ -171,7 +173,7 @@ export const AdminReportsScreen: React.FC = () => {
           <Search color={theme.colors.textMuted} size={18} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar (criança, responsável, psicólogo...)"
+            placeholder={t.admin.searchReportsPlaceholder}
             placeholderTextColor={theme.colors.textMuted}
             value={searchTerm}
             onChangeText={setSearchTerm}
@@ -188,7 +190,7 @@ export const AdminReportsScreen: React.FC = () => {
           ) : (
             <>
               <Download color="#FFFFFF" size={18} />
-              <Text style={styles.exportButtonText}>Exportar (CSV)</Text>
+              <Text style={styles.exportButtonText}>{t.admin.exportCsv}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -207,7 +209,7 @@ export const AdminReportsScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+              <Text style={styles.emptyText}>{t.admin.noRecordsFound}</Text>
             </View>
           }
         />

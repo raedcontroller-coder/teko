@@ -66,6 +66,7 @@ export async function GET(request: Request) {
         email: true,
         crp: true,
         clinicName: true,
+        avatarUrl: true,
         createdAt: true,
       },
       orderBy: (users, { desc }) => [desc(users.createdAt)],

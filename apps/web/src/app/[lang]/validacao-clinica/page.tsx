@@ -1,6 +1,11 @@
 import Image from "next/image";
+import { getDictionary } from "../../../dictionaries";
 
-export default function ValidacaoClinicaPage() {
+export default async function ValidacaoClinicaPage({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = (resolvedParams?.lang === "en" ? "en" : "pt") as "en" | "pt";
+  const dict = await getDictionary(lang);
+
   return (
     <div className="flex-grow pt-[120px] pb-section-gap px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto flex flex-col gap-section-gap">
       {/* Super Hero Section */}
@@ -8,20 +13,20 @@ export default function ValidacaoClinicaPage() {
         <div className="flex-1 flex flex-col gap-stack-md order-2 md:order-1">
           <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
             <span className="material-symbols-outlined text-[#7B61FF] text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-            <span className="font-label-md text-sm text-white">Fundação Científica</span>
+            <span className="font-label-md text-sm text-white">{dict.validacao.badge}</span>
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[64px] font-display-lg-mobile md:font-display-lg text-white leading-[1.1] font-black">
-            A <span className="text-teko-yellow">Ciência</span> <br />
-            por trás do <br />
-            <span className="text-[#7B61FF]">Brincar.</span>
+            {dict.validacao.title_line1} <span className="text-teko-yellow">{dict.validacao.title_highlight1}</span> <br />
+            {dict.validacao.title_line2} <br />
+            <span className="text-[#7B61FF]">{dict.validacao.title_highlight2}</span>
           </h1>
           <p className="font-body-lg text-text-muted">
-            Nossos serious games transformam avaliações neuropsicológicas complexas em dados clínicos engajadores, oferecendo uma janela precisa para o desenvolvimento cognitivo infantil, sem a ansiedade dos testes tradicionais.
+            {dict.validacao.subtitle}
           </p>
           <div className="flex flex-col gap-stack-sm mt-4 border-l-2 border-[#7B61FF] pl-4">
-            <h3 className="font-headline-md font-bold text-on-surface">Rigor Acadêmico, Prática Clínica.</h3>
+            <h3 className="font-headline-md font-bold text-on-surface">{dict.validacao.academic_title}</h3>
             <p className="font-body-md text-text-muted">
-              Todas as dinâmicas da Teko são estritamente baseadas em pesquisas de Mestrado e Doutorado, construindo uma ponte sólida entre a vanguarda do conhecimento acadêmico e as necessidades reais da prática clínica diária.
+              {dict.validacao.academic_desc}
             </p>
           </div>
         </div>
@@ -45,19 +50,18 @@ export default function ValidacaoClinicaPage() {
           <div className="flex-1 flex flex-col gap-stack-md order-2 md:order-1">
             <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
               <span className="material-symbols-outlined text-teko-yellow text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>front_hand</span>
-              <span className="font-label-md text-sm text-white">Controle Inibitório</span>
+              <span className="font-label-md text-sm text-white">{dict.validacao.inibicao_badge}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-display-lg-mobile md:font-display-lg text-white leading-[1.2] font-black">
-              Desafio <br/>
-              <span className="text-teko-yellow">da Inibição</span> <br/>
-              <span className="text-white/60 text-3xl">(Toca Rápido!)</span>
+              {dict.validacao.inibicao_title} <br/>
+              <span className="text-[#7B61FF]">{dict.validacao.inibicao_sub}</span>
             </h2>
             <p className="font-body-lg text-text-muted">
-              Nossa adaptação lúdica do paradigma &quot;Toca Rápido!&quot; mede com precisão o controle inibitório e o gerenciamento de impulsos. Ao transformar estímulos estáticos em desafios interativos, capturamos reações naturais que são fundamentais para avaliar a capacidade de autorregulação da criança em cenários do mundo real.
+              {dict.validacao.inibicao_desc}
             </p>
             <div className="flex flex-col gap-stack-sm mt-4 border-l-2 border-teko-yellow pl-4">
-              <h4 className="font-headline-md font-bold text-on-surface">Métrica Principal</h4>
-              <p className="font-body-md text-text-muted">Impulsividade.</p>
+              <h4 className="font-headline-md font-bold text-on-surface">{dict.validacao.inibicao_metric_title}</h4>
+              <p className="font-body-md text-text-muted">{dict.validacao.inibicao_metric_desc}</p>
             </div>
           </div>
           <div className="flex-1 w-full order-1 md:order-2">
@@ -89,19 +93,18 @@ export default function ValidacaoClinicaPage() {
           <div className="flex-1 flex flex-col gap-stack-md order-2">
             <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
               <span className="material-symbols-outlined text-[#7B61FF] text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>sports_soccer</span>
-              <span className="font-label-md text-sm text-white">Velocidade de Processamento</span>
+              <span className="font-label-md text-sm text-white">{dict.validacao.velocidade_badge}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-display-lg-mobile md:font-display-lg text-white leading-[1.2] font-black">
-              Metrificando o <br/>
-              <span className="text-[#7B61FF]">tempo de resposta.</span> <br/>
-              <span className="text-white/60 text-3xl">(Goleiro)</span>
+              {dict.validacao.velocidade_title} <br/>
+              <span className="text-[#7B61FF]">{dict.validacao.velocidade_sub}</span>
             </h2>
             <p className="font-body-lg text-text-muted">
-              Avalia a velocidade de processamento e a tomada de decisão sob pressão temporal. O Goleiro exige que a criança reaja rapidamente para interceptar chutes ao gol. Os dados coletados rastreiam, com precisão de milissegundos, o tempo de reação em cada defesa e a taxa de sucesso motora, mensurando a agilidade cognitiva de forma direta.
+              {dict.validacao.velocidade_desc}
             </p>
             <div className="flex flex-col gap-stack-sm mt-4 border-l-2 border-[#7B61FF] pl-4">
-              <h4 className="font-headline-md font-bold text-on-surface">Métrica Principal</h4>
-              <p className="font-body-md text-text-muted">Velocidade no tempo de resposta.</p>
+              <h4 className="font-headline-md font-bold text-on-surface">{dict.validacao.velocidade_metric_title}</h4>
+              <p className="font-body-md text-text-muted">{dict.validacao.velocidade_metric_desc}</p>
             </div>
           </div>
         </section>
@@ -111,19 +114,18 @@ export default function ValidacaoClinicaPage() {
           <div className="flex-1 flex flex-col gap-stack-md order-2 md:order-1">
             <div className="inline-flex self-start items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-2">
               <span className="material-symbols-outlined text-teko-yellow text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>photo_camera</span>
-              <span className="font-label-md text-sm text-white">Atenção Sustentada</span>
+              <span className="font-label-md text-sm text-white">{dict.validacao.foco_badge}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-display-lg-mobile md:font-display-lg text-white leading-[1.2] font-black">
-              Foco <br/>
-              <span className="text-teko-yellow">Sustentado.</span> <br/>
-              <span className="text-white/60 text-3xl">(Fotógrafo da Floresta)</span>
+              {dict.validacao.foco_title} <br/>
+              <span className="text-teko-yellow">{dict.validacao.foco_sub}</span>
             </h2>
             <p className="font-body-lg text-text-muted">
-              Avalia a atenção sustentada e a capacidade de rastreamento visual. No Fotógrafo da Floresta, a criança explora um cenário interativo para localizar e &quot;fotografar&quot; animais específicos em meio a distratores. O sistema coleta dados precisos sobre a velocidade de descoberta, a quantidade de fotografias corretas e os falsos positivos (fotos incorretas), mapeando perfeitamente a capacidade de manter o foco prolongado e ignorar distrações.
+              {dict.validacao.foco_desc}
             </p>
             <div className="flex flex-col gap-stack-sm mt-4 border-l-2 border-teko-yellow pl-4">
-              <h4 className="font-headline-md font-bold text-on-surface">Métrica Principal</h4>
-              <p className="font-body-md text-text-muted">Queda de atenção.</p>
+              <h4 className="font-headline-md font-bold text-on-surface">{dict.validacao.foco_metric_title}</h4>
+              <p className="font-body-md text-text-muted">{dict.validacao.foco_metric_desc}</p>
             </div>
           </div>
           <div className="flex-1 w-full order-1 md:order-2">
@@ -139,8 +141,6 @@ export default function ValidacaoClinicaPage() {
           </div>
         </section>
       </div>
-
-
     </div>
   );
 }

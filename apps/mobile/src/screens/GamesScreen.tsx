@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api } from '../services/api';
 import { theme } from '../theme/theme';
 import { useTranslation } from '../i18n';
+import { getChildAvatarSource } from '../utils/patientAvatarHelper';
 import { SkeletonLoader } from '../components/ui/SkeletonLoader';
 
 interface GamesScreenProps {
@@ -148,7 +149,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
                     />
                     <View style={styles.badgePurpleOverlay}>
                       <Sparkles size={12} color={theme.colors.badgePurpleText} />
-                      <Text style={styles.badgePurpleText}>Tempo de Reação</Text>
+                      <Text style={styles.badgePurpleText}>{t.games.reactionTimeBadge}</Text>
                     </View>
                   </View>
 
@@ -181,7 +182,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
                     />
                     <View style={styles.badgePurpleOverlay}>
                       <Sparkles size={12} color={theme.colors.badgePurpleText} />
-                      <Text style={styles.badgePurpleText}>Controle Inibitório</Text>
+                      <Text style={styles.badgePurpleText}>{t.games.inhibitoryControlBadge}</Text>
                     </View>
                   </View>
 
@@ -317,8 +318,12 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
                   }
                   renderItem={({ item }) => (
                     <TouchableOpacity style={styles.patientCard} onPress={() => handlePsiSelected(item.id)}>
-                      <View style={styles.patientAvatar}>
-                        <Text style={styles.patientAvatarText}>{item.name.charAt(0).toUpperCase()}</Text>
+                      <View style={[styles.patientAvatar, item.avatarUrl ? { backgroundColor: 'transparent', padding: 0 } : null]}>
+                        {item.avatarUrl ? (
+                          <Image source={{ uri: item.avatarUrl }} style={{ width: 44, height: 44, borderRadius: 22 }} resizeMode="cover" />
+                        ) : (
+                          <Text style={styles.patientAvatarText}>{item.name.charAt(0).toUpperCase()}</Text>
+                        )}
                       </View>
                       <View style={styles.patientInfo}>
                         <Text style={styles.patientName}>{item.name}</Text>
@@ -355,10 +360,7 @@ export const GamesScreen: React.FC<GamesScreenProps> = ({ userRole, onSelectGame
                       keyExtractor={(item) => item.id}
                       contentContainerStyle={styles.patientList}
                       renderItem={({ item }) => {
-                        const isGirl = item.gender?.toLowerCase().includes('fem') || item.name?.endsWith('a');
-                        const avatarSource = isGirl 
-                          ? require('../../assets/elementos_visuais/menina_crianca.png')
-                          : require('../../assets/elementos_visuais/menino_crianca.png');
+                        const avatarSource = getChildAvatarSource(item.avatarUrl, item.gender);
 
                         return (
                           <TouchableOpacity

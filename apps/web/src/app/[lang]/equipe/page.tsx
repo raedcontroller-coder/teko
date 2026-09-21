@@ -1,20 +1,25 @@
 import Image from "next/image";
+import { getDictionary } from "../../../dictionaries";
 
-export default function EquipePage() {
+export default async function EquipePage({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = (resolvedParams?.lang === "en" ? "en" : "pt") as "en" | "pt";
+  const dict = await getDictionary(lang);
+
   return (
     <div className="pt-[120px] pb-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
       <section className="flex flex-col items-center text-center max-w-4xl mx-auto mb-section-gap gap-stack-md fade-in-up">
         <div className="inline-flex items-center gap-2 glass-pill px-4 py-1.5 rounded-full mb-4">
           <span className="material-symbols-outlined text-teko-yellow text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>groups</span>
-          <span className="font-label-md text-sm text-white uppercase tracking-wider">Fundadores</span>
+          <span className="font-label-md text-sm text-white uppercase tracking-wider">{dict.equipe.badge}</span>
         </div>
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[64px] font-display-lg-mobile md:font-display-lg text-white leading-[1.1] font-black">
-          O <span className="text-teko-yellow">Coração</span> <br />
-          da <br />
-          <span className="text-[#7B61FF]">Teko.</span>
+          {dict.equipe.title_line1} <span className="text-teko-yellow">{dict.equipe.title_highlight1}</span> <br />
+          {dict.equipe.title_line2} <br />
+          <span className="text-[#7B61FF]">{dict.equipe.title_highlight2}</span>
         </h1>
         <p className="font-body-lg text-white/80 max-w-2xl mx-auto mt-4 text-lg md:text-xl">
-          Conheça a equipe multidisciplinar que une precisão clínica, design empático e engenharia de ponta para transformar a avaliação psicométrica infantil.
+          {dict.equipe.subtitle}
         </p>
       </section>
       
@@ -32,10 +37,10 @@ export default function EquipePage() {
           </div>
           <div className="w-full md:flex-1 flex flex-col justify-center gap-stack-lg glass-panel p-10 md:p-12 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div className="inline-flex self-start items-center gap-2 glass-pill px-5 py-2 rounded-full mb-2">
-              <span className="font-label-md text-base text-teko-yellow font-bold">Product Owner &amp; UI/UX Designer</span>
+              <span className="font-label-md text-base text-teko-yellow font-bold">{dict.equipe.mavi_role}</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white">Maria Victoria Batista Oliveira</h2>
-            <p className="font-body-lg text-lg text-text-muted leading-relaxed">Liderando a visão de produto e a experiência do usuário, Maria Victoria garante que a Teko seja intuitiva e acolhedora para crianças e psicólogos. Seu foco em maximizar o valor do produto e mapear jornadas empáticas é fundamental para a identidade da marca, traduzindo complexidade clínica em interações lúdicas e engajadoras.</p>
+            <h2 className="text-4xl md:text-5xl font-black text-white">{dict.equipe.mavi_name}</h2>
+            <p className="font-body-lg text-lg text-text-muted leading-relaxed">{dict.equipe.mavi_bio}</p>
             <div className="flex gap-3 flex-wrap mt-4">
               <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">UX/UI Design</span>
               <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Product Strategy</span>
@@ -59,10 +64,10 @@ export default function EquipePage() {
           </div>
           <div className="w-full md:flex-1 flex flex-col justify-center gap-stack-lg glass-panel p-10 md:p-12 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div className="inline-flex self-start items-center gap-2 glass-pill px-5 py-2 rounded-full mb-2">
-              <span className="font-label-md text-base text-teko-yellow font-bold">Tech Lead &amp; Fullstack Developer</span>
+              <span className="font-label-md text-base text-teko-yellow font-bold">{dict.equipe.carlos_role}</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white">Carlos Eduardo de Lima</h2>
-            <p className="font-body-lg text-lg text-text-muted leading-relaxed">Como arquiteto do sistema, Carlos lidera o desenvolvimento fullstack e a implementação dos pipelines de inteligência artificial. Ele é responsável pelas decisões críticas de engenharia, garantindo que a plataforma seja robusta, escalável e rigorosamente alinhada aos padrões de segurança e conformidade (LGPD), protegendo os dados sensíveis dos pacientes.</p>
+            <h2 className="text-4xl md:text-5xl font-black text-white">{dict.equipe.carlos_name}</h2>
+            <p className="font-body-lg text-lg text-text-muted leading-relaxed">{dict.equipe.carlos_bio}</p>
             <div className="flex gap-3 flex-wrap mt-4">
               <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">System Architecture</span>
               <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">AI Pipeline</span>
@@ -86,10 +91,10 @@ export default function EquipePage() {
           </div>
           <div className="w-full md:flex-1 flex flex-col justify-center gap-stack-lg glass-panel p-10 md:p-12 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div className="inline-flex self-start items-center gap-2 glass-pill px-5 py-2 rounded-full mb-2">
-              <span className="font-label-md text-base text-teko-yellow font-bold">Business &amp; Data Lead</span>
+              <span className="font-label-md text-base text-teko-yellow font-bold">{dict.equipe.miguel_role}</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white">Miguel Rodrigues Pereira Francisco</h2>
-            <p className="font-body-lg text-lg text-text-muted leading-relaxed">Miguel une estratégia financeira e análise de dados para impulsionar o crescimento sustentável da Teko. Especialista em KPIs e validação de algoritmos, ele traduz métricas complexas em insights acionáveis de negócios. Sua visão analítica é complementada por contribuições no desenvolvimento frontend, assegurando que os dados sejam apresentados com clareza clínica.</p>
+            <h2 className="text-4xl md:text-5xl font-black text-white">{dict.equipe.miguel_name}</h2>
+            <p className="font-body-lg text-lg text-text-muted leading-relaxed">{dict.equipe.miguel_bio}</p>
             <div className="flex gap-3 flex-wrap mt-4">
               <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Financial Strategy</span>
               <span className="inline-flex items-center glass-pill px-4 py-2 rounded-full text-sm text-white/80 border border-white/10">Data Analytics</span>

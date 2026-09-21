@@ -38,7 +38,9 @@ vi.mock('../../../../packages/db/db/index', () => {
   };
   (mockDb.where as any).mockResolvedValue([]);
   (mockDb.set as any).mockReturnValue({
-    where: vi.fn().mockResolvedValue([{ id: 'updated-id' }])
+    where: vi.fn().mockReturnValue({
+      returning: vi.fn().mockResolvedValue([{ id: 'updated-id' }])
+    })
   });
   
   return { db: mockDb };
@@ -50,6 +52,7 @@ vi.mock('drizzle-orm', () => ({
   desc: vi.fn(),
   sql: vi.fn(),
   inArray: vi.fn(),
+  isNull: vi.fn(),
 }));
 
 vi.mock('./auth', () => ({
@@ -220,11 +223,9 @@ describe('Integração de Comunicação - Pacientes da Web vs Banco de Dados', (
 
   describe('6. deletePatientAction', () => {
     it('deve excluir permanentemente um paciente do sistema', async () => {
-      (db.where as any).mockResolvedValueOnce([{ id: 'pat-1' }]); 
-
       const res = await deletePatientAction('pat-1');
       
-      expect(db.delete).toHaveBeenCalled();
+      expect(db.update).toHaveBeenCalled();
       expect(res.success).toBe(true);
     });
 

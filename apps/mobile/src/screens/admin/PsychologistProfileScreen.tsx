@@ -12,11 +12,14 @@ import {
   Animated,
   Easing,
   Pressable,
-  Modal
+  Modal,
+  Image
 } from 'react-native';
-import { ArrowLeft, User, Lock, Save, Trash2, CheckCircle2, XCircle, AlertTriangle, Key } from 'lucide-react-native';
+import { ArrowLeft, User, Lock, Save, Trash2, CheckCircle2, XCircle, AlertTriangle, Key, Camera } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { api } from '../../services/api';
 import { theme } from '../../theme/theme';
+import { useTranslation } from '../../i18n';
 
 interface PsychologistProfileScreenProps {
   psicologoId: string;
@@ -24,6 +27,7 @@ interface PsychologistProfileScreenProps {
 }
 
 export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps> = ({ psicologoId, onGoBack }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [savingData, setSavingData] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
@@ -34,6 +38,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
     email: '',
     crp: '',
     clinicName: '',
+    avatarUrl: '',
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -101,6 +106,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             email: response.data.data.email || '',
             crp: response.data.data.crp || '',
             clinicName: response.data.data.clinicName || '',
+            avatarUrl: response.data.data.avatarUrl || '',
           });
         }
       } catch (err) {
@@ -112,6 +118,34 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
     fetchPsi();
   }, [psicologoId]);
 
+  const pickImageFromDevice = async () => {
+    try {
+      if (ImagePicker.requestMediaLibraryPermissionsAsync) {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permissionResult && !permissionResult.granted) {
+          showError('Permissão para acessar as fotos do celular é necessária.');
+          return;
+        }
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions ? ImagePicker.MediaTypeOptions.Images : ['images'] as any,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.6,
+        base64: true,
+      });
+
+      if (result && !result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        const imageUri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+        setFormData(prev => ({ ...prev, avatarUrl: imageUri }));
+      }
+    } catch (err) {
+      showError('Não foi possível carregar a imagem do celular.');
+    }
+  };
+
   const handleCrpChange = (text: string) => {
     let value = text.replace(/\D/g, '');
     if (value.length > 2) {
@@ -122,17 +156,17 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
 
   const handleSaveData = async () => {
     if (!formData.name.trim() || !formData.email.trim()) {
-      showError('Nome e e-mail são obrigatórios.');
+      showError(t.admin.nameEmailRequired);
       return;
     }
     try {
       setSavingData(true);
       const response = await api.put(`/api/admin/psychologists/${psicologoId}?type=data`, formData);
       if (response.data.success) {
-        showToast('Dados salvos com sucesso!');
+        showToast(t.admin.saveDataSuccess);
       }
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Erro ao salvar dados.';
+      const msg = err.response?.data?.error || t.common.saveError;
       showError(msg);
     } finally {
       setSavingData(false);
@@ -141,11 +175,11 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
 
   const handleSavePassword = async () => {
     if (!passwordData.password || passwordData.password !== passwordData.confirmPassword) {
-      showError('As senhas não coincidem ou estão vazias.');
+      showError(t.admin.passwordsMismatchOrEmpty);
       return;
     }
     if (passwordData.password.length < 6) {
-      showError('A senha deve ter no mínimo 6 caracteres.');
+      showError(t.admin.minPasswordLength);
       return;
     }
     try {
@@ -153,10 +187,10 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
       const response = await api.put(`/api/admin/psychologists/${psicologoId}?type=password`, { password: passwordData.password });
       if (response.data.success) {
         setPasswordData({ password: '', confirmPassword: '' });
-        showToast('Senha atualizada com sucesso!');
+        showToast(t.admin.updatePasswordSuccess);
       }
     } catch (err: any) {
-      showError('Erro ao atualizar senha.');
+      showError(t.profileScreen.passwordUpdateError);
     } finally {
       setSavingPassword(false);
     }
@@ -168,14 +202,14 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
       const response = await api.delete(`/api/admin/psychologists/${psicologoId}`);
       if (response.data.success) {
         setShowDeleteModal(false);
-        showToast('Profissional excluído com sucesso!');
+        showToast(t.admin.deleteProfSuccess);
         setTimeout(() => {
           onGoBack();
         }, 1500);
       }
     } catch (err) {
       setShowDeleteModal(false);
-      showError('Erro ao excluir profissional.');
+      showError(t.profileScreen.deleteAccountError);
     } finally {
       setDeleting(false);
     }
@@ -203,7 +237,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
           {({ pressed }) => (
             <>
               <ArrowLeft color={pressed ? theme.colors.textMuted : theme.colors.primary} size={24} />
-              <Text style={styles.topBarTitle}>Credenciais do Profissional</Text>
+              <Text style={styles.topBarTitle}>{t.admin.credentialsTitle}</Text>
             </>
           )}
         </Pressable>
@@ -220,24 +254,58 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             <View style={[styles.sectionIconBg, { backgroundColor: theme.colors.tealSoft }]}>
               <Key color={theme.colors.primary} size={24} />
             </View>
-            <Text style={styles.sectionTitle}>Dados do Profissional</Text>
+            <Text style={styles.sectionTitle}>{t.admin.credentialsTitle}</Text>
+          </View>
+
+          {/* Avatar Hero Widget (Administrador pode alterar a foto do profissional) */}
+          <View style={styles.avatarHeroContainer}>
+            <TouchableOpacity 
+              style={styles.avatarHeroWrapper}
+              onPress={pickImageFromDevice}
+              activeOpacity={0.85}
+            >
+              <View style={styles.avatarHeroCircle}>
+                <Image 
+                  source={formData.avatarUrl ? { uri: formData.avatarUrl } : require('../../../assets/icon.jpg')} 
+                  style={styles.avatarHeroImage}
+                  resizeMode="cover"
+                />
+              </View>
+              {/* Badge Flutuante de Câmera */}
+              <View style={styles.avatarHeroBadge}>
+                <Camera size={16} color="#FFF" strokeWidth={2.4} />
+              </View>
+            </TouchableOpacity>
+
+            <Text style={styles.avatarHeroTitle}>{t.profileScreen.photoTitle}</Text>
+            <Text style={styles.avatarHeroSub}>{t.profileScreen.avatarHeroSub}</Text>
+
+            {Boolean(formData.avatarUrl) && (
+              <TouchableOpacity 
+                style={styles.avatarRemoveBtn} 
+                onPress={() => setFormData(prev => ({ ...prev, avatarUrl: '' }))}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.avatarRemoveText}>{t.profileScreen.avatarRemoveText}</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nome Completo</Text>
+            <Text style={styles.label}>{t.admin.fullNameLabel.replace(' *', '')}</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
                 value={formData.name}
                 onChangeText={t => setFormData(p => ({ ...p, name: t }))}
-                placeholder="Ex: Dra. Ana Souza"
+                placeholder={t.admin.fullNamePlaceholder}
                 placeholderTextColor={theme.colors.textMuted}
               />
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>E-mail</Text>
+            <Text style={styles.label}>{t.profileScreen.email}</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -253,7 +321,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
 
           <View style={styles.row}>
             <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-              <Text style={styles.label}>CRP{'\n'}(Opcional)</Text>
+              <Text style={styles.label}>{t.admin.crpOptionalLabel}</Text>
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
@@ -268,13 +336,13 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             </View>
 
             <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-              <Text style={styles.label}>Nome da Clínica (Opcional)</Text>
+              <Text style={styles.label}>{t.admin.clinicOptionalLabel}</Text>
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
                   value={formData.clinicName}
                   onChangeText={t => setFormData(p => ({ ...p, clinicName: t }))}
-                  placeholder="Clínica Paz"
+                  placeholder={t.admin.clinicPlaceholder}
                   placeholderTextColor={theme.colors.textMuted}
                 />
               </View>
@@ -294,7 +362,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             ) : (
               <>
                 <Save color="#FFF" size={20} />
-                <Text style={styles.primaryButtonText}>Salvar Dados</Text>
+                <Text style={styles.primaryButtonText}>{t.admin.saveDataBtn}</Text>
               </>
             )}
           </Pressable>
@@ -309,11 +377,11 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             <View style={[styles.sectionIconBg, { backgroundColor: theme.colors.badgePurple }]}>
               <Lock color={theme.colors.badgePurpleText} size={24} />
             </View>
-            <Text style={styles.sectionTitle}>Redefinir Senha</Text>
+            <Text style={styles.sectionTitle}>{t.admin.resetPasswordTitle}</Text>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nova Senha</Text>
+            <Text style={styles.label}>{t.admin.newPasswordLabel}</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -327,7 +395,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirmar Nova Senha</Text>
+            <Text style={styles.label}>{t.admin.confirmNewPasswordLabel}</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -354,7 +422,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             ) : (
               <>
                 <Lock color="#FFF" size={20} />
-                <Text style={styles.primaryButtonText}>Redefinir Senha</Text>
+                <Text style={styles.primaryButtonText}>{t.admin.resetPasswordTitle}</Text>
               </>
             )}
           </Pressable>
@@ -369,10 +437,10 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             <View style={[styles.sectionIconBg, { backgroundColor: '#FEE2E2' }]}>
               <AlertTriangle color="#EF4444" size={24} />
             </View>
-            <Text style={[styles.sectionTitle, { color: '#EF4444' }]}>Exclusão de Conta</Text>
+            <Text style={[styles.sectionTitle, { color: '#EF4444' }]}>{t.admin.dangerZoneTitle}</Text>
           </View>
           <Text style={styles.dangerText}>
-            Remover este profissional e todos os seus dados da plataforma.
+            {t.admin.deleteWarningText}
           </Text>
 
           <TouchableOpacity 
@@ -385,7 +453,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             ) : (
               <>
                 <Trash2 color="#FFF" size={20} />
-                <Text style={styles.dangerButtonText}>Excluir Profissional</Text>
+                <Text style={styles.dangerButtonText}>{t.admin.deleteAccountBtn}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -400,7 +468,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             <CheckCircle2 color={theme.colors.primary} size={28} />
           </View>
           <View style={styles.toastTextContainer}>
-            <Text style={styles.toastTitle}>Sucesso!</Text>
+            <Text style={styles.toastTitle}>{t.common.success}</Text>
             <Text style={styles.toastMessage}>{successMessage}</Text>
           </View>
         </Animated.View>
@@ -413,7 +481,7 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             <XCircle color="#EF4444" size={28} />
           </View>
           <View style={styles.toastTextContainer}>
-            <Text style={[styles.toastTitle, { color: '#DC2626' }]}>Erro</Text>
+            <Text style={[styles.toastTitle, { color: '#DC2626' }]}>{t.common.error}</Text>
             <Text style={styles.toastMessage}>{errorMessage}</Text>
           </View>
         </Animated.View>
@@ -426,19 +494,17 @@ export const PsychologistProfileScreen: React.FC<PsychologistProfileScreenProps>
             <View style={styles.modalIconBg}>
               <AlertTriangle color="#EF4444" size={32} />
             </View>
-            <Text style={styles.modalTitle}>Ação Irreversível</Text>
+            <Text style={styles.modalTitle}>{t.admin.deleteConfirmModalTitle}</Text>
             <Text style={styles.modalText}>
-              Você está prestes a excluir permanentemente a conta de <Text style={{fontWeight: 'bold', color: theme.colors.textDark}}>{formData.name}</Text>. Ao prosseguir, todos os dados de pacientes e relatórios atrelados a este profissional serão perdidos.
-              {'\n\n'}
-              <Text style={{fontWeight: 'bold', color: theme.colors.textDark}}>Tem certeza absoluta que deseja continuar?</Text>
+              {t('admin.deleteConfirmModalMsg', { name: formData.name })}
             </Text>
             
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setShowDeleteModal(false)}>
-                <Text style={styles.modalCancelText}>Cancelar</Text>
+                <Text style={styles.modalCancelText}>{t.common.cancel}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirmBtn} onPress={confirmDelete}>
-                <Text style={styles.modalConfirmText}>Sim, excluir</Text>
+                <Text style={styles.modalConfirmText}>{t.admin.yesDeleteBtn}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -479,7 +545,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 130,
   },
   sectionContainer: {
     backgroundColor: theme.colors.cardBg,
@@ -710,6 +778,69 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: '600',
     fontSize: 15,
+  },
+  /* Avatar Hero Widget */
+  avatarHeroContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.cardBorder,
+  },
+  avatarHeroWrapper: {
+    position: 'relative',
+    marginBottom: 10,
+  },
+  avatarHeroCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 3,
+    borderColor: theme.colors.primary,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.tealSoft,
+    ...theme.shadows.card,
+  },
+  avatarHeroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarHeroBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    ...theme.shadows.subtle,
+  },
+  avatarHeroTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: theme.colors.textDark,
+  },
+  avatarHeroSub: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  avatarRemoveBtn: {
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  avatarRemoveText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.accentOrange,
+    textDecorationLine: 'underline',
   },
 });
 

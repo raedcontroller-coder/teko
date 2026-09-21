@@ -7,30 +7,69 @@ import { LayoutDashboard, Users, UserCircle, LogOut, Shield } from "lucide-react
 import { usePathname, useParams } from "next/navigation";
 import { logoutAction } from "../../actions/auth";
 
+const sidebarTranslations: Record<string, {
+  home: string;
+  patients: string;
+  professionals: string;
+  generatedData: string;
+  myData: string;
+  logout: string;
+  logoutTitle: string;
+  logoutDesc: string;
+  cancel: string;
+  confirmLogout: string;
+}> = {
+  pt: {
+    home: "Painel Inicial",
+    patients: "Meus Pacientes",
+    professionals: "Meus profissionais",
+    generatedData: "Dados gerados",
+    myData: "Meus Dados",
+    logout: "Sair",
+    logoutTitle: "Sair da Conta",
+    logoutDesc: "Tem certeza que deseja sair da sua conta na plataforma Teko?",
+    cancel: "Cancelar",
+    confirmLogout: "Sim, Sair"
+  },
+  en: {
+    home: "Dashboard",
+    patients: "My Patients",
+    professionals: "My Professionals",
+    generatedData: "Generated Data",
+    myData: "My Data",
+    logout: "Sign Out",
+    logoutTitle: "Sign Out of Account",
+    logoutDesc: "Are you sure you want to sign out of your Teko account?",
+    cancel: "Cancel",
+    confirmLogout: "Yes, Sign Out"
+  }
+};
+
 export function Sidebar({ role }: { role?: string }) {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const pathname = usePathname();
   const params = useParams();
-  const lang = (params?.lang as string) || "pt";
+  const lang = (params?.lang as string) === "en" ? "en" : "pt";
+  const t = sidebarTranslations[lang];
 
   const links = role === "GLOBAL_ADMIN" 
     ? [
-        { name: "Painel Inicial", href: `/${lang}/dashboard`, icon: <LayoutDashboard size={20} /> },
-        { name: "Meus profissionais", href: `/${lang}/dashboard/admin/profissionais`, icon: <Shield size={20} /> },
-        { name: "Dados gerados", href: `/${lang}/dashboard/admin/dados-gerados`, icon: <Users size={20} /> },
-        { name: "Meus Dados", href: `/${lang}/dashboard/my-data`, icon: <UserCircle size={20} /> },
+        { key: "home", name: t.home, href: `/${lang}/dashboard`, icon: <LayoutDashboard size={20} /> },
+        { key: "professionals", name: t.professionals, href: `/${lang}/dashboard/admin/profissionais`, icon: <Shield size={20} /> },
+        { key: "generatedData", name: t.generatedData, href: `/${lang}/dashboard/admin/dados-gerados`, icon: <Users size={20} /> },
+        { key: "myData", name: t.myData, href: `/${lang}/dashboard/my-data`, icon: <UserCircle size={20} /> },
       ]
     : [
-        { name: "Painel Inicial", href: `/${lang}/dashboard`, icon: <LayoutDashboard size={20} /> },
-        { name: "Meus Pacientes", href: `/${lang}/dashboard/pacientes`, icon: <Users size={20} /> },
-        { name: "Meus Dados", href: `/${lang}/dashboard/my-data`, icon: <UserCircle size={20} /> },
+        { key: "home", name: t.home, href: `/${lang}/dashboard`, icon: <LayoutDashboard size={20} /> },
+        { key: "patients", name: t.patients, href: `/${lang}/dashboard/pacientes`, icon: <Users size={20} /> },
+        { key: "myData", name: t.myData, href: `/${lang}/dashboard/my-data`, icon: <UserCircle size={20} /> },
       ];
 
   return (
     <>
       <aside className="w-64 glass-panel border-r border-white/10 h-screen flex flex-col fixed left-0 top-0 z-50">
       <div className="p-6 flex justify-center w-full mt-4">
-        <Link href="/" className="hover:scale-105 transition-transform duration-500">
+        <Link href={`/${lang}`} className="hover:scale-105 transition-transform duration-500">
           <Image alt="Teko Logo" width={96} height={96} className="w-16 h-16 object-cover rounded-xl border-[2px] border-white/10 shadow-[0_5px_15px_rgba(0,0,0,0.3)]" src="/images/teko_icone.jpeg" />
         </Link>
       </div>
@@ -40,14 +79,14 @@ export function Sidebar({ role }: { role?: string }) {
           let isActive = false;
           if (link.href === `/${lang}/dashboard`) {
             isActive = pathname === link.href;
-          } else if (link.name === "Meus profissionais") {
+          } else if (link.key === "professionals") {
             isActive = pathname.startsWith(link.href) || pathname.includes("/admin/novo-psicologo");
           } else {
             isActive = pathname.startsWith(link.href);
           }
           return (
             <Link
-              key={link.name}
+              key={link.key}
               href={link.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl font-label-md transition-all duration-300 ${
                 isActive
@@ -65,7 +104,7 @@ export function Sidebar({ role }: { role?: string }) {
       <div className="p-4 border-t border-white/10">
         <button onClick={() => setIsLogoutModalOpen(true)} className="flex items-center gap-3 w-full px-4 py-3 text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-xl font-label-md transition-all duration-300">
           <LogOut size={20} />
-          <span>Sair</span>
+          <span>{t.logout}</span>
         </button>
       </div>
     </aside>
@@ -81,18 +120,18 @@ export function Sidebar({ role }: { role?: string }) {
             </div>
             
             <div>
-              <h2 className="text-xl font-bold text-white mb-2">Sair da Conta</h2>
+              <h2 className="text-xl font-bold text-white mb-2">{t.logoutTitle}</h2>
               <p className="text-white/70 text-sm">
-                Tem certeza que deseja sair da sua conta na plataforma Teko?
+                {t.logoutDesc}
               </p>
             </div>
             
             <div className="flex gap-4 w-full pt-4">
               <button onClick={() => setIsLogoutModalOpen(false)} className="flex-1 bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-xl font-bold transition-all">
-                Cancelar
+                {t.cancel}
               </button>
               <button onClick={() => logoutAction()} className="flex-1 bg-teko-yellow hover:bg-white text-[#084D48] px-4 py-3 rounded-xl font-bold shadow-[0_0_15px_rgba(230,168,0,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all">
-                Sim, Sair
+                {t.confirmLogout}
               </button>
             </div>
           </div>
@@ -102,3 +141,4 @@ export function Sidebar({ role }: { role?: string }) {
     </>
   );
 }
+

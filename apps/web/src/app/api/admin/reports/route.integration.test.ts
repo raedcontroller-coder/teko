@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { GET } from './route';
 import { db } from '../../../../../../../packages/db/db/index';
 import { users, gameSessions } from '../../../../../../../packages/db/db/schema';
-import { like, inArray } from 'drizzle-orm';
+import { like, inArray, eq } from 'drizzle-orm';
 import * as jose from 'jose';
 
 vi.mock('jose', () => ({
@@ -16,6 +16,7 @@ describe('Integração - Admin Reports API (/api/admin/reports)', () => {
     if (lixos.length > 0) {
       const lixoIds = lixos.map(l => l.id);
       await db.delete(gameSessions).where(inArray(gameSessions.alunoId, lixoIds));
+      await db.update(users).set({ alunoId: null }).where(inArray(users.id, lixoIds));
       await db.delete(users).where(inArray(users.id, lixos.filter(l => l.role === 'ALUNO').map(l => l.id)));
       await db.delete(users).where(inArray(users.id, lixoIds));
     }

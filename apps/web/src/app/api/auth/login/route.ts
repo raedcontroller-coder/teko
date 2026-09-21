@@ -51,7 +51,8 @@ export async function POST(request: Request) {
         id: userRecord.id,
         name: userRecord.name,
         email: userRecord.email,
-        role: userRecord.role
+        role: userRecord.role,
+        avatarUrl: userRecord.avatarUrl || ''
       }
     });
 

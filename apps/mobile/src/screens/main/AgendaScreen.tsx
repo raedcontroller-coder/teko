@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, ActivityIndicator, Animated, Easing, Dimensions, ScrollView, Pressable } from 'react-native';
-import { Plus, Search, X, Trash2, XCircle, CheckCircle2 } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, ActivityIndicator, Animated, Easing, Dimensions, ScrollView, Pressable, Keyboard } from 'react-native';
+import { Plus, Search, X, Trash2, XCircle, CheckCircle2, ArrowLeft } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../../services/api';
 import { theme } from '../../theme/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -24,10 +25,38 @@ import { useTranslation } from '../../i18n';
 interface AgendaScreenProps {
   initialOpenCreateModal?: boolean;
   onResetCreateModal?: () => void;
+  adminPsicologoId?: string;
+  adminPsicologoName?: string;
+  onGoBack?: () => void;
 }
 
-export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: AgendaScreenProps = {}) {
+export function AgendaScreen({ 
+  initialOpenCreateModal, 
+  onResetCreateModal,
+  adminPsicologoId,
+  adminPsicologoName,
+  onGoBack
+}: AgendaScreenProps = {}) {
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   const getTodayDate = () => {
     const d = new Date();
     const year = d.getFullYear();
@@ -46,7 +75,8 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
 
   const fetchAppointments = async () => {
     try {
-      const response = await api.get('/api/appointments');
+      const endpoint = adminPsicologoId ? `/api/appointments?psicologoId=${adminPsicologoId}` : '/api/appointments';
+      const response = await api.get(endpoint);
       if (response.data?.success && Array.isArray(response.data?.data)) {
         const mapped = response.data.data.map((item: any) => ({
           id: item.id,
@@ -161,6 +191,19 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
       AsyncStorage.setItem('agenda_recent_colors', JSON.stringify(updated)).catch(e => console.error(e));
       return updated;
     });
+  };
+
+  const [showClearColorsModal, setShowClearColorsModal] = useState(false);
+
+  const handleClearRecentColors = () => {
+    setShowClearColorsModal(true);
+  };
+
+  const confirmClearRecentColors = async () => {
+    setShowClearColorsModal(false);
+    setRecentColors([]);
+    await AsyncStorage.removeItem('agenda_recent_colors');
+    showSuccess(t.agenda.clearRecentColorsSuccess || 'Paleta de cores recentes limpa!');
   };
   
   // --- Toast State ---
@@ -353,7 +396,8 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
   const handleQuickStatusUpdate = async (id: string | number, newStatus: string) => {
     try {
       setIsSaving(true);
-      await api.put(`/api/appointments/${id}`, { status: newStatus });
+      const url = adminPsicologoId ? `/api/appointments/${id}?psicologoId=${adminPsicologoId}` : `/api/appointments/${id}`;
+      await api.put(url, { status: newStatus });
       showSuccess(t.agenda.updateSuccess);
       await fetchAppointments();
     } catch (err: any) {
@@ -452,10 +496,12 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
       };
 
       if (editingId) {
-        await api.put(`/api/appointments/${editingId}`, payload);
+        const url = adminPsicologoId ? `/api/appointments/${editingId}?psicologoId=${adminPsicologoId}` : `/api/appointments/${editingId}`;
+        await api.put(url, payload);
         showSuccess(t.agenda.updateSuccess);
       } else {
-        await api.post('/api/appointments', payload);
+        const url = adminPsicologoId ? `/api/appointments?psicologoId=${adminPsicologoId}` : '/api/appointments';
+        await api.post(url, payload);
         showSuccess(t.agenda.createSuccess);
       }
 
@@ -479,7 +525,8 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
     if (deleteConfirmId !== null) {
       try {
         setIsSaving(true);
-        await api.delete(`/api/appointments/${deleteConfirmId}`);
+        const url = adminPsicologoId ? `/api/appointments/${deleteConfirmId}?psicologoId=${adminPsicologoId}` : `/api/appointments/${deleteConfirmId}`;
+        await api.delete(url);
         setDeleteConfirmId(null);
         if (isModalVisible) setIsModalVisible(false);
         await fetchAppointments();
@@ -502,6 +549,11 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
     <View style={styles.container}>
       {/* HEADER */}
       <View style={styles.header}>
+        {adminPsicologoId && onGoBack && (
+          <TouchableOpacity onPress={onGoBack} style={{ marginRight: 12 }}>
+            <ArrowLeft color={theme.colors.primary} size={24} />
+          </TouchableOpacity>
+        )}
         {isSearching && viewMode !== 'Mês' ? (
           <View style={styles.searchContainer}>
             <TextInput 
@@ -519,7 +571,9 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
         ) : (
           <>
             <View style={styles.headerTitleCol}>
-              <Text style={styles.title}>{t.agenda.title}</Text>
+              <Text style={styles.title}>
+                {adminPsicologoName ? `Agenda: ${adminPsicologoName}` : t.agenda.title}
+              </Text>
               <Text style={styles.headerSubtitle}>
                 {`${appointments.length} ${t.agenda.scheduledAppointmentsCount}`}
               </Text>
@@ -604,7 +658,7 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
       )}
 
       {/* FAB - ADD APPOINTMENT */}
-      <TouchableOpacity style={styles.fab} onPress={handleOpenCreateModal}>
+      <TouchableOpacity style={[styles.fab, { bottom: 84 + Math.max(insets.bottom, 12) }]} onPress={handleOpenCreateModal}>
         <Plus size={30} color="#FFF" />
       </TouchableOpacity>
 
@@ -612,9 +666,9 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
       <Modal visible={isModalVisible} animationType="slide" transparent statusBarTranslucent>
         <KeyboardAvoidingView 
           style={styles.modalOverlay} 
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { paddingBottom: keyboardHeight > 0 ? 10 : Math.max(insets.bottom + 16, 24) }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editingId ? t.agenda.editAppointment : t.agenda.newAppointment}</Text>
               <TouchableOpacity 
@@ -629,7 +683,8 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
             <ScrollView 
               showsVerticalScrollIndicator={false} 
               keyboardShouldPersistTaps="handled" 
-              contentContainerStyle={styles.formContainer}
+              automaticallyAdjustKeyboardInsets={true}
+              contentContainerStyle={[styles.formContainer, { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 60 : 30 }]}
               style={{ flexShrink: 1 }}
             >
               <Text style={styles.firstLabel}>{t.agenda.appointmentTitleLabel}</Text>
@@ -780,24 +835,43 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
                 />
               </View>
 
-              <Text style={styles.label}>{t.agenda.recentColorsLabel}</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, marginBottom: 6 }}>
+                <Text style={[styles.label, { marginTop: 0, marginBottom: 0 }]}>{t.agenda.recentColorsLabel}</Text>
+                {recentColors.length > 0 && (
+                  <TouchableOpacity 
+                    onPress={handleClearRecentColors} 
+                    disabled={isSaving}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    style={{ padding: 4 }}
+                  >
+                    <Trash2 size={18} color="#EF4444" />
+                  </TouchableOpacity>
+                )}
+              </View>
+
               <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false} 
                 contentContainerStyle={styles.recentColorsRow}
               >
-                {recentColors.map(color => (
-                  <TouchableOpacity 
-                    key={color} 
-                    style={[
-                      styles.colorBubble, 
-                      { backgroundColor: color }, 
-                      formColor.toUpperCase() === color.toUpperCase() && styles.colorBubbleSelected
-                    ]} 
-                    onPress={() => !isSaving && setFormColor(color)}
-                    disabled={isSaving}
-                  />
-                ))}
+                {recentColors.length === 0 ? (
+                  <Text style={{ color: theme.colors.textMuted, fontSize: 12, fontStyle: 'italic', paddingVertical: 4 }}>
+                    {t.common.none || 'Nenhuma cor recente'}
+                  </Text>
+                ) : (
+                  recentColors.map(color => (
+                    <TouchableOpacity 
+                      key={color} 
+                      style={[
+                        styles.colorBubble, 
+                        { backgroundColor: color }, 
+                        formColor.toUpperCase() === color.toUpperCase() && styles.colorBubbleSelected
+                      ]} 
+                      onPress={() => !isSaving && setFormColor(color)}
+                      disabled={isSaving}
+                    />
+                  ))
+                )}
               </ScrollView>
 
             </ScrollView>
@@ -893,6 +967,40 @@ export function AgendaScreen({ initialOpenCreateModal, onResetCreateModal }: Age
               >
                 {({ pressed }) => (
                   <Text style={[styles.deleteModalConfirmTextRed, pressed && { color: '#FFF' }]}>{t.common.delete}</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* CLEAR RECENT COLORS CONFIRMATION MODAL TEKO STYLE */}
+      <Modal visible={showClearColorsModal} animationType="fade" transparent>
+        <View style={styles.deleteModalOverlay}>
+          <View style={[styles.deleteModalContainer, styles.deleteModalContainerRed]}>
+            <View style={styles.deleteModalIconBgRed}>
+              <Trash2 color="#FF4B4B" size={32} />
+            </View>
+            <Text style={styles.deleteModalTitleRed}>{t.agenda.clearRecentColorsTitle || 'Limpar Cores Recentes'}</Text>
+            <Text style={styles.deleteModalMessage}>
+              {t.agenda.clearRecentColorsConfirm || 'Deseja limpar todas as paletas de cores recentes?'}
+            </Text>
+            <View style={styles.deleteModalActions}>
+              <Pressable 
+                style={({ pressed }) => [styles.deleteModalCancelButton, pressed && { backgroundColor: 'rgba(255,255,255,0.1)' }]}
+                onPress={() => setShowClearColorsModal(false)}
+              >
+                {({ pressed }) => (
+                  <Text style={[styles.deleteModalCancelText, pressed && { color: '#FFF' }]}>{t.common.cancel}</Text>
+                )}
+              </Pressable>
+              
+              <Pressable 
+                style={({ pressed }) => [styles.deleteModalConfirmButtonRed, pressed && { backgroundColor: '#E03131' }]}
+                onPress={confirmClearRecentColors}
+              >
+                {({ pressed }) => (
+                  <Text style={[styles.deleteModalConfirmTextRed, pressed && { color: '#FFF' }]}>{t.common.delete || 'Limpar'}</Text>
                 )}
               </Pressable>
             </View>

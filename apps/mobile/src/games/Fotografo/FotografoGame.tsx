@@ -8,6 +8,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { api } from '../../services/api';
+import { useTranslation } from '../../i18n';
 
 interface FotografoGameProps {
   alunoId: string;
@@ -179,6 +180,7 @@ const AnimalSprite: React.FC<{
 };
 
 export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack }) => {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState<'menu' | 'countdown' | 'playing' | 'photo_taken' | 'timeout'>('menu');
   const [menuStep, setMenuStep] = useState<1 | 2 | 3>(1);
   const [countdownValue, setCountdownValue] = useState<number | string>(3);
@@ -408,8 +410,8 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
           <View style={styles.frownIconWrapper}>
             <Frown color="#FFC857" size={48} />
           </View>
-          <Text style={styles.exitModalTitle}>Puxa vida...</Text>
-          <Text style={styles.exitModalText}>Você já vai embora?{'\n'}A expedição não acabou!</Text>
+          <Text style={styles.exitModalTitle}>{t.gameFotografo.exitTitle}</Text>
+          <Text style={styles.exitModalText}>{t.gameFotografo.exitText}</Text>
 
           <View style={styles.exitModalButtons}>
             <Pressable 
@@ -417,12 +419,12 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
               style={({ pressed }) => [styles.stayButton, pressed && styles.playButtonPressed]}
             >
               {({ pressed }) => (
-                <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero ficar!</Text>
+                <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>{t.gameFotografo.stay}</Text>
               )}
             </Pressable>
 
             <TouchableOpacity style={styles.leaveButton} onPress={confirmExit}>
-              <Text style={styles.leaveButtonText}>Sair do Jogo</Text>
+              <Text style={styles.leaveButtonText}>{t.gameFotografo.leave}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -452,7 +454,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         setCountdownValue(count);
         runAnimation();
       } else if (count === 0) {
-        setCountdownValue('JÁ!');
+        setCountdownValue(t.gameFotografo.go);
         runAnimation();
       } else {
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
@@ -556,7 +558,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
 
   const takePhoto = () => {
     if (!isCameraReady) {
-      showFeedback('warning', 'A câmera recarregando!');
+      showFeedback('warning', t.gameFotografo.cameraReloading);
       return;
     }
     
@@ -574,7 +576,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
     Animated.timing(flashAnim, { toValue: 0, duration: 500, useNativeDriver: true }).start();
     if (activeAnimals.some(a => a.slot.type === TARGET_ANIMAL)) {
       setScore(prev => prev + 1);
-      showFeedback('success', 'Que foto linda!');
+      showFeedback('success', t.gameFotografo.photoSuccess);
       
       const lastBirdIndex = telemetryRef.current.map(t => t.result).lastIndexOf('omission');
       if (lastBirdIndex !== -1) {
@@ -658,8 +660,8 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
             <View style={styles.menuBox}>
               {menuStep === 1 && (
                 <>
-                  <Text style={styles.title}>Fotógrafo da Floresta</Text>
-                  <Text style={styles.subtitle}>Explore a floresta misteriosa e prove que você é o fotógrafo mais rápido da natureza!</Text>
+                  <Text style={styles.title}>{t.gameFotografo.title}</Text>
+                  <Text style={styles.subtitle}>{t.gameFotografo.subtitle}</Text>
                   
                   <Pressable 
                     style={({ pressed }) => [
@@ -669,7 +671,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
                     onPress={() => setMenuStep(2)}
                   >
                     {({ pressed }) => (
-                      <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>PRÓXIMO</Text>
+                      <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>{t.gameFotografo.next}</Text>
                     )}
                   </Pressable>
                 </>
@@ -678,7 +680,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
               {menuStep === 2 && (
                 <>
                   <Text style={styles.subtitle}>
-                    Tire fotos somente quando <Text style={{ fontWeight: 'bold', color: '#FFF' }}>ESSE passarinho abaixo</Text> aparecer na tela.
+                    {t.gameFotografo.tutorialStep1}
                   </Text>
                   
                   <View style={styles.tutorialImageContainer}>
@@ -693,7 +695,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
                     onPress={() => setMenuStep(3)}
                   >
                     {({ pressed }) => (
-                      <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>PRÓXIMO</Text>
+                      <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>{t.gameFotografo.next}</Text>
                     )}
                   </Pressable>
                 </>
@@ -702,7 +704,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
               {menuStep === 3 && (
                 <>
                   <Text style={[styles.subtitle, { marginBottom: 12 }]}>
-                    Atenção ao relógio! Se o passarinho aparecer e você demorar muito...
+                    {t.gameFotografo.tutorialClockTitle}
                   </Text>
                   
                   <View style={[styles.tutorialImageContainer, { marginBottom: 16 }]}>
@@ -713,10 +715,10 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
                   </View>
 
                   <Text style={[styles.subtitle, { fontSize: 14, color: '#EF4444', fontWeight: 'bold' }]}>
-                    O CRONÔMETRO VAI CONGELAR!
+                    {t.gameFotografo.tutorialClockWarning}
                   </Text>
                   <Text style={[styles.subtitle, { fontSize: 13, marginTop: 4, paddingHorizontal: 20 }]}>
-                    O jogo ficará travado e o tempo não avançará até que você finalmente tire a foto dele. Fique atento e seja rápido!
+                    {t.gameFotografo.tutorialClockDesc}
                   </Text>
                   
                   <Pressable 
@@ -730,7 +732,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
                     {({ pressed }) => (
                       <>
                         <Play color={pressed ? "#FFF" : "#084D48"} size={32} fill={pressed ? "#FFF" : "#084D48"} />
-                        <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>COMEÇAR A FOTOGRAFAR</Text>
+                        <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>{t.gameFotografo.startPhoto}</Text>
                       </>
                     )}
                   </Pressable>
@@ -802,9 +804,9 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
           <View style={styles.centerContent}>
             <View style={styles.menuBox}>
               <Timer color="#FFC857" size={64} style={{ marginBottom: 16 }} />
-              <Text style={styles.title}>O tempo voou!</Text>
+              <Text style={styles.title}>{t.gameFotografo.timeUpTitle}</Text>
               <Text style={styles.subtitle}>
-                Você é incrível! Tirou <Text style={{ color: '#FFC857', fontWeight: 'bold' }}>{score}</Text> fotos lindas do passarinho hoje.
+                {t.gameFotografo.timeUpSubtitle.replace('{{score}}', score.toString())}
               </Text>
               
               <View style={styles.actionButtonsRow}>
@@ -816,7 +818,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
                   onPress={onBack}
                 >
                   {({ pressed }) => (
-                    <Text style={[styles.secondaryButtonText, pressed && { color: '#7B61FF' }]}>VOLTAR AO INÍCIO</Text>
+                    <Text style={[styles.secondaryButtonText, pressed && { color: '#7B61FF' }]}>{t.gameFotografo.backHome}</Text>
                   )}
                 </Pressable>
 
@@ -828,7 +830,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
                   onPress={startGame}
                 >
                   {({ pressed }) => (
-                    <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>JOGAR NOVAMENTE</Text>
+                    <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>{t.gameFotografo.playAgain}</Text>
                   )}
                 </Pressable>
               </View>
@@ -862,9 +864,8 @@ const styles = StyleSheet.create({
   centerTopStats: {
     position: 'absolute',
     top: '2%',
-    left: '52%',
-    transform: [{ translateX: -95 }],
-    width: 200,
+    left: 0,
+    right: 0,
     alignItems: 'center',
     gap: 6,
     zIndex: 60,

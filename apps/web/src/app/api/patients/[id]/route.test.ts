@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   mockVerify: vi.fn(),
   mockEq: vi.fn(),
   mockAnd: vi.fn(),
+  mockIsNull: vi.fn(),
   mockDesc: vi.fn()
 }));
 
@@ -20,6 +21,7 @@ vi.mock('jose', () => ({
 vi.mock('drizzle-orm', () => ({
   eq: mocks.mockEq,
   and: mocks.mockAnd,
+  isNull: mocks.mockIsNull,
   desc: mocks.mockDesc
 }));
 

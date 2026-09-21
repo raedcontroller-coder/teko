@@ -14,6 +14,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei/native';
 import { GoleiroCurveEditor, CurveSlot, STORAGE_KEY, GLOBAL_SIZE_KEY } from './GoleiroCurveEditor';
 import { api } from '../../services/api';
+import { useTranslation } from '../../i18n';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -704,6 +705,7 @@ const DEFAULT_SLOTS: CurveSlot[] = [
 ];
 
 export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState<'menu' | 'countdown' | 'playing' | 'timeout' | 'editor'>('menu');
   const [menuStep, setMenuStep] = useState<1 | 2>(1);
   const [countdownValue, setCountdownValue] = useState<number | string>(3);
@@ -880,7 +882,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
       if (count > 0) {
         setCountdownValue(count); runAnimation();
       } else if (count === 0) {
-        setCountdownValue('JÁ!'); runAnimation();
+        setCountdownValue(t.gameGoleiro.go); runAnimation();
       } else {
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         startGame();
@@ -1194,7 +1196,12 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
   const animStyle = isBallActive ? getInterpolations() : null;
 
   const renderExitModal = () => (
-    <Modal visible={showExitModal} transparent animationType="fade">
+    <Modal
+      transparent
+      visible={showExitModal}
+      animationType="fade"
+      onRequestClose={cancelExit}
+    >
       <View style={styles.modalOverlay}>
         <View style={styles.menuBox}>
           <TouchableOpacity style={styles.closeModalButton} onPress={cancelExit}>
@@ -1203,14 +1210,14 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
           <View style={styles.frownIconWrapper}>
             <Frown color="#FFC857" size={48} />
           </View>
-          <Text style={styles.exitModalTitle}>Puxa vida...</Text>
-          <Text style={styles.exitModalText}>Você já vai embora?{'\n'}O campeonato não acabou!</Text>
+          <Text style={styles.exitModalTitle}>{t.gameGoleiro.exitModalTitle}</Text>
+          <Text style={styles.exitModalText}>{t.gameGoleiro.exitModalText}</Text>
           <View style={styles.exitModalButtons}>
             <Pressable onPress={cancelExit} style={({ pressed }) => [styles.stayButton, pressed && styles.playButtonPressed]}>
-              {({ pressed }) => <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>Quero ficar!</Text>}
+              {({ pressed }) => <Text style={[styles.stayButtonText, pressed && { color: '#FFF' }]}>{t.gameGoleiro.stay}</Text>}
             </Pressable>
             <TouchableOpacity style={styles.leaveButton} onPress={confirmExit}>
-              <Text style={styles.leaveButtonText}>Sair do Jogo</Text>
+              <Text style={styles.leaveButtonText}>{t.gameGoleiro.leave}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1245,7 +1252,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
           ) : false && gameState === 'menu' && (
             <TouchableOpacity onPress={() => setGameState('editor')} style={styles.editorButton}>
               <Settings color="#fff" size={24} />
-              <Text style={{ color: '#FFF', fontWeight: 'bold', marginLeft: 8 }}>Editor de Curvas</Text>
+              <Text style={{ color: '#FFF', fontWeight: 'bold', marginLeft: 8 }}>{t.gameGoleiro.editor}</Text>
             </TouchableOpacity>
           )}
 
@@ -1253,7 +1260,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
             <View style={styles.centerTopStats} pointerEvents="none">
               <View style={styles.timerBox}>
                 <Text style={styles.timerText}>
-                  Acertos: {currentShot}/{TOTAL_SHOTS}
+                  {currentShot}/{TOTAL_SHOTS}
                 </Text>
               </View>
             </View>
@@ -1274,7 +1281,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
             pointerEvents="none"
           >
             <Shield color="#FFD700" size={32} />
-            <Text style={styles.floatingComboText}>{comboCount} DEFESAS!</Text>
+            <Text style={styles.floatingComboText}>{comboCount} {t.gameGoleiro.defensesCombo}</Text>
           </Animated.View>
         )}
 
@@ -1306,23 +1313,23 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
             <View style={styles.menuBox}>
               {menuStep === 1 && (
                 <>
-                  <Text style={styles.title}>Goleiro</Text>
-                  <Text style={styles.subtitle}>Teste seus reflexos! Defenda todas as bolas antes que elas entrem no gol.</Text>
+                  <Text style={styles.title}>{t.gameGoleiro.title}</Text>
+                  <Text style={styles.subtitle}>{t.gameGoleiro.subtitle}</Text>
                   <Pressable
                     style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
                     onPress={() => setMenuStep(2)}
                   >
-                    {({ pressed }) => <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>PRÓXIMO</Text>}
+                    {({ pressed }) => <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>{t.gameGoleiro.next}</Text>}
                   </Pressable>
                 </>
               )}
 
               {menuStep === 2 && (
                 <>
-                  <Text style={[styles.title, { marginBottom: 8 }]}>Como Jogar</Text>
+                  <Text style={[styles.title, { marginBottom: 8 }]}>{t.gameGoleiro.howToPlay}</Text>
 
                   <Text style={[styles.subtitle, { fontSize: 16, marginBottom: 8, paddingHorizontal: 16, lineHeight: 22 }]}>
-                    Toque na bola no exato momento em que o círculo ficar <Text style={{ color: '#34C759', fontWeight: '900' }}>VERDE</Text>!
+                    {t.gameGoleiro.tutorialStep1}
                   </Text>
 
                   <View style={{ width: 120, height: 120, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
@@ -1338,7 +1345,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
                   </View>
 
                   <Text style={[styles.subtitle, { fontSize: 15, marginBottom: 16, paddingHorizontal: 16, color: '#FFF', lineHeight: 20 }]}>
-                    Tocou <Text style={{ fontWeight: 'bold' }}>cedo demais</Text> ou deixou <Text style={{ fontWeight: 'bold' }}>passar</Text>? Ponto do adversário!
+                    {t.gameGoleiro.tutorialStep2}
                   </Text>
 
                   <View style={styles.actionButtonsRow}>
@@ -1346,13 +1353,13 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
                       style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryButtonPressed]}
                       onPress={() => setMenuStep(1)}
                     >
-                      {({ pressed }) => <Text style={[styles.secondaryButtonText, pressed && { color: '#7B61FF' }]}>VOLTAR</Text>}
+                      {({ pressed }) => <Text style={[styles.secondaryButtonText, pressed && { color: '#7B61FF' }]}>{t.gameGoleiro.back}</Text>}
                     </Pressable>
                     <Pressable
                       style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
                       onPress={startCountdown}
                     >
-                      {({ pressed }) => <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>COMEÇAR!</Text>}
+                      {({ pressed }) => <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>{t.gameGoleiro.start}</Text>}
                     </Pressable>
                   </View>
                 </>
@@ -1367,15 +1374,13 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
               opacity: countdownAnim,
               transform: [{ scale: countdownAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }]
             }]}>
-              {countdownValue}
+              {countdownValue === 'VAI!' ? t.gameGoleiro.go : countdownValue}
             </Animated.Text>
           </View>
         )}
 
-        {/* Pré-compilação do Canvas: Sempre visível para forçar compilação de shader, mas mantido fora da tela! */}
+        {/* Pré-compilação do Canvas */}
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-
-          {/* Bola Principal (Renderização True 3D + SVG Hitbox) */}
           <Animated.View style={[styles.ballContainer, {
             left: (gameState === 'playing' && isBallActive && animStyle) ? animStyle.main.x : -1000,
             top: (gameState === 'playing' && isBallActive && animStyle) ? animStyle.main.y : -1000,
@@ -1387,7 +1392,6 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
           }
           ]} pointerEvents="box-none">
 
-            {/* Canvas Expandido (Não recebe toque) */}
             <View style={{
               position: 'absolute',
               width: 300, height: 300,
@@ -1407,21 +1411,18 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
               </Canvas>
             </View>
 
-            {/* Apenas renderiza a interação (SVGs e Botões) se a bola estiver ativa */}
             {gameState === 'playing' && isBallActive && animStyle && (
               <Animated.View style={{
                 position: 'absolute', width: 100, height: 100,
                 transform: [{ scale: animStyle.main.scale }]
               }}>
                 <Pressable style={StyleSheet.absoluteFill} onPress={handleSave}>
-                  {/* Anel Estático (Contorna perfeitamente a bola) */}
                   <Animated.View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
                     <Svg width="110" height="110" viewBox="0 0 110 110">
                       <AnimatedCircle cx="55" cy="55" r="30" stroke={animStyle.main.ringColor} strokeWidth="4" fill="transparent" strokeOpacity={0.8} />
                     </Svg>
                   </Animated.View>
 
-                  {/* Anel Interno (Nasce no centro e expande até colar no anel estático) */}
                   <Animated.View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center', transform: [{ scale: animStyle.main.innerRingScale }] }]}>
                     <Svg width="110" height="110" viewBox="0 0 110 110">
                       <AnimatedCircle cx="55" cy="55" r="30" stroke={animStyle.main.ringColor} strokeWidth="3" fill="transparent" strokeOpacity={0.6} />
@@ -1437,27 +1438,28 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
           <View style={styles.centerContent} pointerEvents="box-none">
             <View style={styles.menuBox}>
               <Trophy color="#FFC857" size={64} style={{ marginBottom: 16 }} />
-              <Text style={styles.title}>Fim de Jogo!</Text>
+              <Text style={styles.title}>{t.gameGoleiro.gameOverTitle}</Text>
               <Text style={styles.subtitle}>
-                Você é um verdadeiro campeão! Conseguiu defender com sucesso todos os <Text style={{ color: '#FFC857', fontWeight: 'bold' }}>{TOTAL_SHOTS}</Text> chutes.
+                {t.gameGoleiro.gameOverSubtitle.replace('{{total}}', TOTAL_SHOTS.toString())}
               </Text>
               <View style={styles.actionButtonsRow}>
                 <Pressable
                   style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryButtonPressed]}
                   onPress={onBack}
                 >
-                  {({ pressed }) => <Text style={[styles.secondaryButtonText, pressed && { color: '#7B61FF' }]}>Sair do Jogo</Text>}
+                  {({ pressed }) => <Text style={[styles.secondaryButtonText, pressed && { color: '#7B61FF' }]}>{t.gameGoleiro.leave}</Text>}
                 </Pressable>
                 <Pressable
                   style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
                   onPress={startGame}
                 >
-                  {({ pressed }) => <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>JOGAR NOVAMENTE</Text>}
+                  {({ pressed }) => <Text style={[styles.playButtonText, pressed && { color: '#FFF' }]}>{t.gameGoleiro.playAgain}</Text>}
                 </Pressable>
               </View>
             </View>
           </View>
         )}
+
       </ImageBackground>
     </View>
   );
@@ -1484,7 +1486,6 @@ const styles = StyleSheet.create({
   centerTopStats: {
     position: 'absolute', top: '2%', left: 0, right: 0,
     alignItems: 'center', gap: 6, zIndex: 60,
-    transform: [{ translateX: 7 }],
   },
   timerBox: {
     backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 16, paddingVertical: 6,

@@ -38,6 +38,8 @@ describe('Integration Tests (DB Real) - Pacientes', () => {
     // nós encontramos o PSI de integração e deletamos somente a árvore dele.
     const psi = await db.query.users.findFirst({ where: eq(users.email, PSI_EMAIL) });
     if (psi) {
+      // Limpa os ponteiros de alunoId nos responsáveis antes da deleção física do lixo de teste
+      await db.update(users).set({ alunoId: null }).where(eq(users.psicologoId, psi.id));
       // Deleta os alunos que pertencem especificamente a esse Psicólogo
       await db.delete(users).where(and(eq(users.role, 'ALUNO'), eq(users.psicologoId, psi.id)));
       // Deleta o responsável de teste
@@ -47,6 +49,8 @@ describe('Integration Tests (DB Real) - Pacientes', () => {
       await db.delete(users).where(eq(users.id, psi.id));
     }
     // Limpeza de segurança extra para casos onde a inserção falhou pela metade
+    await db.update(users).set({ alunoId: null }).where(eq(users.email, GUARDIAN_EMAIL));
+    await db.update(users).set({ alunoId: null }).where(eq(users.email, 'novo_guardian@teko.local'));
     await db.delete(users).where(eq(users.email, PSI_EMAIL));
     await db.delete(users).where(eq(users.email, GUARDIAN_EMAIL));
     await db.delete(users).where(eq(users.email, 'novo_guardian@teko.local'));
@@ -145,16 +149,16 @@ describe('Integration Tests (DB Real) - Pacientes', () => {
     expect(updatedChild?.gender).toBe('F');
   });
 
-  it('deve deletar a criança permanentemente do banco', async () => {
+  it('deve deletar a criança (soft delete) do banco', async () => {
     const result = await deletePatientAction(patientId);
     expect(result).toEqual({ success: true });
 
-    // Verificar se evaporou do DB
+    // Verificar se foi marcado com soft delete (deletedAt preenchido)
     const child = await db.query.users.findFirst({
       where: eq(users.id, patientId)
     });
 
-    expect(child).toBeUndefined(); // Banco retornou Vazio
+    expect(child?.deletedAt).not.toBeNull();
   });
 
   it('deve bloquear a criação de paciente caso o e-mail do responsável já exista no banco real', async () => {

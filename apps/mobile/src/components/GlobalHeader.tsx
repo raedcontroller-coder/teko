@@ -15,7 +15,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({ user, onProfilePress
   const { t } = useTranslation();
 
   const roleDisplay = user?.role === 'GLOBAL_ADMIN' ? t.roles.GLOBAL_ADMIN :
-                      user?.role === 'PSICOLOGO' ? t.roles.PSICOLOGO :
+                      (user?.role === 'PSICOLOGO' || user?.role === 'PROFISSIONAL') ? (t.roles.PROFISSIONAL || t.roles.PSICOLOGO) :
                       user?.role === 'FAMILIAR' ? t.roles.FAMILIAR : t.roles.USER;
 
   const userName = user?.name ? user.name.split(' ')[0] : 'Maria';

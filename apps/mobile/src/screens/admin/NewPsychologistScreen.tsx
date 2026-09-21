@@ -18,11 +18,14 @@ import { ArrowLeft, UserCircle, Award, User, Mail, Lock, FileText, Building, Che
 import { api } from '../../services/api';
 import { theme } from '../../theme/theme';
 
+import { useTranslation } from '../../i18n';
+
 interface NewPsychologistScreenProps {
   onGoBack: () => void;
 }
 
 export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ onGoBack }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -94,12 +97,12 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
 
   const handleRegister = async () => {
     if (!formData.name.trim() || !formData.email.trim() || !formData.password) {
-      showError('Preencha todos os campos obrigatórios em Credenciais.');
+      showError(t.admin.fillRequiredCredentials);
       return;
     }
 
     if (formData.password.length < 6) {
-      showError('A senha deve ter no mínimo 6 caracteres.');
+      showError(t.admin.minPasswordLength);
       return;
     }
 
@@ -107,13 +110,13 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
       setLoading(true);
       const response = await api.post('/api/admin/psychologists', formData);
       if (response.data.success) {
-        showToast('Profissional cadastrado com sucesso!');
+        showToast(t.admin.registerProfSuccess);
         setTimeout(() => {
           onGoBack();
         }, 1500);
       }
     } catch (error: any) {
-      const msg = error.response?.data?.error || 'Erro ao cadastrar profissional.';
+      const msg = error.response?.data?.error || t.common.saveError;
       showError(msg);
     } finally {
       setLoading(false);
@@ -133,7 +136,7 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             onPress={onGoBack}
           >
             <ArrowLeft color={theme.colors.primary} size={20} />
-            <Text style={styles.backButtonText}>Voltar para Meus profissionais</Text>
+            <Text style={styles.backButtonText}>{t.admin.backToMyProfessionals}</Text>
           </Pressable>
 
           {/* Seção 1: Credenciais */}
@@ -147,18 +150,18 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
                 <UserCircle color={theme.colors.primary} size={28} />
               </View>
               <View style={styles.sectionHeaderTextContainer}>
-                <Text style={styles.sectionTitle}>Credenciais de Acesso</Text>
-                <Text style={styles.sectionSubtitle}>Defina o nome, e-mail e a senha temporária do profissional.</Text>
+                <Text style={styles.sectionTitle}>{t.admin.accessCredentialsTitle}</Text>
+                <Text style={styles.sectionSubtitle}>{t.admin.accessCredentialsSub}</Text>
               </View>
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.labelSection}>Nome Completo *</Text>
+              <Text style={styles.labelSection}>{t.admin.fullNameLabel}</Text>
               <View style={styles.inputContainer}>
                 <User color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Ex: Dra. Ana Souza"
+                  placeholder={t.admin.fullNamePlaceholder}
                   placeholderTextColor={theme.colors.textMuted}
                   value={formData.name}
                   onChangeText={(val) => handleChange('name', val)}
@@ -167,12 +170,12 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.labelSection}>E-mail de Acesso *</Text>
+              <Text style={styles.labelSection}>{t.admin.accessEmailLabel}</Text>
               <View style={styles.inputContainer}>
                 <Mail color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="ana@clinica.com"
+                  placeholder={t.admin.accessEmailPlaceholder}
                   placeholderTextColor={theme.colors.textMuted}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -183,7 +186,7 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.labelSection}>Senha Temporária *</Text>
+              <Text style={styles.labelSection}>{t.admin.tempPasswordLabel}</Text>
               <View style={styles.inputContainer}>
                 <Lock color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
@@ -212,13 +215,13 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
                 <Award color={theme.colors.badgePurpleText} size={28} />
               </View>
               <View style={styles.sectionHeaderTextContainer}>
-                <Text style={styles.sectionTitle}>Informações Profissionais</Text>
-                <Text style={styles.sectionSubtitle}>Dados adicionais para identificação (Opcionais).</Text>
+                <Text style={styles.sectionTitle}>{t.admin.profInfoTitle}</Text>
+                <Text style={styles.sectionSubtitle}>{t.admin.profInfoSub}</Text>
               </View>
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.labelSection}>CRP (Opcional)</Text>
+              <Text style={styles.labelSection}>{t.admin.crpOptionalLabel}</Text>
               <View style={styles.inputContainer}>
                 <FileText color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
@@ -233,12 +236,12 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.labelSection}>Nome da Clínica (Opcional)</Text>
+              <Text style={styles.labelSection}>{t.admin.clinicOptionalLabel}</Text>
               <View style={styles.inputContainer}>
                 <Building color={theme.colors.textMuted} size={18} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Ex: Clínica Evoluir"
+                  placeholder={t.admin.clinicPlaceholder}
                   placeholderTextColor={theme.colors.textMuted}
                   value={formData.clinicName}
                   onChangeText={(val) => handleChange('clinicName', val)}

@@ -9,7 +9,8 @@ const mocks = vi.hoisted(() => ({
   mockVerify: vi.fn(),
   mockEq: vi.fn(),
   mockAnd: vi.fn(),
-  mockInArray: vi.fn()
+  mockInArray: vi.fn(),
+  mockIsNull: vi.fn()
 }));
 
 vi.mock('jose', () => ({
@@ -19,7 +20,8 @@ vi.mock('jose', () => ({
 vi.mock('drizzle-orm', () => ({
   eq: mocks.mockEq,
   and: mocks.mockAnd,
-  inArray: mocks.mockInArray
+  inArray: mocks.mockInArray,
+  isNull: mocks.mockIsNull
 }));
 
 vi.mock('../../../../../../packages/db/db/schema', () => ({
@@ -28,10 +30,9 @@ vi.mock('../../../../../../packages/db/db/schema', () => ({
     name: 'name',
     email: 'email',
     role: 'role',
-    psicologoId: 'psicologoId',
-    guardianId: 'guardianId',
     phone: 'phone',
-    createdAt: 'createdAt'
+    psicologoId: 'psicologoId',
+    alunoId: 'alunoId'
   },
   gameSessions: {
     id: 'id',
@@ -59,6 +60,13 @@ vi.mock('../../../../../../packages/db/db/index', () => ({
     }),
     insert: () => ({
       values: mocks.mockInsertValues
+    }),
+    update: () => ({
+      set: () => ({
+        where: () => ({
+          returning: mocks.mockReturning
+        })
+      })
     })
   }
 }));
@@ -90,8 +98,8 @@ describe('Patients API (/api/patients)', () => {
 
     it('should return list of patients successfully', async () => {
       mocks.mockFindMany
-        .mockResolvedValueOnce([{ id: 'patient_1', name: 'João', guardianId: 'guardian_1' }]) // users (ALUNO)
-        .mockResolvedValueOnce([{ id: 'guardian_1', name: 'Maria' }]) // users (FAMILIAR)
+        .mockResolvedValueOnce([{ id: 'patient_1', name: 'João' }]) // users (ALUNO)
+        .mockResolvedValueOnce([{ id: 'guardian_1', name: 'Maria', alunoId: 'patient_1' }]) // users (FAMILIAR)
         .mockResolvedValueOnce([]) // gameSessions
         .mockResolvedValueOnce([]); // games
 
