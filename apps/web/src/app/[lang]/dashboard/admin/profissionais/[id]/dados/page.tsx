@@ -55,7 +55,7 @@ export default function AdminProfissionalDadosPage() {
       } else {
         setPersonalData({
           name: res.data.name,
-          email: res.data.email,
+          email: res.data.email || "",
           crp: res.data.crp || "",
           clinicName: res.data.clinicName || "",
         });
