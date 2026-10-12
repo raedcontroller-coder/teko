@@ -12,7 +12,7 @@ import { recordAudit } from '@/lib/audit';
 export const maxDuration = 180; // Configuração Vercel / Next.js para permitir até 3 minutos de execução
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
-const API_TWO_URL = process.env.API_TWO_URL || "http://localhost:3002";
+const API_TWO_URL = process.env.API_TWO_URL || "http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io";
 
 type JobState = {
   status: 'generating' | 'ready' | 'error';

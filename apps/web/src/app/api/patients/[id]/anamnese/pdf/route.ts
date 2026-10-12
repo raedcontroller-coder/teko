@@ -9,6 +9,7 @@ import fs from 'fs';
 import os from 'os';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_super_secret_key_teko_app");
+const API_TWO_URL = process.env.API_TWO_URL || "http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io";
 
 async function authenticateRequest(request: Request) {
   const authHeader = request.headers.get('authorization');
@@ -156,8 +157,22 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     });
 
     if (exitCode !== 0 || !fs.existsSync(pdfTmpPath)) {
-      console.error("Python PDF Error (exit code", exitCode, "):", stderr, "Script Path:", pyScript);
-      return NextResponse.json({ error: `Erro ao gerar PDF da anamnese: ${stderr || 'script execution failed'}` }, { status: 500 });
+      console.warn("Python local falhou ou ausente. Tentando motor externo api_two:", stderr);
+      try {
+        const remoteRes = await fetch(`${API_TWO_URL}/api/anamnese/pdf`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pdfPayload)
+        });
+        if (remoteRes.ok) {
+          const ab = await remoteRes.arrayBuffer();
+          fs.writeFileSync(pdfTmpPath, Buffer.from(ab));
+        } else {
+          return NextResponse.json({ error: `Erro ao gerar PDF da anamnese via servidor remoto (${remoteRes.status}).` }, { status: 500 });
+        }
+      } catch (remoteErr: any) {
+        return NextResponse.json({ error: `Erro ao conectar com api_two remoto: ${remoteErr.message}` }, { status: 500 });
+      }
     }
 
     // 5. Read PDF Buffer and clean temporary file (no database persistence)
