@@ -21,4 +21,13 @@ apps/mobile/
 .expo
 dist
 apps/api_two/dist
+Logo/
+elementos_visuais/
+estetica_nova/
+calendario_teko/
+teko_site/
+scratch/
+new-functions-teko/
+*.md
+*.txt
 
