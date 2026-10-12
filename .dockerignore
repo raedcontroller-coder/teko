@@ -12,3 +12,13 @@ teko-stitch/
 README.md
 Chicote/
 docs/
+.venv
+*/.venv
+apps/api_two/.venv
+*.mp4
+*.pdf
+apps/mobile/
+.expo
+dist
+apps/api_two/dist
+
