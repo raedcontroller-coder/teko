@@ -16,7 +16,7 @@ import {
   Alert,
   Image
 } from 'react-native';
-import { ArrowLeft, Baby, User, Shield, Target, Camera, Bomb, Save, Trash2, CheckCircle2, XCircle, AlertTriangle, X } from 'lucide-react-native';
+import { ArrowLeft, Baby, User, Shield, Target, Camera, Bomb, Save, Trash2, CheckCircle2, XCircle, AlertTriangle, X, Lock } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { api } from '../../services/api';
@@ -24,6 +24,7 @@ import { theme } from '../../theme/theme';
 import { AnamneseTab } from './patient-tabs/AnamneseTab';
 import { NotasTab } from './patient-tabs/NotasTab';
 import { EvolucaoTab } from './patient-tabs/EvolucaoTab';
+import { RelatorioTab } from './patient-tabs/RelatorioTab';
 import { useTranslation } from '../../i18n';
 import { getChildAvatarSource, AVAILABLE_AVATAR_OPTIONS } from '../../utils/patientAvatarHelper';
 
@@ -40,7 +41,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
   const [loading, setLoading] = useState(true);
   const [savingPatient, setSavingPatient] = useState(false);
   const [savingGuardian, setSavingGuardian] = useState(false);
-  const [activeTab, setActiveTab] = useState<'Dados' | 'Anamnese' | 'Notas' | 'Evolução'>('Dados');
+  const [activeTab, setActiveTab] = useState<'Dados' | 'Anamnese' | 'Notas' | 'Evolução' | 'Relatório'>('Dados');
   
   const [guardianId, setGuardianId] = useState('');
   const [sessions, setSessions] = useState<any[]>([]);
@@ -269,23 +270,56 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
       </View>
 
       <View style={styles.topTabsContainer}>
-        <View style={styles.topTabsWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.topTabsWrapper}>
           {([
-            { key: 'Dados', label: t.patientProfile.infoTab },
-            { key: 'Anamnese', label: t.patientProfile.anamneseTab },
-            { key: 'Notas', label: t.patientProfile.notasTab },
-            { key: 'Evolução', label: t.patientProfile.evolucaoTab },
-          ] as const).map((tabItem) => (
-            <TouchableOpacity 
-              key={tabItem.key} 
-              style={[styles.topTabBtn, activeTab === tabItem.key && styles.topTabBtnActive]}
-              onPress={() => setActiveTab(tabItem.key)}
-              activeOpacity={0.75}
-            >
-              <Text style={[styles.topTabText, activeTab === tabItem.key && styles.topTabTextActive]}>{tabItem.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+            { key: 'Dados', label: t.patientProfile.infoTab, locked: false },
+            { key: 'Anamnese', label: t.patientProfile.anamneseTab, locked: false },
+            { key: 'Notas', label: t.patientProfile.notasTab, locked: false },
+            { key: 'Evolução', label: t.patientProfile.evolucaoTab, locked: false },
+            { 
+              key: 'Relatório', 
+              label: (t.patientProfile as any).relatorioTab || 'Relatório', 
+              locked: !(sessions && sessions.length > 0) 
+            },
+          ] as const).map((tabItem) => {
+            const isSelected = activeTab === tabItem.key;
+            const isLocked = tabItem.locked;
+
+            return (
+              <TouchableOpacity 
+                key={tabItem.key} 
+                style={[
+                  styles.topTabBtn, 
+                  isSelected && styles.topTabBtnActive,
+                  isLocked && { opacity: 0.5, backgroundColor: 'rgba(0,0,0,0.04)' }
+                ]}
+                onPress={() => {
+                  if (isLocked) {
+                    Alert.alert(
+                      "Relatório Bloqueado",
+                      "Para liberar a geração do laudo de IA, o paciente precisa ter:\n\n• Anamnese preenchida e salva\n• Pelo menos 1 Bateria de Jogos completa concluída",
+                      [{ text: "Entendido", style: "default" }]
+                    );
+                  } else {
+                    setActiveTab(tabItem.key);
+                  }
+                }}
+                activeOpacity={isLocked ? 0.9 : 0.75}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  {isLocked && <Lock size={12} color="#9CA3AF" />}
+                  <Text style={[
+                    styles.topTabText, 
+                    isSelected && styles.topTabTextActive,
+                    isLocked && { color: '#9CA3AF' }
+                  ]}>
+                    {tabItem.label}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
 
       {activeTab === 'Dados' && (
@@ -564,6 +598,7 @@ export const PatientProfileScreen: React.FC<PatientProfileScreenProps> = ({ pati
       {activeTab === 'Anamnese' && <AnamneseTab patientId={patientId} adminPsicologoId={adminPsicologoId} />}
       {activeTab === 'Notas' && <NotasTab patientId={patientId} adminPsicologoId={adminPsicologoId} />}
       {activeTab === 'Evolução' && <EvolucaoTab patientId={patientId} adminPsicologoId={adminPsicologoId} />}
+      {activeTab === 'Relatório' && <RelatorioTab patientId={patientId} adminPsicologoId={adminPsicologoId} />}
 
       {/* Modal de Confirmação de Edição do Responsável */}
       <Modal
@@ -767,34 +802,33 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   topTabsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   topTabsWrapper: {
-    flexDirection: 'row',
+    paddingHorizontal: 20,
     alignItems: 'center',
-    backgroundColor: theme.colors.cardBg,
-    borderRadius: theme.radii.full,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: theme.colors.cardBorder,
-    ...theme.shadows.subtle,
+    flexDirection: 'row',
+    gap: 8,
   },
   topTabBtn: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: theme.radii.full,
-    backgroundColor: 'transparent',
+    backgroundColor: theme.colors.cardBg,
+    borderWidth: 1,
+    borderColor: theme.colors.cardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...theme.shadows.subtle,
   },
   topTabBtnActive: {
     backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
     ...theme.shadows.subtle,
   },
   topTabText: {
     color: theme.colors.textMuted,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
   },
   topTabTextActive: {

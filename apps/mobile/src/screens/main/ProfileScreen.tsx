@@ -15,11 +15,14 @@ import {
   Pressable,
   Image
 } from 'react-native';
-import { UserCircle, Lock, Save, AlertTriangle, Trash2, Eye, EyeOff, CheckCircle2, XCircle, Camera, Upload } from 'lucide-react-native';
+import { UserCircle, Lock, Save, AlertTriangle, Trash2, Eye, EyeOff, CheckCircle2, XCircle, Camera, Upload, ShieldCheck, FileText, Download, X, CheckSquare, Sparkles } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import { api } from '../../services/api';
 import { theme } from '../../theme/theme';
 import { useTranslation } from '../../i18n';
+import { TERMS_SECTIONS_PT, TERMS_SECTIONS_EN } from '../auth/termsData';
 
 interface ProfileScreenProps {
   onLogout: (dest: 'Login' | 'Register') => void;
@@ -27,7 +30,7 @@ interface ProfileScreenProps {
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUpdate }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [savingPersonal, setSavingPersonal] = useState(false);
   const [savingSecurity, setSavingSecurity] = useState(false);
@@ -39,6 +42,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
     clinicName: '',
     avatarUrl: '',
   });
+
+  const [consentData, setConsentData] = useState<any>(null);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [sharingPdf, setSharingPdf] = useState(false);
 
   const [securityData, setSecurityData] = useState({
     currentPassword: '',
@@ -115,6 +122,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
             clinicName: u.clinicName || '',
             avatarUrl: u.avatarUrl || '',
           });
+          if (u.consent) {
+            setConsentData(u.consent);
+          }
         }
       } catch (error) {
         showError('Não foi possível carregar seus dados.');
@@ -399,7 +409,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 onChangeText={(t) => setSecurityData(p => ({...p, currentPassword: t}))}
               />
               <TouchableOpacity onPress={() => setShowCurrentPassword(!showCurrentPassword)} style={styles.eyeIcon}>
-                {showCurrentPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
+                {showCurrentPassword ? <Eye color={theme.colors.textMuted} size={18} /> : <EyeOff color={theme.colors.textMuted} size={18} />}
               </TouchableOpacity>
             </View>
           </View>
@@ -416,7 +426,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 onChangeText={(t) => setSecurityData(p => ({...p, newPassword: t}))}
               />
               <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)} style={styles.eyeIcon}>
-                {showNewPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
+                {showNewPassword ? <Eye color={theme.colors.textMuted} size={18} /> : <EyeOff color={theme.colors.textMuted} size={18} />}
               </TouchableOpacity>
             </View>
           </View>
@@ -433,7 +443,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 onChangeText={(t) => setSecurityData(p => ({...p, confirmPassword: t}))}
               />
               <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
-                {showConfirmPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
+                {showConfirmPassword ? <Eye color={theme.colors.textMuted} size={18} /> : <EyeOff color={theme.colors.textMuted} size={18} />}
               </TouchableOpacity>
             </View>
           </View>
@@ -450,6 +460,54 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
                 <Text style={styles.saveButtonTextPurple}>{t.profileScreen.updatePasswordBtn}</Text>
               </>
             )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Seção: Termo de Consentimento e Ciência Assinado (Leitura Exclusiva) */}
+        <View style={[styles.card, styles.cardEmerald]}>
+          <View style={styles.cardBgIcon}>
+            <ShieldCheck color={theme.colors.primary} size={110} />
+          </View>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircleEmerald}>
+              <ShieldCheck color={theme.colors.primary} size={28} />
+            </View>
+            <View style={styles.headerTexts}>
+              <Text style={styles.sectionTitle}>{t.profileScreen.signedTermsTitle}</Text>
+              <Text style={styles.sectionSubtitle}>{t.profileScreen.signedTermsSub}</Text>
+            </View>
+          </View>
+
+          {/* Badges e Status da Assinatura */}
+          <View style={styles.termsStatusContainer}>
+            <View style={styles.signedStatusBadge}>
+              <CheckCircle2 color={theme.colors.primary} size={14} />
+              <Text style={styles.signedStatusBadgeText}>{t.profileScreen.signedTermsStatusSigned}</Text>
+            </View>
+            <Text style={styles.termsMetaText}>
+              {t('profileScreen.signedTermsVersion', { 
+                version: consentData?.termVersion || '2.0', 
+                lang: (consentData?.termLanguage || 'pt').toUpperCase() 
+              })}
+            </Text>
+          </View>
+
+          {consentData?.acceptedAt && (
+            <Text style={styles.termsDateText}>
+              {t('profileScreen.signedTermsAcceptedAt', { 
+                date: new Date(consentData.acceptedAt).toLocaleDateString(language === 'en' ? 'en-US' : 'pt-BR') 
+              })}
+            </Text>
+          )}
+
+          {/* Botão de Visualização do Documento Preenchido */}
+          <TouchableOpacity 
+            style={styles.viewSignedDocumentBtn} 
+            activeOpacity={0.85}
+            onPress={() => setShowTermsModal(true)}
+          >
+            <FileText color="#084D48" size={18} />
+            <Text style={styles.viewSignedDocumentBtnText}>{t.profileScreen.viewSignedDocumentBtn}</Text>
           </TouchableOpacity>
         </View>
 
@@ -521,7 +579,143 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, onUserUp
         </View>
       </Modal>
 
-      {/* Modal Confirmar Exclusão de Conta */}
+      {/* Modal Visualizador do Termo Assinado (Somente Leitura) */}
+      <Modal
+        visible={showTermsModal}
+        transparent={true}
+        animationType="slide"
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowTermsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.signedTermsModalContent}>
+            {/* Cabeçalho do Modal */}
+            <View style={styles.signedTermsModalHeader}>
+              <View style={{ flex: 1 }}>
+                <View style={styles.readOnlyBadgeRow}>
+                  <ShieldCheck size={14} color="#FFC857" />
+                  <Text style={styles.readOnlyBadgeText}>{t.profileScreen.signedTermsStatusSigned}</Text>
+                </View>
+                <Text style={styles.signedTermsModalHeaderTitle}>{t.profileScreen.signedTermsModalTitle}</Text>
+                <Text style={styles.signedTermsModalHeaderSub}>{t.profileScreen.signedTermsModalSub}</Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.closeSignedModalBtn} 
+                onPress={() => setShowTermsModal(false)}
+              >
+                <X size={20} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Aviso de Documento Imutável */}
+            <View style={styles.readOnlyNoticeBox}>
+              <Lock size={15} color={theme.colors.primary} />
+              <Text style={styles.readOnlyNoticeText}>
+                {t.profileScreen.signedTermsReadOnlyNotice}
+              </Text>
+            </View>
+
+            {/* Conteúdo do Termo com Marcações */}
+            <ScrollView 
+              style={styles.signedTermsScrollView}
+              contentContainerStyle={styles.signedTermsScrollBody}
+              showsVerticalScrollIndicator={true}
+            >
+              {/* Carimbo Digital de Abertura */}
+              <View style={styles.digitalStampCard}>
+                <Sparkles size={16} color="#FFC857" style={{ marginBottom: 4 }} />
+                <Text style={styles.stampTitle}>{t.profileScreen.stampTitle}</Text>
+                <Text style={styles.stampDetails}>
+                  {t.profileScreen.stampProfessional}: {personalData.name.toUpperCase()}{'\n'}
+                  {t.profileScreen.stampCrp}: {personalData.crp || 'N/A'}{'\n'}
+                  {t.profileScreen.stampEmail}: {personalData.email}{'\n'}
+                  {t.profileScreen.stampDate}: {consentData?.acceptedAt ? new Date(consentData.acceptedAt).toLocaleString(language === 'en' ? 'en-US' : 'pt-BR') : new Date().toLocaleString(language === 'en' ? 'en-US' : 'pt-BR')}{'\n'}
+                  {t.profileScreen.stampVersion}: {consentData?.termVersion || '2.0'} {t.profileScreen.stampSections}
+                </Text>
+              </View>
+
+              {/* Seções Completas do Termo (1 a 15) */}
+              {(language === 'en' ? TERMS_SECTIONS_EN : TERMS_SECTIONS_PT).slice(0, 16).map((sec, idx) => (
+                <View key={idx} style={styles.docSectionBlock}>
+                  <Text style={styles.docSectionTitle}>{sec.title}</Text>
+                  <Text style={styles.docSectionContent}>{sec.content}</Text>
+                </View>
+              ))}
+
+              {/* Seção 16: As 13 Declarações Assinaladas (Imutáveis) */}
+              <View style={styles.docChecklistSection}>
+                <Text style={styles.docChecklistTitle}>
+                  {t.profileScreen.section16SignedTitle}
+                </Text>
+                <View style={styles.docChecklistContainer}>
+                  {(t.auth.termsChecklist || []).map((clauseText: string, cIdx: number) => (
+                    <View key={cIdx} style={styles.docCheckItemRow}>
+                      <View style={styles.checkedBoxIcon}>
+                        <CheckSquare size={18} color="#084D48" strokeWidth={2.6} />
+                      </View>
+                      <Text style={styles.docCheckItemText}>
+                        {clauseText}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {/* Carimbo Digital de Fechamento */}
+              <View style={[styles.digitalStampCard, { marginTop: 10 }]}>
+                <Text style={styles.stampFooterText}>
+                  {t.profileScreen.stampHash}: SHA256-TEKO-{personalData.crp ? personalData.crp.replace(/\D/g, '') : 'PSI'}-{consentData?.id ? consentData.id.substring(0, 8) : t.profileScreen.stampVerified}
+                </Text>
+              </View>
+            </ScrollView>
+
+            {/* Rodapé com Botão de Compartilhar / Download */}
+            <View style={styles.signedTermsModalFooter}>
+              <TouchableOpacity 
+                style={styles.sharePdfBtn}
+                activeOpacity={0.85}
+                disabled={sharingPdf}
+                onPress={async () => {
+                  try {
+                    setSharingPdf(true);
+                    if (consentData?.signedPdfBase64) {
+                      const fileUri = `${FileSystem.documentDirectory}Termo_Consentimento_Teko_${personalData.name.replace(/\s+/g, '_')}.pdf`;
+                      await FileSystem.writeAsStringAsync(fileUri, consentData.signedPdfBase64, {
+                        encoding: FileSystem.EncodingType.Base64,
+                      });
+                      if (await Sharing.isAvailableAsync()) {
+                        await Sharing.shareAsync(fileUri, {
+                          mimeType: 'application/pdf',
+                          dialogTitle: t.profileScreen.shareDialogTitle,
+                          UTI: 'com.adobe.pdf',
+                        });
+                      } else {
+                        showToast(t.profileScreen.pdfSavedSuccess);
+                      }
+                    } else {
+                      showToast(t.profileScreen.pdfReadyToast);
+                    }
+                  } catch (err) {
+                    showError(t.profileScreen.pdfExportError);
+                  } finally {
+                    setSharingPdf(false);
+                  }
+                }}
+              >
+                {sharingPdf ? (
+                  <ActivityIndicator color="#084D48" size="small" />
+                ) : (
+                  <>
+                    <Download size={18} color="#084D48" />
+                    <Text style={styles.sharePdfBtnText}>{t.profileScreen.downloadShareBtn}</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <Modal
         visible={showDeleteModal}
         transparent={true}
@@ -1048,4 +1242,244 @@ const styles = StyleSheet.create({
     color: theme.colors.accentOrange,
     textDecorationLine: 'underline',
   },
+
+  /* Card Emerald & Termo Assinado */
+  cardEmerald: {
+    borderColor: 'rgba(8, 77, 72, 0.25)',
+    backgroundColor: '#FAFDFD',
+  },
+  iconCircleEmerald: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(8, 77, 72, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  termsStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  signedStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: theme.colors.tealSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: theme.radii.full,
+    borderWidth: 1,
+    borderColor: 'rgba(8, 77, 72, 0.2)',
+  },
+  signedStatusBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: theme.colors.primary,
+  },
+  termsMetaText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: theme.colors.textMuted,
+  },
+  termsDateText: {
+    fontSize: 12,
+    color: theme.colors.textMuted,
+    marginBottom: 16,
+  },
+  viewSignedDocumentBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#FFC857',
+    paddingVertical: 13,
+    borderRadius: theme.radii.md,
+    borderWidth: 1,
+    borderColor: '#E6A902',
+    ...theme.shadows.subtle,
+  },
+  viewSignedDocumentBtnText: {
+    color: '#084D48',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+
+  /* Modal de Visualização Integral do Termo Assinado */
+  signedTermsModalContent: {
+    width: '100%',
+    maxWidth: 640,
+    maxHeight: '90%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: theme.radii.lg,
+    overflow: 'hidden',
+  },
+  signedTermsModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  readOnlyBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  readOnlyBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFC857',
+    textTransform: 'uppercase',
+  },
+  signedTermsModalHeaderTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#FFF',
+  },
+  signedTermsModalHeaderSub: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 2,
+  },
+  closeSignedModalBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  readOnlyNoticeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#F3FBFB',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(8, 77, 72, 0.1)',
+  },
+  readOnlyNoticeText: {
+    flex: 1,
+    fontSize: 11,
+    color: theme.colors.primary,
+    fontWeight: '600',
+    lineHeight: 16,
+  },
+  signedTermsScrollView: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  signedTermsScrollBody: {
+    paddingBottom: 24,
+    gap: 14,
+  },
+  digitalStampCard: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: theme.radii.md,
+    padding: 14,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.primary,
+  },
+  stampTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: theme.colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  stampDetails: {
+    fontSize: 11,
+    lineHeight: 18,
+    color: theme.colors.textDark,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  stampFooterText: {
+    fontSize: 10,
+    color: theme.colors.textMuted,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  docSectionBlock: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    paddingBottom: 12,
+  },
+  docSectionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: theme.colors.primary,
+    marginBottom: 4,
+  },
+  docSectionContent: {
+    fontSize: 12,
+    lineHeight: 19,
+    color: '#334155',
+  },
+  docChecklistSection: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: theme.radii.md,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginTop: 6,
+  },
+  docChecklistTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: theme.colors.primary,
+    marginBottom: 10,
+  },
+  docChecklistContainer: {
+    gap: 10,
+  },
+  docCheckItemRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: '#FFFFFF',
+    padding: 10,
+    borderRadius: theme.radii.sm,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  checkedBoxIcon: {
+    marginTop: 1,
+  },
+  docCheckItemText: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 17,
+    color: theme.colors.textDark,
+    fontWeight: '500',
+  },
+  signedTermsModalFooter: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+  },
+  sharePdfBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#FFC857',
+    paddingVertical: 12,
+    borderRadius: theme.radii.md,
+    borderWidth: 1,
+    borderColor: '#E6A902',
+  },
+  sharePdfBtnText: {
+    color: '#084D48',
+    fontSize: 14,
+    fontWeight: '800',
+  },
 });
+

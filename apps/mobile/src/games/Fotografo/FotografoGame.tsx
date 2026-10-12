@@ -7,7 +7,7 @@ import { Camera, ArrowLeft, Trophy, Play, Timer, X, Frown } from 'lucide-react-n
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
-import { api } from '../../services/api';
+import { api, API_TWO_URL } from '../../services/api';
 import { useTranslation } from '../../i18n';
 
 interface FotografoGameProps {
@@ -336,7 +336,7 @@ export const FotografoGame: React.FC<FotografoGameProps> = ({ alunoId, onBack })
         telemetry: tData
       };
       
-      const apiUrl = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io/api/calculo/fotografo';
+      const apiUrl = `${API_TWO_URL}/api/calculo/fotografo`;
       
       fetch(apiUrl, {
         method: 'POST',

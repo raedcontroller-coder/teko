@@ -146,7 +146,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onNavi
                   onChangeText={setPassword}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                  {showPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
+                  {showPassword ? <Eye color={theme.colors.textMuted} size={18} /> : <EyeOff color={theme.colors.textMuted} size={18} />}
                 </TouchableOpacity>
               </View>
             </View>

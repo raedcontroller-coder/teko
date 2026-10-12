@@ -1,0 +1,43 @@
+TEKO - RESUMO ESTATÍSTICO DO MODELO BETA
+============================================================
+
+P(TDAH) = 1 / (1 + exp(-z))
+z = -1.415854 + (0.011830 * VTRI) + (0.000126976 * QA) + (0.397986 * IMP) + (-0.079936 * Idade)
+
+N = 400
+LLR p-value = 6.37428480612e-10
+Pseudo-R² McFadden = 0.088036
+
+MÉTRICAS CV10 OOF
+threshold: 0.5
+TN: 119
+FP: 81
+FN: 72
+TP: 128
+accuracy: 0.6175
+recall_sensibilidade: 0.64
+precision: 0.6124401913875598
+f1: 0.6259168704156479
+specificity: 0.595
+balanced_accuracy: 0.6174999999999999
+auc_roc: 0.694075
+brier_score: 0.22267937806125956
+
+AUC CV REPETIDA
+auc_media: 0.7028499999999999
+auc_dp: 0.07984598495310403
+auc_min: 0.485
+auc_max: 0.855
+n_folds_total: 100
+
+VALIDAÇÃO INDIVIDUAL
+Registro_ID: SINT_133
+VTRI: 161.77
+QA: 1052.21
+IMP: 4.0
+Idade: 14.0
+TDAH_real: Sim
+Origem: SINTÉTICO
+z: 1.104331881290431
+probabilidade: 0.7510708894344599
+percentual: 75.10708894344599

@@ -30,7 +30,6 @@ async function seed() {
     role: "PSICOLOGO",
     name: "Maria Victoria",
     email: "psicologo@teco.com.br",
-    cpf: "333.444.555-111",
     crp: "06/123456",
     clinicName: "MaviPsic",
     passwordHash: psicoPassword,

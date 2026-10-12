@@ -1,7 +1,9 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, UIManager, LayoutAnimation, Pressable, ActivityIndicator, Modal } from 'react-native';
-import { Save, ChevronDown, ChevronUp, User, Baby, Activity, TrendingUp, Moon, Heart, Shield, Users, Book, Pill, FileText, Stethoscope, CheckCircle2, Circle, CircleDashed, Trash2, AlertTriangle, XCircle } from 'lucide-react-native';
-import { api } from '../../../services/api';
+import { Save, ChevronDown, ChevronUp, User, Baby, Activity, TrendingUp, Moon, Heart, Shield, Users, Book, Pill, FileText, Stethoscope, CheckCircle2, Circle, CircleDashed, Trash2, AlertTriangle, XCircle, FileDown } from 'lucide-react-native';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+import { api, API_URL } from '../../../services/api';
 import { theme } from '../../../theme/theme';
 import { useTranslation } from '../../../i18n';
 
@@ -181,7 +183,7 @@ interface AnamneseTabProps {
 }
 
 export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [expandedSection, setExpandedSection] = useState<string | null>('motivo');
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState<boolean>(false);
@@ -261,6 +263,116 @@ export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
     }
   };
 
+  const ALL_REQUIRED_FIELDS = [
+    'queixa',
+    'desejada', 'idadeMae', 'idadePai', 'prenatal', 'doencasGestacao',
+    'tipoParto', 'chorouAoNascer', 'uti', 'ictericia', 'pesoNascer', 'alturaNascer',
+    'sentar', 'andar', 'primeirasPalavras', 'desfralde', 'tiques',
+    'alimentacaoInfancia', 'alimentacaoAtual', 'sonoTranquilo', 'horasSono', 'dormeSozinho', 'disturbiosSono',
+    'curiosidadeSexual', 'manipulacao', 'orientacaoSexual', 'relatosSex',
+    'doencasAnteriores', 'traumatismo', 'enxaqueca', 'convulsao', 'detalhesMedicos',
+    'situacaoPais', 'relacionamentos', 'interacaoSocial',
+    'gostaEscola', 'dificuldadeEscolar', 'historicoEscolar',
+    'tratamentos', 'usoMedicacao', 'medicacoes',
+    'impressaoGeral', 'planoIntervencao'
+  ];
+
+  const isAnamneseComplete = ALL_REQUIRED_FIELDS.every(field => {
+    const val = formData[field];
+    if (Array.isArray(val)) return val.length > 0;
+    return val !== undefined && val !== null && val !== '';
+  });
+
+  const [pdfModalVisible, setPdfModalVisible] = useState<boolean>(false);
+  const [pdfStep, setPdfStep] = useState<'generating' | 'ready' | 'error'>('generating');
+  const [generatedPdfUri, setGeneratedPdfUri] = useState<string | null>(null);
+
+  const [pdfErrorMessage, setPdfErrorMessage] = useState<string>('');
+
+  const handleExportPdf = async () => {
+    if (!patientId) {
+      triggerErrorToast("Selecione um paciente para exportar a anamnese.");
+      return;
+    }
+
+    if (!isAnamneseComplete) {
+      triggerErrorToast("Preencha todos os campos da anamnese para liberar a exportação do PDF.");
+      return;
+    }
+
+    try {
+      setPdfStep('generating');
+      setPdfErrorMessage('');
+      setPdfModalVisible(true);
+
+      // Auto-save any current form changes first
+      const saveUrl = adminPsicologoId 
+        ? `/api/patients/${patientId}/anamnese?psicologoId=${adminPsicologoId}`
+        : `/api/patients/${patientId}/anamnese`;
+      
+      await api.put(saveUrl, {
+        content: formData,
+        status: 'completed'
+      });
+
+      // Construct dynamic PDF endpoint URL with active language (pt/en)
+      const currentLang = language || 'pt';
+      const pdfEndpoint = adminPsicologoId 
+        ? `${API_URL}/api/patients/${patientId}/anamnese/pdf?psicologoId=${adminPsicologoId}&lang=${currentLang}`
+        : `${API_URL}/api/patients/${patientId}/anamnese/pdf?lang=${currentLang}`;
+
+      const tokenHeader = api.defaults.headers.common['Authorization'];
+      const localFileUri = `${FileSystem.documentDirectory}Anamnese_${patientId}.pdf`;
+
+      const downloadResult = await FileSystem.downloadAsync(
+        pdfEndpoint,
+        localFileUri,
+        {
+          headers: tokenHeader ? { Authorization: String(tokenHeader) } : {},
+        }
+      );
+
+      if (downloadResult.status === 200) {
+        setGeneratedPdfUri(downloadResult.uri);
+        setPdfStep('ready');
+      } else {
+        let detailedMsg = `Status HTTP ${downloadResult.status}`;
+        try {
+          if (downloadResult.uri) {
+            const fileContent = await FileSystem.readAsStringAsync(downloadResult.uri);
+            const parsed = JSON.parse(fileContent);
+            if (parsed.error) detailedMsg = parsed.error;
+          }
+        } catch {}
+        setPdfErrorMessage(detailedMsg);
+        setPdfStep('error');
+        triggerErrorToast(`Falha na exportação: ${detailedMsg}`);
+      }
+    } catch (err: any) {
+      console.error("Erro ao exportar PDF:", err);
+      const msg = err.response?.data?.error || err.message || "Erro de conexão com o servidor.";
+      setPdfErrorMessage(msg);
+      setPdfStep('error');
+      triggerErrorToast(msg);
+    }
+  };
+
+  const handleOpenSharedPdf = async () => {
+    if (!generatedPdfUri) return;
+    try {
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(generatedPdfUri, {
+          mimeType: 'application/pdf',
+          dialogTitle: t.anamnese.shareDialogTitle || 'Exportar Anamnese (PDF)',
+          UTI: 'com.adobe.pdf',
+        });
+      }
+      setPdfModalVisible(false);
+    } catch (err) {
+      console.error("Erro ao abrir compartilhamento do PDF:", err);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!patientId) return;
     try {
@@ -313,19 +425,13 @@ export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
           />
         </Accordion>
 
-        <Accordion key="gestacao" id="gestacao" title={t.anamnese.gestacaoTitle} icon={Baby} color="#EC4899" fields={['desejada', 'idadeMae', 'idadePai', 'prenatal', 'complGestacao', 'doencasGestacao']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+        <Accordion key="gestacao" id="gestacao" title={t.anamnese.gestacaoTitle} icon={Baby} color="#EC4899" fields={['desejada', 'idadeMae', 'idadePai', 'prenatal', 'doencasGestacao']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
           <BooleanPill label={t.anamnese.desejadaLabel} field="desejada" formData={formData} setFormData={setFormData} />
           <CustomTextInput style={styles.inputField} field="idadeMae" placeholder={t.anamnese.idadeMaePlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.idadeMae} onChangeField={handleFieldChange} />
           <CustomTextInput style={styles.inputField} field="idadePai" placeholder={t.anamnese.idadePaiPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.idadePai} onChangeField={handleFieldChange} />
           <BooleanPill label={t.anamnese.prenatalLabel} field="prenatal" formData={formData} setFormData={setFormData} />
           
-          <MultiSelectPillGroup 
-            label={t.anamnese.complGestacaoLabel} 
-            field="complGestacao" 
-            options={t.anamnese.complGestacaoOptions} 
-            formData={formData} 
-            setFormData={setFormData} 
-          />
+          <Text style={styles.inputLabel}>{t.anamnese.complGestacaoLabel}</Text>
           <CustomTextInput style={styles.textArea} multiline field="doencasGestacao" placeholder={t.anamnese.doencasGestacaoPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.doencasGestacao} onChangeField={handleFieldChange} />
         </Accordion>
         
@@ -385,12 +491,15 @@ export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
           <CustomTextInput style={styles.inputField} field="horasSono" placeholder={t.anamnese.horasSonoPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" keyboardType="numeric" value={formData.horasSono} onChangeField={handleFieldChange} />
           <BooleanPill label={t.anamnese.dormeSozinhoLabel} field="dormeSozinho" formData={formData} setFormData={setFormData} />
           
-          <MultiSelectPillGroup 
-            label={t.anamnese.disturbiosSonoLabel} 
+          <Text style={styles.inputLabel}>{t.anamnese.disturbiosSonoLabel}</Text>
+          <CustomTextInput 
+            style={styles.textArea} 
+            multiline 
             field="disturbiosSono" 
-            options={t.anamnese.disturbiosSonoOptions} 
-            formData={formData} 
-            setFormData={setFormData} 
+            placeholder={t.anamnese.disturbiosSonoLabel + '...'} 
+            placeholderTextColor="rgba(255,255,255,0.4)" 
+            value={formData.disturbiosSono} 
+            onChangeField={handleFieldChange} 
           />
         </Accordion>
 
@@ -402,12 +511,15 @@ export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
         </Accordion>
 
         <Accordion key="historiaMedica" id="historiaMedica" title={t.anamnese.historiaMedicaTitle} icon={Shield} color="#3B82F6" fields={['doencasAnteriores', 'traumatismo', 'enxaqueca', 'convulsao', 'detalhesMedicos']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
-          <MultiSelectPillGroup 
-            label={t.anamnese.doencasAnterioresLabel} 
+          <Text style={styles.inputLabel}>{t.anamnese.doencasAnterioresLabel}</Text>
+          <CustomTextInput 
+            style={styles.textArea} 
+            multiline 
             field="doencasAnteriores" 
-            options={t.anamnese.doencasAnterioresOptions} 
-            formData={formData} 
-            setFormData={setFormData} 
+            placeholder={t.anamnese.doencasAnterioresLabel + '...'} 
+            placeholderTextColor="rgba(255,255,255,0.4)" 
+            value={formData.doencasAnteriores} 
+            onChangeField={handleFieldChange} 
           />
           <BooleanPill label={t.anamnese.traumatismoLabel} field="traumatismo" formData={formData} setFormData={setFormData} />
           <BooleanPill label={t.anamnese.enxaquecaLabel} field="enxaqueca" formData={formData} setFormData={setFormData} />
@@ -419,24 +531,31 @@ export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
           <SelectPillGroup label={t.anamnese.situacaoPaisLabel} field="situacaoPais" options={t.anamnese.situacaoPaisOptions} formData={formData} setFormData={setFormData} />
           <CustomTextInput style={styles.textArea} multiline field="relacionamentos" placeholder={t.anamnese.relacionamentosPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.relacionamentos} onChangeField={handleFieldChange} />
           
-          <MultiSelectPillGroup 
-            label={t.anamnese.interacaoSocialLabel} 
+          <Text style={styles.inputLabel}>{t.anamnese.interacaoSocialLabel}</Text>
+          <CustomTextInput 
+            style={styles.textArea} 
+            multiline 
             field="interacaoSocial" 
-            options={t.anamnese.interacaoSocialOptions} 
-            formData={formData} 
-            setFormData={setFormData} 
+            placeholder={t.anamnese.interacaoSocialLabel + '...'} 
+            placeholderTextColor="rgba(255,255,255,0.4)" 
+            value={formData.interacaoSocial} 
+            onChangeField={handleFieldChange} 
           />
         </Accordion>
 
         <Accordion key="escolaridade" id="escolaridade" title={t.anamnese.escolaridadeTitle} icon={Book} color="#F59E0B" fields={['gostaEscola', 'dificuldadeEscolar', 'historicoEscolar']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
           <BooleanPill label={t.anamnese.gostaEscolaLabel} field="gostaEscola" formData={formData} setFormData={setFormData} />
-          <MultiSelectPillGroup 
-            label={t.anamnese.dificuldadeEscolarLabel} 
+          <Text style={styles.inputLabel}>{t.anamnese.dificuldadeEscolarLabel}</Text>
+          <CustomTextInput 
+            style={styles.textArea} 
+            multiline 
             field="dificuldadeEscolar" 
-            options={t.anamnese.dificuldadeEscolarOptions} 
-            formData={formData} 
-            setFormData={setFormData} 
+            placeholder={t.anamnese.dificuldadeEscolarLabel + '...'} 
+            placeholderTextColor="rgba(255,255,255,0.4)" 
+            value={formData.dificuldadeEscolar} 
+            onChangeField={handleFieldChange} 
           />
+          <Text style={styles.inputLabel}>{t.anamnese.historicoEscolarLabel}</Text>
           <CustomTextInput style={styles.textArea} multiline field="historicoEscolar" placeholder={t.anamnese.historicoEscolarPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.historicoEscolar} onChangeField={handleFieldChange} />
         </Accordion>
 
@@ -448,7 +567,10 @@ export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
         </Accordion>
 
         <Accordion key="observacoesFinais" id="observacoesFinais" title={t.anamnese.observacoesFinaisTitle} icon={Stethoscope} color="#8B5CF6" fields={['impressaoGeral', 'planoIntervencao']} expandedSection={expandedSection} toggleSection={toggleSection} formData={formData}>
+          <Text style={styles.inputLabel}>{t.anamnese.impressaoGeralLabel}</Text>
           <CustomTextInput style={styles.textArea} multiline field="impressaoGeral" placeholder={t.anamnese.impressaoGeralPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.impressaoGeral} onChangeField={handleFieldChange} />
+          
+          <Text style={styles.inputLabel}>{t.anamnese.planoIntervencaoLabel}</Text>
           <CustomTextInput style={styles.textArea} multiline field="planoIntervencao" placeholder={t.anamnese.planoIntervencaoPlaceholder} placeholderTextColor="rgba(255,255,255,0.4)" value={formData.planoIntervencao} onChangeField={handleFieldChange} />
         </Accordion>
 
@@ -532,7 +654,98 @@ export function AnamneseTab({ patientId, adminPsicologoId }: AnamneseTabProps) {
         </View>
       </Modal>
 
+      {/* Modal Tela Geral de Fabricação do PDF Teko */}
+      <Modal
+        visible={pdfModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          if (pdfStep !== 'generating') setPdfModalVisible(false);
+        }}
+      >
+        <View style={styles.modalOverlayLock}>
+          <View style={styles.tekoPdfModalContainer}>
+            {pdfStep === 'generating' && (
+              <>
+                <View style={styles.tekoModalIconBgEmerald}>
+                  <ActivityIndicator size="large" color={theme.colors.primary} />
+                </View>
+                <Text style={styles.tekoPdfModalTitle}>{t.anamnese.generatingPdfTitle}</Text>
+                <Text style={styles.tekoPdfModalSubtitle}>
+                  {t.anamnese.generatingPdfSubtitle}
+                </Text>
+                <View style={styles.loadingBarContainer}>
+                  <View style={styles.loadingBarPulse} />
+                </View>
+              </>
+            )}
+
+            {pdfStep === 'ready' && (
+              <>
+                <View style={styles.tekoModalIconBgMint}>
+                  <CheckCircle2 color={theme.colors.primary} size={36} />
+                </View>
+                <Text style={styles.tekoPdfModalTitle}>{t.anamnese.pdfGeneratedTitle}</Text>
+                <Text style={styles.tekoPdfModalSubtitle}>
+                  {t.anamnese.pdfGeneratedSubtitle}
+                </Text>
+                
+                <TouchableOpacity 
+                  style={styles.downloadPdfButton} 
+                  onPress={handleOpenSharedPdf}
+                  activeOpacity={0.8}
+                >
+                  <FileDown size={22} color="#FFF" style={{ marginRight: 8 }} />
+                  <Text style={styles.downloadPdfButtonText}>{t.anamnese.downloadPdfBtn}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={styles.closePdfModalButton} 
+                  onPress={() => setPdfModalVisible(false)}
+                >
+                  <Text style={styles.closePdfModalButtonText}>{t.anamnese.closeModalBtn}</Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {pdfStep === 'error' && (
+              <>
+                <View style={styles.modalIconBgRed}>
+                  <XCircle color="#FF4B4B" size={36} />
+                </View>
+                <Text style={styles.modalTitleRed}>{t.anamnese.generationErrorTitle}</Text>
+                <Text style={styles.tekoPdfModalSubtitle}>
+                  {pdfErrorMessage || t.anamnese.generationErrorFallback}
+                </Text>
+                
+                <TouchableOpacity 
+                  style={styles.modalCancelButton} 
+                  onPress={() => setPdfModalVisible(false)}
+                >
+                  <Text style={styles.modalCancelText}>{t.anamnese.closeModalBtn}</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <View style={styles.fabContainer}>
+        <TouchableOpacity 
+          style={[
+            styles.pdfFab, 
+            !isAnamneseComplete && styles.pdfFabDisabled
+          ]}
+          onPress={handleExportPdf}
+          disabled={saving}
+          activeOpacity={isAnamneseComplete ? 0.7 : 0.9}
+        >
+          <FileDown size={20} color={isAnamneseComplete ? "#FFF" : "rgba(255,255,255,0.6)"} style={{ marginRight: 8 }} />
+          <Text style={[styles.saveText, !isAnamneseComplete && { color: "rgba(255,255,255,0.6)" }]}>
+            {t.anamnese.exportPdf}
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity 
           style={[styles.saveFab, saving && { opacity: 0.7 }]}
           onPress={handleSave}
@@ -791,6 +1004,106 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  modalOverlayLock: {
+    flex: 1,
+    backgroundColor: 'rgba(28, 41, 66, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    zIndex: 9999,
+  },
+  tekoPdfModalContainer: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: theme.colors.cardBg,
+    borderRadius: theme.radii.lg,
+    padding: 24,
+    borderWidth: 1.5,
+    borderColor: theme.colors.cardBorder,
+    alignItems: 'center',
+    ...theme.shadows.card,
+  },
+  tekoModalIconBgEmerald: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: theme.colors.tealSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.tealMint,
+  },
+  tekoModalIconBgMint: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: theme.colors.tealSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.tealMint,
+  },
+  tekoPdfModalTitle: {
+    color: theme.colors.textDark,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  tekoPdfModalSubtitle: {
+    color: theme.colors.textMuted,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  loadingBarContainer: {
+    width: '100%',
+    height: 6,
+    backgroundColor: theme.colors.tealSoft,
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  loadingBarPulse: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: theme.colors.primary,
+    borderRadius: 3,
+  },
+  downloadPdfButton: {
+    width: '100%',
+    height: 52,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    ...theme.shadows.subtle,
+  },
+  downloadPdfButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  closePdfModalButton: {
+    width: '100%',
+    height: 44,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.tealSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.tealMint,
+  },
+  closePdfModalButtonText: {
+    color: theme.colors.textDark,
+    fontSize: 14,
+    fontWeight: '600',
+  },
   modalContainerRed: {
     width: '100%',
     maxWidth: 400,
@@ -864,12 +1177,29 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 130,
     alignSelf: 'center',
+    flexDirection: 'row',
+    gap: 12,
     zIndex: 10,
+  },
+  pdfFab: {
+    flexDirection: 'row',
+    backgroundColor: '#7B61FF',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: theme.radii.full,
+    alignItems: 'center',
+    ...theme.shadows.floating,
+  },
+  pdfFabDisabled: {
+    backgroundColor: '#374151',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+    opacity: 0.75,
   },
   saveFab: { 
     flexDirection: 'row', 
     backgroundColor: theme.colors.primary, 
-    paddingHorizontal: 24, 
+    paddingHorizontal: 20, 
     paddingVertical: 14, 
     borderRadius: theme.radii.full, 
     alignItems: 'center', 
@@ -878,7 +1208,7 @@ const styles = StyleSheet.create({
   saveText: { 
     color: '#FFFFFF', 
     fontWeight: '700', 
-    fontSize: 15 
+    fontSize: 14 
   },
 
   /* Teko Toast Banners */

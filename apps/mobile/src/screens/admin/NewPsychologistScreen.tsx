@@ -198,7 +198,7 @@ export const NewPsychologistScreen: React.FC<NewPsychologistScreenProps> = ({ on
                   onChangeText={(val) => handleChange('password', val)}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
-                  {showPassword ? <EyeOff color={theme.colors.textMuted} size={18} /> : <Eye color={theme.colors.textMuted} size={18} />}
+                  {showPassword ? <Eye color={theme.colors.textMuted} size={18} /> : <EyeOff color={theme.colors.textMuted} size={18} />}
                 </TouchableOpacity>
               </View>
             </View>

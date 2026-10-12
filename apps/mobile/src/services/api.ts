@@ -3,7 +3,20 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-export const API_URL = 'https://teko.raed.world';
+const getLocalHost = () => {
+  const hostUri = Constants.expoConfig?.hostUri || (Constants as any).manifest?.debuggerHost;
+  if (hostUri) {
+    const ip = hostUri.split(':')[0];
+    if (ip) return ip;
+  }
+  if (Platform.OS === 'android') return '10.0.2.2';
+  return 'localhost';
+};
+
+const localHost = getLocalHost();
+
+export const API_URL = __DEV__ ? `http://${localHost}:3000` : 'https://teko.raed.world';
+export const API_TWO_URL = __DEV__ ? `http://${localHost}:3002` : 'https://teko.raed.world';
 
 
 export const api = axios.create({

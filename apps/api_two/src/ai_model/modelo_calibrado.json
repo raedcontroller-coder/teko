@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0-beta",
+  "description": "Modelo de Regressão Logística Calibrado Teko para Probabilidade de TDAH",
+  "features": [
+    "VTRI",
+    "QA",
+    "IMP",
+    "Idade"
+  ],
+  "target": "TDAH",
+  "default_threshold": 0.5,
+  "coefficients": {
+    "const": -1.4158540746107966,
+    "VTRI": 0.011830011602051743,
+    "QA": 0.00012697616134272477,
+    "IMP": 0.39798638796950225,
+    "Idade": -0.0799361542547943
+  },
+  "increments_odds_ratio": {
+    "VTRI": 10.0,
+    "QA": 100.0,
+    "IMP": 1.0,
+    "Idade": 1.0
+  },
+  "performance_cv10_oof": {
+    "threshold": 0.5,
+    "TN": 119,
+    "FP": 81,
+    "FN": 72,
+    "TP": 128,
+    "accuracy": 0.6175,
+    "recall_sensibilidade": 0.64,
+    "precision": 0.6124401913875598,
+    "f1": 0.6259168704156479,
+    "specificity": 0.595,
+    "balanced_accuracy": 0.6174999999999999,
+    "auc_roc": 0.694075,
+    "brier_score": 0.22267937806125956
+  },
+  "formula": "P(TDAH) = 1 / (1 + exp(-z))\nz = -1.415854 + (0.011830 * VTRI) + (0.000126976 * QA) + (0.397986 * IMP) + (-0.079936 * Idade)"
+}

@@ -14,12 +14,15 @@ async function fetchOpenRouterAnalysis(
   gameTitle: string,
   gameTypeKey: 'fotografo' | 'goleiro' | 'toca_rapido',
   stats: { firstVal: number; lastVal: number; diff: number; trendText: string; totalSessions: number },
-  patientName: string
+  patientName: string,
+  lang: string = "pt"
 ): Promise<string | null> {
   if (!OPENROUTER_API_KEY) {
     console.warn("⚠️ OpenRouter API Key (apiKey_OpenRouter) não encontrada em .env");
     return null;
   }
+
+  const isEn = lang.toLowerCase().startsWith("en");
 
   try {
     let metricDescription = "";
@@ -27,45 +30,87 @@ async function fetchOpenRouterAnalysis(
 
     if (gameTypeKey === 'goleiro') {
       const isImprovement = stats.diff < 0;
-      interpretationHint = isImprovement
-        ? `REDUÇÃO da oscilação (desvio padrão diminuiu de ${stats.firstVal}ms para ${stats.lastVal}ms, variação de ${stats.diff}ms). Significado clínico: MELHORA na estabilidade atencional e maior consistência no tempo de reação do paciente.`
-        : `AUMENTO da oscilação (desvio padrão subiu de ${stats.firstVal}ms para ${stats.lastVal}ms, variação de +${stats.diff}ms). Significado clínico: MAIOR INCONSISTÊNCIA no tempo de resposta e oscilações no padrão de atenção atencional do paciente.`;
-      metricDescription = `Jogo do Goleiro (Oscilação no Tempo de Reação / Desvio Padrão da Atenção em ms). ${interpretationHint}`;
+      if (isEn) {
+        interpretationHint = isImprovement
+          ? `REDUCTION in latency fluctuation (standard deviation decreased from ${stats.firstVal}ms to ${stats.lastVal}ms, diff: ${stats.diff}ms). Clinical meaning: IMPROVEMENT in attentional stability and reaction time consistency.`
+          : `INCREASE in latency fluctuation (standard deviation increased from ${stats.firstVal}ms to ${stats.lastVal}ms, diff: +${stats.diff}ms). Clinical meaning: GREATER INCONSISTENCY in response time and attentional stability.`;
+        metricDescription = `Goalkeeper Game (Reaction Time Variability in ms). ${interpretationHint}`;
+      } else {
+        interpretationHint = isImprovement
+          ? `REDUÇÃO da oscilação (desvio padrão diminuiu de ${stats.firstVal}ms para ${stats.lastVal}ms, variação de ${stats.diff}ms). Significado clínico: MELHORA na estabilidade atencional e maior consistência no tempo de reação do paciente.`
+          : `AUMENTO da oscilação (desvio padrão subiu de ${stats.firstVal}ms para ${stats.lastVal}ms, variação de +${stats.diff}ms). Significado clínico: MAIOR INCONSISTÊNCIA no tempo de resposta e oscilações no padrão de atenção atencional do paciente.`;
+        metricDescription = `Jogo do Goleiro (Oscilação no Tempo de Reação / Desvio Padrão da Atenção em ms). ${interpretationHint}`;
+      }
     } else if (gameTypeKey === 'fotografo') {
       const isImprovement = stats.diff < 0;
-      interpretationHint = isImprovement
-        ? `REDUÇÃO da variação de foco (desvio padrão diminuiu de ${stats.firstVal}ms para ${stats.lastVal}ms, variação de ${stats.diff}ms). Significado clínico: MELHORA no foco visual e maior estabilização da atenção sustentada.`
-        : `AUMENTO da variação de foco (desvio padrão subiu de ${stats.firstVal}ms para ${stats.lastVal}ms, variação de +${stats.diff}ms). Significado clínico: MAIOR OSCILAÇÃO do foco visual e menor estabilidade atencional.`;
-      metricDescription = `Fotógrafo da Floresta (Variação de Foco Visual / Atenção Sustentada em ms). ${interpretationHint}`;
+      if (isEn) {
+        interpretationHint = isImprovement
+          ? `REDUCTION in visual focus variance (standard deviation decreased from ${stats.firstVal}ms to ${stats.lastVal}ms, diff: ${stats.diff}ms). Clinical meaning: IMPROVEMENT in sustained visual focus and cognitive endurance.`
+          : `INCREASE in visual focus variance (standard deviation increased from ${stats.firstVal}ms to ${stats.lastVal}ms, diff: +${stats.diff}ms). Clinical meaning: GREATER FLUCTUATION in visual focus and cognitive fatigue.`;
+        metricDescription = `Forest Photographer (Sustained Focus Variance in ms). ${interpretationHint}`;
+      } else {
+        interpretationHint = isImprovement
+          ? `REDUÇÃO da variação de foco (desvio padrão diminuiu de ${stats.firstVal}ms para ${stats.lastVal}ms, variação de ${stats.diff}ms). Significado clínico: MELHORA no foco visual e maior estabilização da atenção sustentada.`
+          : `AUMENTO da variação de foco (desvio padrão subiu de ${stats.firstVal}ms para ${stats.lastVal}ms, variação de +${stats.diff}ms). Significado clínico: MAIOR OSCILAÇÃO do foco visual e menor estabilidade atencional.`;
+        metricDescription = `Fotógrafo da Floresta (Variação de Foco Visual / Atenção Sustentada em ms). ${interpretationHint}`;
+      }
     } else {
       const isImprovement = stats.diff < 0;
       const isEqual = stats.diff === 0;
-      if (isEqual) {
-        interpretationHint = `MANUTENÇÃO do número de toques indevidos em ${stats.lastVal} toque(s). Significado clínico: Estabilidade no padrão de controle inibitório.`;
-      } else if (isImprovement) {
-        interpretationHint = `REDUÇÃO nos toques indevidos (de ${stats.firstVal} para ${stats.lastVal} toques, redução de ${Math.abs(stats.diff)} erro(s)). Significado clínico: MELHORA significativa no controle inibitório e redução da impulsividade.`;
+      if (isEn) {
+        if (isEqual) {
+          interpretationHint = `MAINTENANCE of improper touches at ${stats.lastVal} touch(es). Clinical meaning: Stability in inhibitory control.`;
+        } else if (isImprovement) {
+          interpretationHint = `REDUCTION in improper touches (from ${stats.firstVal} to ${stats.lastVal}, reduction of ${Math.abs(stats.diff)} error(s)). Clinical meaning: Significant IMPROVEMENT in motor impulse control.`;
+        } else {
+          interpretationHint = `INCREASE in improper touches (from ${stats.firstVal} to ${stats.lastVal}, increase of +${stats.diff} error(s)). Clinical meaning: GREATER IMPULSIVITY and reduced motor braking capability.`;
+        }
+        metricDescription = `Tap Fast! (No-Go Commission Errors / Impulsivity). ${interpretationHint}`;
       } else {
-        interpretationHint = `AUMENTO nos toques indevidos (de ${stats.firstVal} para ${stats.lastVal} toques, aumento de +${stats.diff} erro(s)). Significado clínico: MAIOR IMPULSIVIDADE e menor eficácia no controle inibitório ao reagir aos estímulos do jogo.`;
+        if (isEqual) {
+          interpretationHint = `MANUTENÇÃO do número de toques indevidos em ${stats.lastVal} toque(s). Significado clínico: Estabilidade no padrão de controle inibitório.`;
+        } else if (isImprovement) {
+          interpretationHint = `REDUÇÃO nos toques indevidos (de ${stats.firstVal} para ${stats.lastVal} toques, redução de ${Math.abs(stats.diff)} erro(s)). Significado clínico: MELHORA significativa no controle inibitório e redução da impulsividade.`;
+        } else {
+          interpretationHint = `AUMENTO nos toques indevidos (de ${stats.firstVal} para ${stats.lastVal} toques, aumento de +${stats.diff} erro(s)). Significado clínico: MAIOR IMPULSIVIDADE e menor eficácia no controle inibitório ao reagir aos estímulos do jogo.`;
+        }
+        metricDescription = `Toca Rápido! (Toques Indevidos / Erros por Impulsividade). ${interpretationHint}`;
       }
-      metricDescription = `Toca Rápido! (Toques Indevidos / Erros por Impulsividade). ${interpretationHint}`;
     }
 
-    const systemPrompt = `Você é o Assistente Neuropsicológico Clínico do aplicativo Teko, especializado em psicometria infantil e acompanhamento terapêutico.
-Sua função é elaborar uma Análise Assistida precisa para o psicólogo responsável pelo paciente, interpretando fielmente os dados pré-analisados fornecidos.
+    const systemPrompt = isEn
+      ? `You are a Senior Clinical Neuropsychological Assistant for the Teko platform, specializing in pediatric psychometrics and therapeutic tracking.
+Your role is to craft a concise, clear clinical opinion for the psychologist, faithfully interpreting the pre-analyzed patient data.
+Guidelines:
+1. Respond strictly in professional, welcoming English.
+2. STRICT CONCISENESS (CRITICAL): Write AT MOST ONE SINGLE SHORT PARAGRAPH (2 to 3 direct, conclusive sentences). Do NOT produce long or exhaustive text.
+3. Follow the clinical trend: if errors or fluctuations rose, indicate worsening/higher impulsivity; if they dropped, indicate improvement/higher stability.
+4. Avoid complex mathematical formulas or isolated raw stats, focusing on practical clinical meaning.
+5. No markdown code blocks, thoughts, or formatting tags. Output the plain clinical paragraph directly.`
+      : `Você é o Assistente Neuropsicológico Clínico do aplicativo Teko, especializado em psicometria infantil e acompanhamento terapêutico.
+Sua função é elaborar uma Análise Assistida precisa e sintética para o psicólogo responsável pelo paciente, interpretando fielmente os dados pré-analisados fornecidos.
 Diretrizes do laudo:
 1. Responda estritamente em Português do Brasil com linguagem clara, profissional e acessível para a área da saúde.
-2. Siga estritamente o significado clínico pré-interpretado: se houve aumento de erros ou oscilação, indique piora/maior impulsividade/inconsistência; se houve redução, indique melhora/maior controle inibitório/estabilidade.
-3. Seja conciso: escreva entre 2 e 3 frases completas e conclusivas.
+2. MÁXIMO UM PARÁGRAFO CURTO (REGRA CRÍTICA): Escreva no máximo UM ÚNICO PARÁGRAFO conciso e conclusivo (entre 2 e 3 frases diretas). Evite textos longos, repetitivos ou massantes.
+3. Siga estritamente o significado clínico pré-interpretado: se houve aumento de erros ou oscilação, indique piora/maior impulsividade/inconsistência; se houve redução, indique melhora/maior controle inibitório/estabilidade.
 4. Evite fórmulas complexas ou jargões matemáticos puros, focando na aplicação prática para o acompanhamento do paciente.
-5. Não use markdown, códigos ou tags de raciocínio. Escreva diretamente o parecer clínico.`;
+5. Não use markdown, códigos ou tags de raciocínio. Escreva diretamente o parecer clínico em parágrafo único.`;
 
-    const userPrompt = `Com base nos dados estatísticos do paciente, elabore o parecer clínico para a aba de Evolução:
+    const userPrompt = isEn
+      ? `Based on the patient biometric trend, write the single-paragraph clinical opinion:
+
+Patient: ${patientName}
+Game / Task: ${gameTitle}
+Trajectory (${stats.totalSessions} sessions): ${metricDescription}
+
+Single-Paragraph Clinical Opinion:`
+      : `Com base nos dados estatísticos do paciente, elabore o parecer clínico em parágrafo único para a aba de Evolução:
 
 Paciente: ${patientName}
 Jogo / Mecânica: ${gameTitle}
 Histórico de partida (${stats.totalSessions} sessões acumuladas): ${metricDescription}
 
-Parecer Clínico Acessível:`;
+Parecer Clínico Acessível em Parágrafo Único:`;
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -283,7 +328,8 @@ export async function GET(
           aiAnalysis = cachedAnalysis;
         } else {
           // Se não houver análise salva no banco de dados para a 3ª/6ª sessão, chama o OpenRouter
-          const llmResponse = await fetchOpenRouterAnalysis(gameTitle, gameTypeKey, cycleStats, patient.name);
+          const lang = url.searchParams.get("lang") || "pt";
+          const llmResponse = await fetchOpenRouterAnalysis(gameTitle, gameTypeKey, cycleStats, patient.name, lang);
 
           if (llmResponse) {
             aiAnalysis = llmResponse;

@@ -260,7 +260,7 @@ export default function AdminProfissionalDadosPage() {
                       onClick={() => setShowNewPassword(!showNewPassword)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors"
                     >
-                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showNewPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                     </button>
                   </div>
                 </div>
@@ -280,7 +280,7 @@ export default function AdminProfissionalDadosPage() {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors"
                     >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                     </button>
                   </div>
                 </div>

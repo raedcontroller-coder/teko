@@ -48,7 +48,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     const { psicologoId } = auth;
     const { id: patientId } = await context.params;
 
-    // Verify patient belongs to psychologist tenant
+    // Verify patient belongs strictly to psychologist tenant (Enforce RLS)
     const patientExists = await db.query.users.findFirst({
       where: and(
         eq(users.id, patientId),
@@ -58,7 +58,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     });
 
     if (!patientExists) {
-      return NextResponse.json({ error: "Paciente não encontrado ou sem acesso." }, { status: 404 });
+      return NextResponse.json({ error: "Paciente não encontrado ou sem permissão de acesso." }, { status: 404 });
     }
 
     // Find active anamnese for patient
@@ -99,7 +99,7 @@ async function handleUpsert(request: Request, context: { params: Promise<{ id: s
     const { psicologoId } = auth;
     const { id: patientId } = await context.params;
 
-    // Verify patient belongs to psychologist tenant
+    // Verify patient belongs strictly to psychologist tenant (Enforce RLS)
     const patientExists = await db.query.users.findFirst({
       where: and(
         eq(users.id, patientId),
@@ -109,7 +109,7 @@ async function handleUpsert(request: Request, context: { params: Promise<{ id: s
     });
 
     if (!patientExists) {
-      return NextResponse.json({ error: "Paciente não encontrado ou sem permissão." }, { status: 404 });
+      return NextResponse.json({ error: "Paciente não encontrado ou sem permissão de acesso." }, { status: 404 });
     }
 
     const body = await request.json();

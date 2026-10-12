@@ -28,7 +28,10 @@ RUN npm run build --workspace=@teko/web
 FROM docker.io/library/node:20-alpine AS runner
 WORKDIR /app
 
-# Adicionar usuario nao-root
+# Adicionar usuario nao-root e Python 3 para geracao autonoma de PDFs via ReportLab
+RUN apk add --no-cache python3 py3-pip && \
+    pip install reportlab urllib3 --break-system-packages
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -36,6 +39,8 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+# Copiar scripts python de api_two para geração local de PDFs se necessário
+COPY --from=builder --chown=nextjs:nodejs /app/apps/api_two/src ./apps/api_two/src
 
 USER nextjs
 

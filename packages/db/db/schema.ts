@@ -9,10 +9,9 @@ export const users = pgTable('users', {
   role: roleEnum('role').notNull().default('ALUNO'),
   name: text('name').notNull(),
   
-  // E-mail for user verification (Mandatory)
-  email: text('email').notNull().unique(),
+  // E-mail for user verification (Mandatory for PSICOLOGO / GLOBAL_ADMIN / FAMILIAR, null for ALUNO)
+  email: text('email').unique(),
   
-  cpf: text('cpf').unique(),
   crp: text('crp'),
   clinicName: text('clinic_name'),
   
@@ -116,5 +115,27 @@ export const appointments = pgTable('appointments', {
   deletedAt: timestamp('deleted_at'),
 });
 
+// 8. Audit Logs Table (Enxuta, imutável e com detalhes em JSON)
+export const auditLogs = pgTable('audit_logs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => users.id),
+  userRole: text('user_role'),
+  action: text('action').notNull(),
+  resourceType: text('resource_type').notNull(),
+  resourceId: text('resource_id'),
+  details: jsonb('details'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
 
-
+// 9. User Consents Table (Termo de Consentimento e Ciência do Psicólogo)
+export const userConsents = pgTable('user_consents', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  termVersion: text('term_version').notNull().default('2.0'),
+  termLanguage: text('term_language').notNull().default('pt'),
+  checkItems: jsonb('check_items').notNull().default([]),
+  signedPdfBase64: text('signed_pdf_base64'),
+  signedPdfPath: text('signed_pdf_path'),
+  acceptedAt: timestamp('accepted_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});

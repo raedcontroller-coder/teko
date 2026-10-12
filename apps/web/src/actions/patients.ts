@@ -5,6 +5,7 @@ import { users, gameSessions } from "../../../../packages/db/db/schema";
 import { eq, and, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "./auth";
+import { recordAudit } from "../lib/audit";
 
 export async function createPatientAction(formData: FormData, adminPsicologoId?: string) {
   try {
@@ -67,17 +68,13 @@ export async function createPatientAction(formData: FormData, adminPsicologoId?:
     }
 
     // 2. Criar o Paciente (ALUNO)
-    // O paciente (criança) não tem email próprio obrigatório no form, 
-    // mas o schema exige email unique para todo "user".
-    // Então geramos um email fictício único para a criança.
-    const childUniqueEmail = `child_${Date.now()}_${Math.random().toString(36).substring(7)}@teko.local`;
-
+    // Crianças não possuem coleta de e-mail (LGPD / PII Compliance)
     const [newChild] = await db.insert(users).values({
       role: "ALUNO",
       name: name,
       age: age,
       gender: gender,
-      email: childUniqueEmail,
+      email: null,
       psicologoId: psicologoId,
       hasTdah: hasTdah,
     }).returning();
@@ -87,6 +84,15 @@ export async function createPatientAction(formData: FormData, adminPsicologoId?:
         .set({ alunoId: newChild.id })
         .where(eq(users.id, guardianId));
     }
+
+    await recordAudit({
+      userId: session.sub,
+      userRole: session.role,
+      action: "PATIENT_CREATE",
+      resourceType: "PATIENT",
+      resourceId: newChild.id,
+      details: { patientName: name, age, gender, hasTdah, psicologoId },
+    });
 
     revalidatePath("/[lang]/dashboard/pacientes", "page");
     return { success: true };
@@ -159,12 +165,17 @@ export async function getPatientByIdAction(patientId: string, adminPsicologoId?:
       psicologoId = adminPsicologoId;
     }
 
+    const isAdmin = session.role === "GLOBAL_ADMIN";
+    const patientWhere = isAdmin && !adminPsicologoId
+      ? and(eq(users.id, patientId), eq(users.role, "ALUNO"))
+      : and(
+          eq(users.id, patientId),
+          eq(users.role, "ALUNO"),
+          eq(users.psicologoId, psicologoId)
+        );
+
     const patient = await db.query.users.findFirst({
-      where: and(
-        eq(users.id, patientId),
-        eq(users.role, "ALUNO"),
-        eq(users.psicologoId, psicologoId)
-      ),
+      where: patientWhere,
     });
 
     if (!patient) {
@@ -216,10 +227,24 @@ export async function updatePatientAction(patientId: string, data: { name: strin
       psicologoId = adminPsicologoId;
     }
 
+    const isAdmin = session.role === "GLOBAL_ADMIN";
+    const updateWhere = isAdmin && !adminPsicologoId
+      ? eq(users.id, patientId)
+      : and(eq(users.id, patientId), eq(users.psicologoId, psicologoId));
+
     await db.update(users)
       .set({ name: data.name, age: data.age, gender: data.gender, hasTdah: data.hasTdah })
-      .where(and(eq(users.id, patientId), eq(users.psicologoId, psicologoId)));
+      .where(updateWhere);
     
+    await recordAudit({
+      userId: session.sub,
+      userRole: session.role,
+      action: "PATIENT_UPDATE",
+      resourceType: "PATIENT",
+      resourceId: patientId,
+      details: { ...data, psicologoId },
+    });
+
     revalidatePath("/[lang]/dashboard/pacientes/[id]", "page");
     revalidatePath("/[lang]/dashboard/pacientes", "page");
     return { success: true };
@@ -279,19 +304,22 @@ export async function deletePatientAction(patientId: string, adminPsicologoId?: 
 
     const now = new Date();
 
+    const isAdmin = session.role === "GLOBAL_ADMIN";
+    const deleteWhere = isAdmin && !adminPsicologoId
+      ? and(eq(users.id, patientId), eq(users.role, "ALUNO"), isNull(users.deletedAt))
+      : and(
+          eq(users.id, patientId),
+          eq(users.psicologoId, psicologoId),
+          eq(users.role, "ALUNO"),
+          isNull(users.deletedAt)
+        );
+
     const [deleted] = await db.update(users)
       .set({ 
         deletedAt: now,
         updatedAt: now
       })
-      .where(
-        and(
-          eq(users.id, patientId),
-          eq(users.psicologoId, psicologoId),
-          eq(users.role, "ALUNO"),
-          isNull(users.deletedAt)
-        )
-      )
+      .where(deleteWhere)
       .returning();
 
     if (!deleted) {
@@ -299,19 +327,30 @@ export async function deletePatientAction(patientId: string, adminPsicologoId?: 
     }
 
     // Soft delete associated guardian and clear alunoId reference
+    const guardianDeleteWhere = isAdmin && !adminPsicologoId
+      ? and(eq(users.role, "FAMILIAR"), eq(users.alunoId, patientId))
+      : and(
+          eq(users.role, "FAMILIAR"),
+          eq(users.alunoId, patientId),
+          eq(users.psicologoId, psicologoId)
+        );
+
     await db.update(users)
       .set({ 
         alunoId: null,
         deletedAt: now,
         updatedAt: now
       })
-      .where(
-        and(
-          eq(users.role, "FAMILIAR"),
-          eq(users.alunoId, patientId),
-          eq(users.psicologoId, psicologoId)
-        )
-      );
+      .where(guardianDeleteWhere);
+
+    await recordAudit({
+      userId: session.sub,
+      userRole: session.role,
+      action: "PATIENT_DELETE",
+      resourceType: "PATIENT",
+      resourceId: patientId,
+      details: { psicologoId },
+    });
 
     revalidatePath("/[lang]/dashboard/pacientes", "page");
     return { success: true };

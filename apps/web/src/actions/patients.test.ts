@@ -136,7 +136,8 @@ describe('Integração de Comunicação - Pacientes da Web vs Banco de Dados', (
 
       const res = await createPatientAction(formData);
       
-      expect(db.insert).toHaveBeenCalledTimes(2); 
+      // Insere guardian, child e registra audit log (3 inserts)
+      expect(db.insert).toHaveBeenCalledTimes(3); 
       expect(db.values).toHaveBeenCalled();
       expect(res.success).toBe(true);
     });

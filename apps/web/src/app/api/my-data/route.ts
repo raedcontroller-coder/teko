@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react/no-unescaped-entities, @next/next/no-page-custom-font */
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../../packages/db/db/index';
-import { users } from '../../../../../../packages/db/db/schema';
-import { eq } from 'drizzle-orm';
+import { users, userConsents } from '../../../../../../packages/db/db/schema';
+import { eq, desc } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 
@@ -28,18 +28,50 @@ export async function GET(request: Request) {
     const psicologoId = await authenticate(request);
 
     const [user] = await db.select({
+      id: users.id,
       name: users.name,
       email: users.email,
       crp: users.crp,
       clinicName: users.clinicName,
       avatarUrl: users.avatarUrl,
+      role: users.role,
+      createdAt: users.createdAt,
     }).from(users).where(eq(users.id, psicologoId));
 
     if (!user) {
       return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: user });
+    // Busca o termo de consentimento assinado mais recente do psicólogo
+    const [consent] = await db.select({
+      id: userConsents.id,
+      termVersion: userConsents.termVersion,
+      termLanguage: userConsents.termLanguage,
+      checkItems: userConsents.checkItems,
+      acceptedAt: userConsents.acceptedAt,
+      hasSignedPdf: userConsents.signedPdfBase64,
+    })
+      .from(userConsents)
+      .where(eq(userConsents.userId, psicologoId))
+      .orderBy(desc(userConsents.acceptedAt))
+      .limit(1);
+
+    const consentData = consent ? {
+      id: consent.id,
+      termVersion: consent.termVersion,
+      termLanguage: consent.termLanguage,
+      checkItems: consent.checkItems,
+      acceptedAt: consent.acceptedAt,
+      signedPdfBase64: consent.hasSignedPdf || null,
+    } : null;
+
+    return NextResponse.json({ 
+      success: true, 
+      data: {
+        ...user,
+        consent: consentData
+      } 
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Erro interno." }, { status: 500 });
   }

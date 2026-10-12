@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { db } from "../../../../../../../../packages/db/db/index";
-import { users } from "../../../../../../../../packages/db/db/schema";
-import { eq, and } from "drizzle-orm";
+import { users, userConsents } from "../../../../../../../../packages/db/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 const JWT_SECRET = new TextEncoder().encode(
@@ -37,6 +37,29 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       return NextResponse.json({ error: "Profissional não encontrado." }, { status: 404 });
     }
 
+    // Busca o termo de consentimento assinado mais recente do profissional
+    const [consent] = await db.select({
+      id: userConsents.id,
+      termVersion: userConsents.termVersion,
+      termLanguage: userConsents.termLanguage,
+      checkItems: userConsents.checkItems,
+      acceptedAt: userConsents.acceptedAt,
+      signedPdfBase64: userConsents.signedPdfBase64,
+    })
+      .from(userConsents)
+      .where(eq(userConsents.userId, psi.id))
+      .orderBy(desc(userConsents.acceptedAt))
+      .limit(1);
+
+    const consentData = consent ? {
+      id: consent.id,
+      termVersion: consent.termVersion,
+      termLanguage: consent.termLanguage,
+      checkItems: consent.checkItems,
+      acceptedAt: consent.acceptedAt ? consent.acceptedAt.toISOString() : null,
+      signedPdfBase64: consent.signedPdfBase64,
+    } : null;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -45,7 +68,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
         email: psi.email,
         crp: psi.crp,
         clinicName: psi.clinicName,
-        avatarUrl: psi.avatarUrl
+        avatarUrl: psi.avatarUrl,
+        consent: consentData,
       }
     });
   } catch {

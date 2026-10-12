@@ -30,7 +30,7 @@ export function Input({ label, error, className = "", type, ...props }: InputPro
             className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none"
             title={showPassword ? "Ocultar senha" : "Mostrar senha"}
           >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
           </button>
         )}
       </div>

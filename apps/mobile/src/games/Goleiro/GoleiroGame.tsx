@@ -13,7 +13,7 @@ import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei/native';
 import { GoleiroCurveEditor, CurveSlot, STORAGE_KEY, GLOBAL_SIZE_KEY } from './GoleiroCurveEditor';
-import { api } from '../../services/api';
+import { api, API_TWO_URL } from '../../services/api';
 import { useTranslation } from '../../i18n';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -1085,7 +1085,7 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
     };
 
     // Forçando o IP real da máquina para que funcione tanto no emulador quanto no device físico via Wi-Fi
-    const apiUrl = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io/api/calculo/goleiro';
+    const apiUrl = `${API_TWO_URL}/api/calculo/goleiro`;
 
     fetch(apiUrl, {
       method: 'POST',
@@ -1245,17 +1245,6 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
         {flashType === 'error' && <View style={[styles.flashOverlay, { backgroundColor: 'rgba(255, 0, 0, 0.4)' }]} />}
 
         <View style={styles.header} pointerEvents="box-none">
-          {gameState === 'playing' ? (
-            <TouchableOpacity onPress={handleRequestExit} style={styles.backButton}>
-              <ArrowLeft color="#fff" size={24} />
-            </TouchableOpacity>
-          ) : false && gameState === 'menu' && (
-            <TouchableOpacity onPress={() => setGameState('editor')} style={styles.editorButton}>
-              <Settings color="#fff" size={24} />
-              <Text style={{ color: '#FFF', fontWeight: 'bold', marginLeft: 8 }}>{t.gameGoleiro.editor}</Text>
-            </TouchableOpacity>
-          )}
-
           {gameState === 'playing' && (
             <View style={styles.centerTopStats} pointerEvents="none">
               <View style={styles.timerBox}>
@@ -1265,8 +1254,13 @@ export const GoleiroGame: React.FC<GoleiroGameProps> = ({ alunoId, onBack }) => 
               </View>
             </View>
           )}
-
         </View>
+
+        {gameState === 'playing' && (
+          <TouchableOpacity onPress={handleRequestExit} style={styles.bottomBackButton}>
+            <ArrowLeft color="#fff" size={24} />
+          </TouchableOpacity>
+        )}
 
         {gameState === 'playing' && comboCount >= 2 && (
           <Animated.View 
@@ -1546,6 +1540,20 @@ const styles = StyleSheet.create({
   backButton: {
     width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
+  },
+  bottomBackButton: {
+    position: 'absolute',
+    bottom: 24,
+    left: 24,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    zIndex: 90,
   },
   centerContent: {
     flex: 1, alignItems: 'center', justifyContent: 'center', zIndex: 10,

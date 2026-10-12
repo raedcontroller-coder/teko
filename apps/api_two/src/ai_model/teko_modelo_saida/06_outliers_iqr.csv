@@ -1,0 +1,9 @@
+﻿Registro_ID,VTRI,QA,IMP,Idade,Gênero,TDAH,Psicólogo,Origem,y,Outlier_VTRI,Outlier_QA,Outlier_IMP
+REAL_001,245.17,2682.67,6,13,Feminino,Sim,Maria Victoria Batista Oliveira,REAL,1,True,True,False
+REAL_004,129.89,307.88,12,13,Masculino,Não,Maria Victoria Batista Oliveira,REAL,0,False,False,True
+REAL_007,181.55,1098.0,7,12,Feminino,Não,Maria Victoria Batista Oliveira,REAL,0,False,False,True
+REAL_018,132.0,-1251.17,13,12,Masculino,Não,Maria Victoria Batista Oliveira,REAL,0,False,False,True
+REAL_022,137.47,-2843.31,0,13,Feminino,Não,Maria Victoria Batista Oliveira,REAL,0,False,True,False
+REAL_025,149.93,-1625.81,2,13,Feminino,Não,Maria Victoria Batista Oliveira,REAL,0,False,True,False
+REAL_029,80.29,725.75,10,11,Feminino,Sim,Maria Victoria Batista Oliveira,REAL,1,False,False,True
+SINT_159,106.24,575.8,7,14,Feminino,Sim,,SINTÉTICO,1,False,False,True

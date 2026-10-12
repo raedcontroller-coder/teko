@@ -9,8 +9,15 @@ if (!fs.existsSync(distDir)) {
 }
 
 fs.readdirSync(srcDir).forEach(file => {
-  if (file.endsWith('.py')) {
-    fs.copyFileSync(path.join(srcDir, file), path.join(distDir, file));
+  const srcPath = path.join(srcDir, file);
+  const distPath = path.join(distDir, file);
+  const stat = fs.statSync(srcPath);
+
+  if (stat.isDirectory()) {
+    fs.cpSync(srcPath, distPath, { recursive: true });
+    console.log(`Copied directory ${file} to dist/`);
+  } else if (file.endsWith('.py')) {
+    fs.copyFileSync(srcPath, distPath);
     console.log(`Copied ${file} to dist/`);
   }
 });

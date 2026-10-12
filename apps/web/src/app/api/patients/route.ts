@@ -176,15 +176,13 @@ export async function POST(request: Request) {
       guardianId = newGuardian.id;
     }
 
-    // 5. Criar o Paciente (ALUNO)
-    const childUniqueEmail = `child_${Date.now()}_${Math.random().toString(36).substring(7)}@teko.local`;
-
+    // 5. Criar o Paciente (ALUNO) - Crianças não possuem coleta de e-mail (LGPD / PII Compliance)
     const [newChild] = await db.insert(users).values({
       role: "ALUNO",
       name: name,
       age: age,
       gender: gender,
-      email: childUniqueEmail,
+      email: null,
       psicologoId: psicologoId,
       hasTdah: hasTdah ?? false,
       avatarUrl: avatarUrl || undefined,

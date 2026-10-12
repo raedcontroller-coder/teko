@@ -328,7 +328,7 @@ export default function CadastroPage() {
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-teko-yellow transition-colors flex items-center justify-center outline-none"
                     tabIndex={-1}
                   >
-                    <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility' : 'visibility_off'}</span>
+                    <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
                   </button>
                 </div>
               </div>
@@ -352,7 +352,7 @@ export default function CadastroPage() {
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-teko-yellow transition-colors flex items-center justify-center outline-none"
                     tabIndex={-1}
                   >
-                    <span className="material-symbols-outlined text-[20px]">{showConfirmPassword ? 'visibility' : 'visibility_off'}</span>
+                    <span className="material-symbols-outlined text-[20px]">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
                   </button>
                 </div>
               </div>

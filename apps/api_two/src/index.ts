@@ -8,7 +8,20 @@ import { spawn } from 'child_process';
 
 dotenv.config();
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ 
+  logger: {
+    level: 'info'
+  } 
+});
+
+fastify.addHook('onRequest', async (request) => {
+  console.log(`[${new Date().toLocaleTimeString('pt-BR')}] 📥 ${request.method} ${request.url}`);
+});
+
+fastify.addHook('onResponse', async (request, reply) => {
+  const statusEmoji = reply.statusCode < 400 ? '✅' : '❌';
+  console.log(`[${new Date().toLocaleTimeString('pt-BR')}] ${statusEmoji} ${request.method} ${request.url} -> Status ${reply.statusCode}`);
+});
 
 fastify.register(multipart, {
   limits: { fileSize: 10 * 1024 * 1024 }
@@ -297,11 +310,192 @@ fastify.post('/api/calculo/tocarapido', async (request, reply) => {
   }
 });
 
+fastify.post('/api/calculo/tdah', async (request, reply) => {
+  try {
+    const data = request.body as any;
+
+    if (!data) {
+      return reply.status(400).send({ error: 'Payload de dados do paciente ausente.' });
+    }
+
+    const pyScript = path.join(__dirname, 'calculo_tdah.py');
+    const pythonProcess = spawn('python', [pyScript, JSON.stringify(data)]);
+
+    let dataString = '';
+    let errorString = '';
+
+    for await (const chunk of pythonProcess.stdout) {
+      dataString += chunk.toString();
+    }
+    for await (const chunk of pythonProcess.stderr) {
+      errorString += chunk.toString();
+    }
+
+    const code = await new Promise((resolve) => {
+      pythonProcess.on('close', resolve);
+    });
+
+    if (code !== 0) {
+      fastify.log.error(`Erro no script TDAH Python (exit code ${code}): ${errorString}`);
+      return reply.status(500).send({ error: 'Erro ao executar inferência de TDAH no Python.' });
+    }
+
+    try {
+      const result = JSON.parse(dataString);
+      if (result.error) {
+        return reply.status(400).send({ error: result.error });
+      }
+      return reply.send(result);
+    } catch (parseErr) {
+      fastify.log.error(`Erro de parse do retorno do Python (TDAH): ${dataString}`);
+      return reply.status(500).send({ error: 'Retorno inválido do script TDAH Python.' });
+    }
+  } catch (err) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: 'Erro interno no servidor ao chamar inferência TDAH.' });
+  }
+});
+fastify.post('/api/relatorio/generate-content', async (request, reply) => {
+  try {
+    const data = request.body as any;
+
+    if (!data) {
+      return reply.status(400).send({ error: 'Payload de dados do paciente/bateria ausente.' });
+    }
+
+    const tmpDir = os.tmpdir();
+    const dataTmpPath = path.join(tmpDir, `input-content-${Date.now()}.json`);
+    fs.writeFileSync(dataTmpPath, JSON.stringify(data, null, 2), 'utf-8');
+
+    const pyScript = path.join(__dirname, 'generate_content', 'teko_relatorio_final.py');
+    const pythonProcess = spawn('python', [pyScript, dataTmpPath]);
+
+    let dataString = '';
+    let errorString = '';
+
+    for await (const chunk of pythonProcess.stdout) {
+      dataString += chunk.toString();
+    }
+    for await (const chunk of pythonProcess.stderr) {
+      errorString += chunk.toString();
+    }
+
+    const code = await new Promise((resolve) => {
+      pythonProcess.on('close', resolve);
+    });
+
+    try { fs.unlinkSync(dataTmpPath); } catch {}
+
+    if (code !== 0) {
+      fastify.log.error(`Erro no script LLM Nemotron Python (exit code ${code}): ${errorString}`);
+      return reply.status(500).send({ error: 'Erro ao gerar conteúdo do relatório via LLM Nemotron.' });
+    }
+
+    try {
+      const result = JSON.parse(dataString);
+      if (result.error) {
+        return reply.status(400).send({ error: result.error });
+      }
+      return reply.send(result);
+    } catch (parseErr) {
+      fastify.log.error(`Erro de parse do retorno da LLM Nemotron: ${dataString}`);
+      return reply.status(500).send({ error: 'Retorno inválido da LLM Nemotron.' });
+    }
+  } catch (err) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: 'Erro interno ao gerar conteúdo do relatório.' });
+  }
+});
+
+fastify.post('/api/relatorio/pdf', async (request, reply) => {
+  try {
+    const data = request.body as any || {};
+    const tmpDir = os.tmpdir();
+    const pdfTmpPath = path.join(tmpDir, `relatorio-final-${Date.now()}.pdf`);
+    const dataTmpPath = path.join(tmpDir, `pdf-data-${Date.now()}.json`);
+    fs.writeFileSync(dataTmpPath, JSON.stringify(data, null, 2), 'utf-8');
+
+    const pyScript = path.join(__dirname, 'pdfs', 'teko_relatorio_final_pdf.py');
+    const pythonProcess = spawn('python', [pyScript, '--output', pdfTmpPath, '--data', dataTmpPath]);
+
+    let errorString = '';
+    for await (const chunk of pythonProcess.stderr) {
+      errorString += chunk.toString();
+    }
+
+    const code = await new Promise((resolve) => {
+      pythonProcess.on('close', resolve);
+    });
+
+    try { fs.unlinkSync(dataTmpPath); } catch {}
+
+    if (code !== 0 || !fs.existsSync(pdfTmpPath)) {
+      fastify.log.error(`Erro no script PDF Relatório Final Python (exit code ${code}): ${errorString}`);
+      return reply.status(500).send({ error: 'Erro ao gerar PDF do relatório final no Python.' });
+    }
+
+    const stream = fs.createReadStream(pdfTmpPath);
+    stream.on('close', () => {
+      try { fs.unlinkSync(pdfTmpPath); } catch {}
+    });
+
+    return reply
+      .header('Content-Type', 'application/pdf')
+      .header('Content-Disposition', 'attachment; filename="Relatorio_Final_Teko.pdf"')
+      .send(stream);
+  } catch (err) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: 'Erro interno ao gerar PDF do relatório final.' });
+  }
+});
+
+fastify.post('/api/anamnese/pdf', async (request, reply) => {
+  try {
+    const data = request.body as any || {};
+    const tmpDir = os.tmpdir();
+    const pdfTmpPath = path.join(tmpDir, `anamnese-${Date.now()}.pdf`);
+    const pyScript = path.join(__dirname, 'pdfs', 'teko_modelo_anamnese.py');
+
+    const pythonProcess = spawn('python', [pyScript, '--output', pdfTmpPath, '--data', JSON.stringify(data)]);
+
+    let errorString = '';
+    for await (const chunk of pythonProcess.stderr) {
+      errorString += chunk.toString();
+    }
+
+    const code = await new Promise((resolve) => {
+      pythonProcess.on('close', resolve);
+    });
+
+    if (code !== 0 || !fs.existsSync(pdfTmpPath)) {
+      fastify.log.error(`Erro no script PDF Anamnese Python (exit code ${code}): ${errorString}`);
+      return reply.status(500).send({ error: 'Erro ao gerar PDF da anamnese no Python.' });
+    }
+
+    const stream = fs.createReadStream(pdfTmpPath);
+    stream.on('close', () => {
+      try { fs.unlinkSync(pdfTmpPath); } catch {}
+    });
+
+    return reply
+      .header('Content-Type', 'application/pdf')
+      .header('Content-Disposition', 'attachment; filename="Anamnese.pdf"')
+      .send(stream);
+  } catch (err) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: 'Erro interno ao gerar PDF da anamnese.' });
+  }
+});
+
 const start = async () => {
   try {
     const port = Number(process.env.PORT) || 3002;
     await fastify.listen({ port, host: '0.0.0.0' });
-    console.log(`[API V2] Server listening on http://localhost:${port}`);
+    console.log(`\n==================================================`);
+    console.log(`🚀 [API V2 - CÁLCULOS PSICOMÉTRICOS & TEKA]`);
+    console.log(`📡 Servidor rodando em: http://localhost:${port}`);
+    console.log(`📋 Logs estruturados ativos com Pino Pretty`);
+    console.log(`==================================================\n`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
