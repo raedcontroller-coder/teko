@@ -9,7 +9,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from ".
 type Psicologo = {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   crp: string | null;
   clinicName: string | null;
   createdAt: Date;
@@ -28,7 +28,7 @@ export default function ProfissionaisClient({ initialData }: { initialData: Psic
 
   const filtered = initialData.filter((psi) =>
     psi.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    psi.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (psi.email ? psi.email.toLowerCase().includes(searchTerm.toLowerCase()) : false)
   );
 
   return (
