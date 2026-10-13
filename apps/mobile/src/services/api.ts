@@ -15,7 +15,7 @@ const getLocalHost = () => {
 
 const localHost = getLocalHost();
 
-export const API_URL = __DEV__ ? `http://${localHost}:3000` : 'https://teko.raed.world';
+export const API_URL = 'https://teko.raed.world';
 export const API_TWO_URL = 'http://osor03kc2dy6lkyazdhydnwz.62.171.175.197.sslip.io';
 
 
